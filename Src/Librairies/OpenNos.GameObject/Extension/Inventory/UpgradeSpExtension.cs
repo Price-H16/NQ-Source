@@ -144,9 +144,13 @@ namespace OpenNos.GameObject.Extension.Inventory
             var wearable = sesion.Character.Inventory.GetItemInstanceById(e.Id);
             var inventory = sesion.Character.Inventory.GetItemInstanceById(e.Id);
             var rnd = ServerManager.RandomNumber();
+            if (ServerManager.Instance.Configuration.EventSpUp != 0)
+            {
+                rnd += (rnd / 100) * ServerManager.Instance.Configuration.EventSpUp;
+            }
             if (rnd < conf.Destroy[e.Upgrade])
             {
-                if (protect == UpgradeProtection.Protected)
+                if (protect == UpgradeProtection.Protected || protect == UpgradeProtection.Event)
                 {
                     sesion.CurrentMapInstance.Broadcast(
                         StaticPacketHelper.GenerateEff(UserType.Player, sesion.Character.CharacterId, 3004),
@@ -192,7 +196,7 @@ namespace OpenNos.GameObject.Extension.Inventory
             }
             else if (rnd < conf.UpFail[e.Upgrade])
             {
-                if (protect == UpgradeProtection.Protected)
+                if (protect == UpgradeProtection.Protected || protect == UpgradeProtection.Event)
                 {
                     sesion.CurrentMapInstance.Broadcast(
                         StaticPacketHelper.GenerateEff(UserType.Player, sesion.Character.CharacterId, 3004),
@@ -230,7 +234,7 @@ namespace OpenNos.GameObject.Extension.Inventory
             }
             else
             {
-                if (protect == UpgradeProtection.Protected)
+                if (protect == UpgradeProtection.Protected || protect == UpgradeProtection.Event)
                 {
                     sesion.CurrentMapInstance.Broadcast(
                             StaticPacketHelper.GenerateEff(UserType.Player, sesion.Character.CharacterId, 3004),

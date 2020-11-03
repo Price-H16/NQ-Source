@@ -677,6 +677,7 @@ namespace OpenNos.GameObject
 
         public byte VehicleSpeed { private get; set; }
 
+
         public IDisposable WalkDisposable { get; set; }
 
         public int WareHouseSize
@@ -702,7 +703,28 @@ namespace OpenNos.GameObject
 
         #endregion
 
+        public DateTime LastBugSkill = DateTime.Now;
+
+        public DateTime LastSkillUseNew = DateTime.Now;
         #region Methods
+
+        public string GenerateEventIcon()
+        {
+            ConfigurationObject c = ServerManager.Instance.Configuration;
+            return $"evtb " +
+                $"{ServerManager.Instance.Configuration.EventLvlUpEq} " +
+                $"{ServerManager.Instance.Configuration.EventRareUpEq} " +
+                $"{ServerManager.Instance.Configuration.EventSpUp} " +
+                $"{ServerManager.Instance.Configuration.EventSpPerfection} " +
+                $"{ServerManager.Instance.Configuration.EventXPF} " +
+                $"{ServerManager.Instance.Configuration.EventSealed} " +
+                $"{ServerManager.Instance.Configuration.EventXp} " +
+                $"{ServerManager.Instance.Configuration.EventGold} " +
+                $"{ServerManager.Instance.Configuration.EventRep} " +
+                $"{ServerManager.Instance.Configuration.EventDrop} " +
+                $"{ServerManager.Instance.Configuration.EventRuneUp} " +
+                $"{ServerManager.Instance.Configuration.EventTattoUp}";
+        }
 
         public static string GenerateAct() => "act 6";
 
@@ -2935,6 +2957,7 @@ namespace OpenNos.GameObject
             {
                 FamilyCharacterDTO famchar = FamilyCharacter;
                 FamilyDTO fam = Family;
+                FXP += (FXP / 100) * ServerManager.Instance.Configuration.EventXPF;
                 fam.FamilyExperience += FXP;
                 famchar.Experience += FXP;
                 if (CharacterHelper.LoadFamilyXPData(Family.FamilyLevel) <= fam.FamilyExperience)
@@ -3428,6 +3451,11 @@ namespace OpenNos.GameObject
         {
             void _handleGoldDrop(DropDTO drop, long maxGold, long? dropOwner, short posX, short posY)
             {
+                int amount = drop.Amount;
+                if (ServerManager.Instance.Configuration.EventGold > 1)
+                {
+                    amount *= ServerManager.Instance.Configuration.EventGold;
+                }
                 Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
                 {
                     if (Session.HasCurrentMapInstance)
@@ -3482,7 +3510,7 @@ namespace OpenNos.GameObject
                             Session.SendPacket(GenerateGold());
                         }
 
-                        //RewardsHelper.Instance.MobKillRewards(Session); dely
+                        RewardsHelper.Instance.MobKillRewards(Session);
                     }
                 });
             }
@@ -3510,6 +3538,11 @@ namespace OpenNos.GameObject
 
             void _handleItemDrop(DropDTO drop, long? owner, short posX, short posY)
             {
+                int amount = drop.Amount;
+                if (ServerManager.Instance.Configuration.EventDrop > 1)
+                {
+                    amount *= ServerManager.Instance.Configuration.EventDrop;
+                }
                 if (ServerManager.Instance.Configuration.AccountLock)
                 {
                     Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
@@ -5503,6 +5536,10 @@ namespace OpenNos.GameObject
 
         public void GetJobExp(long val, bool applyRate = true)
         {
+            if (ServerManager.Instance.Configuration.EventXp > 1)
+            {
+                val = val * ServerManager.Instance.Configuration.EventXp;
+            }
             val *= (applyRate ? ServerManager.Instance.Configuration.RateXP : 1);
             ItemInstance SpInstance = null;
             if (Inventory != null)
@@ -5642,6 +5679,10 @@ namespace OpenNos.GameObject
 
         public void GetReputation(int amount, bool applyRate = true)
         {
+            if (ServerManager.Instance.Configuration.EventRep > 1)
+            {
+                amount *= ServerManager.Instance.Configuration.EventRep;
+            }
             long val2 = amount * (amount > 0 && applyRate ? ServerManager.Instance.Configuration.RateReputation : 1);
             int bonus = GetBuff(CardType.Dracula, (byte) AdditionalTypes.Dracula.ReputationIncrease)[0];
             double Last = val2 * (bonus * 0.01);
@@ -6055,6 +6096,10 @@ namespace OpenNos.GameObject
 
         public void GetXp(long val, bool applyRate = true)
         {
+            if (ServerManager.Instance.Configuration.EventXp > 1)
+            {
+                val = val * ServerManager.Instance.Configuration.EventXp;
+            }
             if (Level >= ServerManager.Instance.Configuration.MaxLevel)
             {
                 return;
@@ -8601,7 +8646,10 @@ namespace OpenNos.GameObject
 
             double memberHXp = sharedHXp * CharacterHelper.ExperiencePenalty(Level, npcMonster.Level) *
                                ServerManager.Instance.Configuration.RateHeroicXP;
-
+            if (ServerManager.Instance.Configuration.EventXp > 1)
+            {
+                memberHXp = memberHXp * ServerManager.Instance.Configuration.EventXp;
+            }
             return (int) memberHXp;
         }
 

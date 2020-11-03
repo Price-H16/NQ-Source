@@ -50,7 +50,30 @@ namespace NosTale.Configuration
         public EventConfiguration Event { get; set; } = new EventConfiguration
         {
             ChristmasEvent = false,
-            HalloweenEvent = false
+            HalloweenEvent = false,
+            EstivalEvent = false,
+            ValentineEvent = false,
+            LunarNewYearEvent = false,
+            EasterEvent = false,
+            //Event icon-->
+            //By percentage-->
+            EventLvlUpEq = 0,
+            EventRareUpEq = 0,
+            EventSpUp = 0,
+            EventSpPerfection = 0,
+            EventXPF = 0,
+            //Useless at the moment-->
+            EventSealed = 0,
+            //By multiplication-->
+            EventXp = 0,
+            EventGold = 0,
+            EventRep = 0,
+            EventDrop = 0,
+            //Coming soon-->
+            EventRuneUp = 0,
+            EventTattoUp = 0
+            //End event icon-->
+
         };
 
         public MaxConfiguration Max { get; set; } = new MaxConfiguration

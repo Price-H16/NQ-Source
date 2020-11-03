@@ -23,6 +23,7 @@
         Act4Instance,
         RainbowBattleInstance,
         SheepGameInstance,
+        RoundToRound,
         MapPvp = ArenaInstance | TalentArenaMapInstance | Act4Instance,
         Act7Ship = 32,
         SealedVesselsMap = 33

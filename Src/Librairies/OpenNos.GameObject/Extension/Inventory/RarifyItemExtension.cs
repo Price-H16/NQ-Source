@@ -93,7 +93,11 @@ namespace OpenNos.GameObject.Extension.Inventory
                 e.Rarify(session, forceRare, mode, protection);
                 return;
             }
-
+            var rnd2 = ServerManager.RandomNumber();
+            if (ServerManager.Instance.Configuration.EventRareUpEq != 0)
+            {
+                rnd2 -= (rnd2 / 100) * ServerManager.Instance.Configuration.EventRareUpEq;
+            }
             var conf = DependencyContainer.Instance.GetInstance<JsonItemConfiguration>().RarifyChances;
 
             if (session != null && !session.HasCurrentMapInstance) return;

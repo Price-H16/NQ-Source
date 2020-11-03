@@ -176,7 +176,10 @@ namespace OpenNos.GameObject.Extension.Inventory
             var wearable = session.Character.Inventory.GetItemInstanceById(e.Id);
 
             var rnd = ServerManager.RandomNumber();
-
+            if (ServerManager.Instance.Configuration.EventLvlUpEq != 0)
+            {
+                rnd += (rnd / 100) * ServerManager.Instance.Configuration.EventLvlUpEq;
+            }
             if (e.Rare == 8)
             {
                 if (rnd < upfail[e.Upgrade])

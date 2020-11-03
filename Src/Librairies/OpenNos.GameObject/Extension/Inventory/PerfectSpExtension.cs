@@ -95,6 +95,10 @@ namespace OpenNos.GameObject.Extension.Inventory
 
             var specialist = session.Character.Inventory.GetItemInstanceById(e.Id);
             var rnd = ServerManager.RandomNumber();
+            if (ServerManager.Instance.Configuration.EventSpPerfection != 0)
+            {
+                rnd -= (rnd / 100) * ServerManager.Instance.Configuration.EventSpPerfection;
+            }
             if (rnd < conf.UpSuccess[upmode - 1]
             ) // + DependencyContainer.Instance.Get<JsonGameConfiguration>().DefaultEvent.PerfectionSp)
             {

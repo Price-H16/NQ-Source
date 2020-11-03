@@ -3,6 +3,7 @@ using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.GameObject;
 using OpenNos.GameObject._ItemUsage.Event;
+using OpenNos.GameObject.Helpers;
 
 namespace OpenNos.Handler.PacketHandler.Inventory
 {
@@ -24,11 +25,16 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void UseItem(UseItemPacket useItemPacket)
         {
-            if (useItemPacket == null || (byte) useItemPacket.Type >= 9)
+            if (!Session.Character.VerifiedLock)
             {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
                 return;
             }
 
+            if (useItemPacket == null || (byte)useItemPacket.Type >= 9)
+            {
+                return;
+            }
 
             var packet = useItemPacket.OriginalContent.Split(' ', '^');
             

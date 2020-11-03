@@ -205,6 +205,10 @@ namespace OpenNos.DAL.EF
 
         public bool UiBlocked { get; set; }
 
+        public string LockCode { get; set; }
+
+        public bool VerifiedLock { get; set; }
+
         #endregion
     }
 }

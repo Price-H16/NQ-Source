@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using NosTale.Packets.Packets.ClientPackets;
+using NosTale.Packets.Packets.CustomPackets;
 using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.GameObject;
@@ -105,7 +106,20 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     return;
             }
         }
-
+        public void ChangeLockCode(ChangeLockCodePacket packet)
+        {
+            if (packet != null)
+            {
+                if (packet.Lock == "Disable" || packet.Lock == "disable")
+                {
+                    Session.Character.LockCode = null;
+                }
+                else
+                {
+                    Session.Character.LockCode = CryptographyBase.Sha512(packet.Lock);
+                }
+            }
+        }
         #endregion
     }
 }

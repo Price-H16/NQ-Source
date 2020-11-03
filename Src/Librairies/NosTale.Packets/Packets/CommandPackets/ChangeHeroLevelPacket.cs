@@ -5,7 +5,7 @@ using OpenNos.Domain;
 
 namespace NosTale.Packets.Packets.CommandPackets
 {
-    [PacketHeader("$HeroLvl", PassNonParseablePacket = true, Authorities = new[] {AuthorityType.Administrator})]
+    [PacketHeader("$HeroLvl", PassNonParseablePacket = true, Authorities = new[] {AuthorityType.Administrator, AuthorityType.BetaTester})]
     public class ChangeHeroLevelPacket : PacketDefinition
     {
         #region Properties

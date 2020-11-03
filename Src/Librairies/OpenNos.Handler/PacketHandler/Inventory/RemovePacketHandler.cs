@@ -32,6 +32,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
         {
             if (removePacket != null)
             {
+                if (!Session.Character.VerifiedLock)
+                {
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                    return;
+                }
+
                 InventoryType equipment;
                 GameObject.Mate mate = null;
                 if (removePacket.Type > 0)

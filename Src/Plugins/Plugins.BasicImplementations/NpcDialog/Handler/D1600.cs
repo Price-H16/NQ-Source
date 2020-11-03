@@ -15,14 +15,20 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
 
         public async Task Execute(ClientSession Session, NpcDialogEvent packet)
         {
-           var npc = packet.Npc;
-           if (Session.Account.IsLimited)
-           {
-               Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-               return;
-           }
+           //var npc = packet.Npc;
+           // if (!Session.Character.VerifiedLock)
+           // {
+           //     Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ACTION_NOT_POSSIBLE_USE_UNLOCK"), 0));
+           //     return;
+           // }
 
-           Session.SendPacket(Session.Character.OpenFamilyWarehouse());
+           // if (Session.Account.IsLimited)
+           //{
+           //    Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
+           //    return;
+           //}
+
+           //Session.SendPacket(Session.Character.OpenFamilyWarehouse());
         }
     }
 }

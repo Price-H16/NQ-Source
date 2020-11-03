@@ -1019,6 +1019,11 @@ namespace OpenNos.GameObject.Networking
             var session = GetSessionByCharacterId(id);
             if (session?.Character != null)
             {
+                if (session.Character.IsLocked)
+                {
+                    session.SendPacket(session.Character.GenerateSay("Your character is locked. First, use $Unlock", 10));
+                    return;
+                }
                 if (mapId != null)
                 //MapInstance gotoMapInstance = GetMapInstanceByMapId(mapId.Value);
                 /*if (session.Character.Level < gotoMapInstance.MinLevel || session.Character.Level > gotoMapInstance.MaxLevel)
@@ -1040,6 +1045,11 @@ namespace OpenNos.GameObject.Networking
         public void ChangeMapInstance(long characterId, Guid mapInstanceId, int? mapX = null, int? mapY = null, bool noAggroLoss = false)
         {
             var session = GetSessionByCharacterId(characterId);
+            if (session.Character.IsLocked && mapInstanceId != session.Character.Miniland.MapInstanceId)
+            {
+                session.SendPacket(session.Character.GenerateSay("Your character is locked. First, use $Unlock", 10));
+                return;
+            }
             if (session?.Character != null && !session.Character.IsChangingMapInstance)
             {
                 session.Character.IsChangingMapInstance = true;
@@ -2081,6 +2091,16 @@ namespace OpenNos.GameObject.Networking
                 5, 8);
             if (session.Character.Miniland.MapInstanceId != minilandOwner.Character.Miniland.MapInstanceId)
             {
+                if (session.Character.IsLocked)
+                {
+                    minilandOwner.SendPacket(session.Character.GenerateSay("Your character is locked. First, use $Unlock", 10));
+                    return;
+                }
+                if (minilandOwner.Character.IsLocked)
+                {
+                    session.SendPacket(session.Character.GenerateSay("The other character is locked. First, use $Unlock", 10));
+                    return;
+                }
                 session.SendPacket(UserInterfaceHelper.GenerateMsg(minilandOwner.Character.MinilandMessage,
                     0));
                 session.SendPacket(minilandOwner.Character.GenerateMlinfobr());

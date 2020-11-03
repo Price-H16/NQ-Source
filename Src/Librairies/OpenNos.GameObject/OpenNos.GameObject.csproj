@@ -93,9 +93,7 @@
     <Compile Include="Event\INSTANTBATTLE\InstantBattle.cs" />
     <Compile Include="Event\ICEBREAKER\IceBreaker.cs" />
     <Compile Include="Event\PARTY TIMESPACE\PartyTimespace.cs" />
-    <Compile Include="Event\RAINBOWBATTLE\RainbowBattle.cs" />
-    <Compile Include="Event\RAINBOWBATTLE\RainbowBattleManager.cs" />
-    <Compile Include="Event\RAINBOWBATTLE\RainbowBattleTeam.cs" />
+    <Compile Include="Event\RAINBOWBATTLE\RAINBOWBATTLE.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArena.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArenaBattle.cs" />
     <Compile Include="Extension\CharacterExtension.cs" />
@@ -119,6 +117,7 @@
     <Compile Include="Extension\LogsExtension.cs" />
     <Compile Include="Extension\NumberExtension.cs" />
     <Compile Include="Helpers\ChangeClassHelper.cs" />
+    <Compile Include="Helpers\DamageHelper.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\MallAPIHelper.cs" />
     <Compile Include="Helpers\MateHelper.cs" />
@@ -135,7 +134,7 @@
     <Compile Include="Helpers\ShellGeneratorHelper.cs" />
     <Compile Include="Helpers\StaticPacketHelper.cs" />
     <Compile Include="Battle\BattleEntity.cs" />
-    <Compile Include="Helpers\DamageHelper.cs" />
+    <Compile Include="Helpers\DamageHelper2.cs" />
     <Compile Include="Event\EventContainer.cs" />
     <Compile Include="Event\Schedule.cs" />
     <Compile Include="Helpers\EventHelper.cs" />
@@ -150,6 +149,8 @@
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="PossibleTypeAndSubtype.cs" />
     <Compile Include="Quest.cs" />
+    <Compile Include="RainbowBattle\RainbowBattleManager.cs" />
+    <Compile Include="RainbowBattle\RainbowBattleTeam.cs" />
     <Compile Include="ScriptedObjects\Clock.cs" />
     <Compile Include="ScriptedObjects\Locker.cs" />
     <Compile Include="Map\MapButton.cs" />

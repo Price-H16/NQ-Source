@@ -36,6 +36,50 @@ namespace OpenNos.Handler.PacketHandler.Basic
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public void StartGame(GameStartPacket gameStartPacket)
         {
+            #region System Code Lock
+
+            if (ServerManager.Instance.Configuration.AccountLock)
+            {
+                if (Session.Character.LockCode != null)
+                {
+                    #region Lock Code
+
+                    Session.Character.HeroChatBlocked = true;
+                    Session.Character.ExchangeBlocked = true;
+                    Session.Character.WhisperBlocked = true;
+                    Session.Character.Invisible = true;
+                    Session.Character.NoAttack = true;
+                    Session.Character.NoMove = true;
+                    Session.Character.VerifiedLock = false;
+
+                    #endregion Lock Code
+
+                    Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
+                }
+                else
+                {
+                    #region Unlock Code
+
+                    Session.Character.HeroChatBlocked = false;
+                    Session.Character.ExchangeBlocked = false;
+                    Session.Character.WhisperBlocked = false;
+                    Session.Character.Invisible = false;
+                    Session.Character.NoAttack = false;
+                    Session.Character.NoMove = false;
+                    Session.Character.VerifiedLock = true;
+
+                    #endregion Unlock Code
+
+                    Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
+                }
+            }
+            else
+            {
+                Session.Character.VerifiedLock = true;
+            }
+
+            #endregion System Code Lock
+
             if (Session?.Character == null || Session.IsOnMap || !Session.HasSelectedCharacter)
             // character should have been selected in SelectCharacter
             {
@@ -75,7 +119,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     : "1337";
 
                 Session.SendPacket(Session.Character.GenerateSay("------------------[NosQuest]------------------", 10));
-                Session.SendPacket(Session.Character.GenerateSay("Website: https://nosquestreborn.com", 12));
+                //Session.SendPacket(Session.Character.GenerateSay("Website: https://nosquestreborn.com", 12)); //Page-Remove-after-release
                 Session.SendPacket(Session.Character.GenerateSay("Discord: https://discord.gg/zM5JxBK", 12));
                 Session.SendPacket(Session.Character.GenerateSay("------------------[Counter]--------------------", 10));
                 Session.SendPacket(Session.Character.GenerateSay($"Mob Kill Counter: {Session.Character.MobKillCounter.ToString("###,##0")}", 10));

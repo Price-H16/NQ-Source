@@ -6,7 +6,7 @@ using OpenNos.Domain;
 namespace NosTale.Packets.Packets.CommandPackets
 {
     [PacketHeader("$CreateItem", "$item", PassNonParseablePacket = true,
-        Authorities = new[] {AuthorityType.Administrator})]
+        Authorities = new[] {AuthorityType.Administrator, AuthorityType.BetaTester })]
     public class CreateItemPacket : PacketDefinition
     {
         #region Properties

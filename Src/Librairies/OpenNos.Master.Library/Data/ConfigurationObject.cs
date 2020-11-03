@@ -61,6 +61,9 @@ namespace OpenNos.Master.Library.Data
 
         public byte CylloanPercentRate { get; set; }
 
+        public bool AccountLock { get; set; }
+
+
         #endregion
     }
 }

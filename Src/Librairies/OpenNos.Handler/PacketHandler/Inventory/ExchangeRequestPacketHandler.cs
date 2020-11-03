@@ -38,6 +38,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 return;
             }
 
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             /*if (Session.Account?.Authority >= AuthorityType.GM && Session.Account?.Authority < AuthorityType.Administrator) // this is useless
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("GM_CANNOT_TRADE")));
@@ -63,6 +69,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                             var targetSession =
                                 Session.CurrentMapInstance.GetSessionByCharacterId(exchangeRequestPacket.CharacterId);
                             if (targetSession?.Account == null) return;
+
+                            if (!targetSession.Character.VerifiedLock)
+                            {
+                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                                return;
+                            }
 
                             if (targetSession.Account.IsLimited)
                             {

@@ -15,15 +15,15 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
 
         public async Task Execute(ClientSession Session, NpcDialogEvent packet)
         {
-            var npc = packet.Npc;
-            if (npc != null && Session.Character.Family != null)
-            {
-                Session.SendPackets(Session.Character.OpenFamilyWarehouseHist());
-            }
-            else
-            {
-                Session.SendPacket(npc?.GenerateSay(Language.Instance.GetMessageFromKey("NO_FAMILY_FOUND"), 10)); 
-            }
+            //var npc = packet.Npc;
+            //if (npc != null && Session.Character.Family != null)
+            //{
+            //    Session.SendPackets(Session.Character.OpenFamilyWarehouseHist());
+            //}
+            //else
+            //{
+            //    Session.SendPacket(npc?.GenerateSay(Language.Instance.GetMessageFromKey("NO_FAMILY_FOUND"), 10)); 
+            //}
                
         }
     }

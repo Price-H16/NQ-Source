@@ -72,7 +72,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bot\DiscordBotCommand.cs" />
     <Compile Include="PacketHandler\Basic\BlDelPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\BlInsPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\BlPacketHandler.cs" />
@@ -249,6 +248,7 @@
     <Compile Include="PacketHandler\Command\TeleportHandler.cs" />
     <Compile Include="PacketHandler\Command\UnbanHandler.cs" />
     <Compile Include="PacketHandler\Command\UndercoverHandler.cs" />
+    <Compile Include="PacketHandler\Command\UnlockHandler.cs" />
     <Compile Include="PacketHandler\Command\UnmuteHandler.cs" />
     <Compile Include="PacketHandler\Command\UnstuckHandler.cs" />
     <Compile Include="PacketHandler\Command\UpgradeHandler.cs" />
@@ -390,8 +390,17 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DSharpPlus.CommandsNext">
+    <PackageReference Include="DSharpPlus">
       <Version>3.2.3</Version>
+    </PackageReference>
+    <PackageReference Include="DSharpPlus.CommandsNext">
+      <Version>4.0.0-nightly-00743</Version>
+    </PackageReference>
+    <PackageReference Include="DSharpPlus.Interactivity">
+      <Version>4.0.0-nightly-00743</Version>
+    </PackageReference>
+    <PackageReference Include="DSharpPlus.Rest">
+      <Version>4.0.0-nightly-00711</Version>
     </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>4.3.2</Version>
@@ -399,6 +408,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Bot\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

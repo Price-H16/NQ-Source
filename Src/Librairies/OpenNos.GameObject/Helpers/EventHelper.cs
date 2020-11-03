@@ -152,7 +152,7 @@ namespace OpenNos.GameObject.Helpers
                         case EventType.RAINBOWBATTLE:
                             if (ServerManager.Instance.ChannelId != 51)
                             {
-                                Event.RAINBOWBATTLE.RainbowBattle.GenerateEvent();
+                                Event.RAINBOWBATTLE.RAINBOWBATTLE.GenerateEvent();
                             }
                             else
                             {

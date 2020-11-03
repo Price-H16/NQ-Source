@@ -27,6 +27,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void MoveItem(MviPacket mviPacket)
         {
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             if (mviPacket != null)
             {
                 if (mviPacket.InventoryType != InventoryType.Equipment

@@ -32,7 +32,17 @@ namespace OpenNos.Handler.PacketHandler.Mate
 
         public void Attack(SuctlPacket suctlPacket)
         {
-            if (suctlPacket == null) return;
+            if (suctlPacket == null)
+            {
+                return;
+            }
+
+            if (suctlPacket.TargetType != UserType.Npc
+                && !Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
 
             if (suctlPacket.TargetType != UserType.Npc
                 && Session.Account.IsLimited)

@@ -1273,6 +1273,12 @@ namespace OpenNos.GameObject
                                 default:
                                     if (int.TryParse(packetsplit[6], out packetType))
                                     {
+                                        if (!session.Character.VerifiedLock)
+                                        {
+                                            session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ACTION_NOT_POSSIBLE_USE_UNLOCK"), 0));
+                                            return;
+                                        }
+
                                         if (session.Character.MapInstance.Map.MapTypes.Any(s =>
                                             s.MapTypeId == (short)MapTypeEnum.Act4))
                                         {

@@ -195,6 +195,19 @@ namespace OpenNos.Handler.PacketHandler.Battle
                                     return;
                                 }
                         }
+                        if (useSkillPacket.MapX.HasValue && useSkillPacket.MapY.HasValue)
+                        {
+                            if (Map.GetDistance(new MapCell() { X = Session.Character.PositionX, Y = Session.Character.PositionY }, new MapCell() { X = useSkillPacket.MapX ?? 0, Y = useSkillPacket.MapY ?? 0 }) + 1 > ski.Skill.Range)
+                            {
+                                Session.SendPacket(StaticPacketHelper.Cancel());
+                                return;
+                            }
+                            if (ski.Skill.Type != 5)
+                            {
+                                Session.SendPacket(StaticPacketHelper.Cancel());
+                                return;
+                            }
+                        }
                     }
                 }
 
@@ -208,6 +221,7 @@ namespace OpenNos.Handler.PacketHandler.Battle
 
                 if (useSkillPacket.MapX.HasValue && useSkillPacket.MapY.HasValue)
                 {
+
                     Session.Character.PositionX = useSkillPacket.MapX.Value;
                     Session.Character.PositionY = useSkillPacket.MapY.Value;
                 }

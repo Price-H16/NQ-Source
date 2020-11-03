@@ -50,11 +50,17 @@ namespace OpenNos.Handler.PacketHandler.Battle
                             FalconFocusedEntity.Mate.HitRequest(iconSkillHitRequest);
                             break;
                     }
+                    Session.Character.BattleEntity.FalconFocusedEntityId = -2;
 
                     Session.CurrentMapInstance.Broadcast(Session,
-                        $"eff_ob {(byte) FalconFocusedEntity.UserType} {FalconFocusedEntity.MapEntityId} 0 4269",
+                        $"eff_ob {(byte)FalconFocusedEntity.UserType} {FalconFocusedEntity.MapEntityId} 0 4269",
                         ReceiverType.AllExceptMe);
                 }
+
+            }
+            else if (Session.Character.BattleEntity.FalconFocusedEntityId == -2)
+            {
+                Logger.Info($"ob_a packet abuse try {Session.Character.GenerateIdentity()} {Session.Character.Name}");
             }
         }
 

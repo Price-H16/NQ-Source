@@ -1993,11 +1993,11 @@ namespace OpenNos.GameObject
                                                 {
                                                     newSkill.FirstCastId = oldSkill.FirstCastId;
 
-                                                    if (newSkillVNum == 1126 && character.SkillComboCount > 4
-                                                        || newSkillVNum == 1140 && character.SkillComboCount > 8)
+                                                    if ((newSkillVNum == 1126 || newSkillVNum == 1125) && character.SkillComboCount > 7
+                                                        || (newSkillVNum == 1139 || newSkillVNum == 1140) && character.SkillComboCount > 11)
                                                     {
                                                         character.SkillComboCount = 0;
-                                                        character.LastSkillComboUse = DateTime.Now.AddSeconds(3);
+                                                        character.LastSkillComboUse = DateTime.Now.AddSeconds(5);
                                                     }
                                                     else
                                                     {

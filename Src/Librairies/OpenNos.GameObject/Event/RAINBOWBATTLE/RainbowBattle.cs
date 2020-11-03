@@ -25,7 +25,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
         #endregion
     }
 
-    public class RainbowBattle
+    public class RAINBOWBATTLE
     {
         #region Members
 
@@ -38,7 +38,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
         public static void CheckAll(List<ClientSession> ses)
         {
-            if (ses.Count() == GroupPlayer)
+            if (ses.Count() <= GroupPlayer)
             {
                 var map = ServerManager.GenerateMapInstance(2010, MapInstanceType.RainbowBattleInstance, new InstanceBag());
                 foreach (var ss in ses)
@@ -70,17 +70,17 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
         public static void SendEvent()
         {
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
-            Thread.Sleep(4 * 60 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
-            Thread.Sleep(30 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
-            Thread.Sleep(20 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
+            //Thread.Sleep(4 * 60 * 1000);
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
+            //Thread.Sleep(30 * 1000);
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
+            //Thread.Sleep(20 * 1000);
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
+            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
             Thread.Sleep(10 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("RAINBOW_STARTED"), 1));
             ServerManager.Instance.EventInWaiting = true;
@@ -91,7 +91,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 if (s.Character.IsMuted() == false)
                 {
                     ServerManager.Instance.Sessions.Where(x => x.CurrentMapInstance.MapInstanceType == MapInstanceType.BaseMapInstance).ToList()
-                        .ForEach(x => x.SendPacket($"qnaml 8 #guri^503 Do you want to do the Rainbow Battle ?"));
+                        .ForEach(x => x.SendPacket($"qnaml 8 #guri^506 Do you want to do the Rainbow Battle ?"));
                 }
             }
             Thread.Sleep(30 * 1000);
@@ -108,7 +108,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
             // Create 3v3 RBB
             foreach (ClientSession s in sessions.OrderBy(s => Guid.NewGuid()).ToList())
             {
-                if (s.Character.Level == 99)
+                if (s.Character.Level == 50)
                 {
                     a.Item1.Add(s);
                 }
@@ -134,7 +134,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 DestinationCharacterId = null,
                 SourceCharacterId = 0,
                 SourceWorldId = ServerManager.Instance.WorldId,
-                Message = "The Rainbow Battle will start in 5 minutes on the channel 4 !",
+                Message = $"The Rainbow Battle will start in 5 minutes on the channel {ServerManager.Instance.ChannelId} !",
                 Type = MessageType.Shout
             });
         }
@@ -319,6 +319,34 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                         Effect = 3009,
                         Score = 3
                     },
+                     new MapNpc
+                    {
+                        NpcVNum = 922,
+                        MapNpcId = map.GetNextNpcId(),
+                        Dialog = 0,
+                        MapId = map.Map.MapId,
+                        MapX = 85,
+                        MapY = 4,
+                        IsMoving = false,
+                        Position = 0,
+                        IsSitting = false,
+                        Effect = 3009,
+                        Score = 3
+                    },
+                    new MapNpc
+                    {
+                        NpcVNum = 922,
+                        MapNpcId = map.GetNextNpcId(),
+                        Dialog = 0,
+                        MapId = map.Map.MapId,
+                        MapX = 32,
+                        MapY = 75,
+                        IsMoving = false,
+                        Position = 0,
+                        IsSitting = false,
+                        Effect = 3009,
+                        Score = 3
+                    },
                     new MapNpc
                     {
                         NpcVNum = 924,
@@ -398,8 +426,8 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
             {
                 var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(ses));
                 if (rbb == null) return;
-                ses.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(30, 32) : ServerManager.RandomNumber<short>(83, 85);
-                ses.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(73, 76) : ServerManager.RandomNumber<short>(2, 4);
+                ses.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(117, 117) : ServerManager.RandomNumber<short>(0, 0);
+                ses.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(27, 59) : ServerManager.RandomNumber<short>(20, 51);
                 ses.CurrentMapInstance.Broadcast(ses.Character.GenerateTp());
                 ses.Character.NoAttack = true;
                 ses.Character.NoMove = true;

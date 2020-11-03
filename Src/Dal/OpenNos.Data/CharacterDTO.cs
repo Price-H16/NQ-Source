@@ -131,6 +131,7 @@ namespace OpenNos.Data
         public int MobKillCounter { get; set; }
 
         public byte UnlockedHLevel { get; set; }
+
         public int ArenaDeath { get; set; }
 
         public int ArenaKill { get; set; }
@@ -138,6 +139,10 @@ namespace OpenNos.Data
         public bool HideHat { get; set; }
         
         public bool UiBlocked { get; set; }
+
+        public string LockCode { get; set; }
+
+        public bool VerifiedLock { get; set; }
 
         #endregion
     }

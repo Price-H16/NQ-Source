@@ -18,12 +18,11 @@ using NosTale.Configuration.Helper;
 using NosTale.Configuration.Utilities;
 using OpenNos.Core;
 using OpenNos.DAL.EF.Helpers;
-using OpenNos.Handler.Bot;
 using OpenNos.Master.Library.Client;
 using OpenNos.SCS.Communication.Scs.Communication.EndPoints.Tcp;
 using OpenNos.SCS.Communication.ScsServices.Service;
 
-/*namespace NosTale.Bot
+namespace NosTale.Bot
 {
     public class Program
     {
@@ -84,7 +83,7 @@ using OpenNos.SCS.Communication.ScsServices.Service;
                 StringPrefixes = new[] {DefaultPrefix},
                 EnableDms = true,
                 EnableMentionPrefix = true,
-                EnableDefaultHelp = false
+                EnableDefaultHelp = true
             };
 
             Commands = Client.UseCommandsNext(ccfg);
@@ -115,7 +114,7 @@ using OpenNos.SCS.Communication.ScsServices.Service;
         {
             e.Client.DebugLogger.LogMessage(LogLevel.Info, "BotDev", "Client is ready to process events.",
                 DateTime.Now);
-            e.Client.UpdateStatusAsync(new DiscordActivity("++help [BOT by Zanou]", ActivityType.Playing));
+            e.Client.UpdateStatusAsync(new DiscordActivity("++help [BOT by Price]", ActivityType.Playing));
             return Task.CompletedTask;
         }
 
@@ -161,7 +160,7 @@ using OpenNos.SCS.Communication.ScsServices.Service;
                 Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
 
                 ConfigurationHelper.CustomisationRegistration();
-                var port = Convert.ToInt32("5050");
+                var port = Convert.ToInt32("6969");
 
                 if (!ignoreStartupMessages)
                 {
@@ -189,7 +188,7 @@ using OpenNos.SCS.Communication.ScsServices.Service;
 
                 try
                 {
-                    var ipAddress = "89.203.249.171";
+                    var ipAddress = "127.0.0.1";
                     var _server = ScsServiceBuilder.CreateService(new ScsTcpEndPoint(ipAddress, port));
                     _server.ClientConnected += OnClientConnected;
                     _server.ClientDisconnected += OnClientDisconnected;
@@ -219,4 +218,4 @@ using OpenNos.SCS.Communication.ScsServices.Service;
             Logger.Info(Language.Instance.GetMessageFromKey("DISCONNECT") + e.Client.ClientId);
         }
     }
-}*/
+}

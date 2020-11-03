@@ -283,6 +283,7 @@
     <Compile Include="Packets\CommandPackets\TeleportToMePacket.cs" />
     <Compile Include="Packets\CommandPackets\UnbanPacket.cs" />
     <Compile Include="Packets\CommandPackets\UndercoverPacket.cs" />
+    <Compile Include="Packets\CommandPackets\UnlockPacket.cs" />
     <Compile Include="Packets\CommandPackets\UnmutePacket.cs" />
     <Compile Include="Packets\CommandPackets\UnstuckPacket.cs" />
     <Compile Include="Packets\CommandPackets\UpgradeCommandPacket.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="Packets\CommandPackets\WigColorPacket.cs" />
     <Compile Include="Packets\CommandPackets\XpRatePacket.cs" />
     <Compile Include="Packets\CommandPackets\ZoomPacket.cs" />
+    <Compile Include="Packets\CustomPackets\ChangeLockCodePacket.cs" />
     <Compile Include="Packets\CustomPackets\NtcpACPacket.cs" />
     <Compile Include="Packets\FamilyCommandPackets\FamilyInvitePacket.cs" />
     <Compile Include="Packets\FamilyCommandPackets\FamilyKickPacket.cs" />

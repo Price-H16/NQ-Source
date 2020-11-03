@@ -5,7 +5,7 @@ using OpenNos.Domain;
 
 namespace NosTale.Packets.Packets.CommandPackets
 {
-    [PacketHeader("$FamilyFaction", PassNonParseablePacket = true, Authorities = new[] {AuthorityType.Administrator})]
+    [PacketHeader("$FamilyFaction", PassNonParseablePacket = true, Authorities = new[] {AuthorityType.Administrator, AuthorityType.BetaTester })]
     public class FamilyFactionPacket : PacketDefinition
     {
         [PacketIndex(0)] public string FamilyName { get; set; }

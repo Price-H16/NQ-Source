@@ -65,6 +65,18 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
+            if (cRegPacket.Price * cRegPacket.Amount < 501)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("MINIMUM_PRICE_IS_501")));
+                return;
+            }
+
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             if (cRegPacket.Inventory != 0 && cRegPacket.Inventory != 1 && cRegPacket.Inventory != 2 &&
                 cRegPacket.Inventory != 4) return; //DUPE
 

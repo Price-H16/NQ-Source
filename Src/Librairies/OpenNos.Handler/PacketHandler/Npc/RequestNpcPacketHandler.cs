@@ -49,6 +49,25 @@ namespace OpenNos.Handler.PacketHandler.Npc
                     return;
                 }
 
+                if (Session.CurrentMapInstance.Map.MapId == 2010)
+                {
+                    var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+
+                    if (RainbowTeam == null)
+                    {
+                        return;
+                    }
+
+                    if (RainbowBattleManager.AlreadyHaveFlag(RainbowTeam, (RainbowNpcType)npc.Score, npc.MapNpcId))
+                    {
+                        return;
+                    }
+
+                    Session.SendPacket(UserInterfaceHelper.GenerateDelay(3000, 1, $"#guri^720^{npc.Score}^{npc.MapNpcId}"));
+                    return;
+                }
+
+
                 var tp = npc.Teleporters?.FirstOrDefault(t => t?.Type == TeleporterType.TeleportOnMap);
                 if (tp != null)
                 {

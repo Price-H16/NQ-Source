@@ -30,6 +30,12 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
         public void CreateShop(MShopPacket packet)
         {
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             if (Session.Account.IsLimited)
             {
                 Session.SendPacket(

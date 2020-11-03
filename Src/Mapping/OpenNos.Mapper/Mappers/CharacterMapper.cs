@@ -78,6 +78,8 @@ namespace OpenNos.Mapper.Mappers
             output.UnlockedHLevel = input.UnlockedHLevel;
             output.HideHat = input.HideHat;
             output.UiBlocked = input.UiBlocked;
+            output.LockCode = input.LockCode;
+            output.VerifiedLock = input.VerifiedLock;
 
             return true;
         }
@@ -150,6 +152,8 @@ namespace OpenNos.Mapper.Mappers
             output.UnlockedHLevel = input.UnlockedHLevel;
             output.HideHat = input.HideHat;
             output.UiBlocked = input.UiBlocked;
+            output.LockCode = input.LockCode;
+            output.VerifiedLock = input.VerifiedLock;
 
             return true;
         }

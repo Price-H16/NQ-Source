@@ -553,7 +553,7 @@ namespace OpenNos.Handler.Bot
                             IconUrl = ctx.Member.AvatarUrl,
                             Text = $"{ctx.Member.Username}#{ctx.Member.Discriminator}"
                         },
-                        ThumbnailUrl = GetImg(characterDto)
+                        
                     };
                     var bio = characterDto.Biography != null ? characterDto.Biography : "";
                     tmp.AddField($"CharacterId : {characterDto.CharacterId}", "Stats");

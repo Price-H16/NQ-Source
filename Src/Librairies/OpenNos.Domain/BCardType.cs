@@ -449,8 +449,10 @@
         {
             // TODO
             LastSkillReset = 11,
-
+            PoliceMan = 41,
+            Illusionist = 51,
             OnCellule = 21,
+            MoveBoostInHidden = 61,
             DamageBoostOnHigherLvl = 31
         }
 

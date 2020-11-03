@@ -143,6 +143,8 @@ namespace OpenNos.GameObject
             IsChangeName = input.IsChangeName;
             MobKillCounter = input.MobKillCounter;
             UnlockedHLevel = input.UnlockedHLevel;
+            LockCode = input.LockCode;
+            VerifiedLock = input.VerifiedLock;
         }
 
         #endregion
@@ -157,6 +159,11 @@ namespace OpenNos.GameObject
 
         public byte BeforeDirection { get; set; }
 
+        public DateTime LastCheckIsLocked = DateTime.Now; 
+
+        public bool isFreezed { get; set; }
+
+        public bool IsLocked { get; set; }
         public Node[][] BrushFireJagged { get; set; }
         public int SheepScore1 { get; set; }
 
@@ -1524,6 +1531,17 @@ namespace OpenNos.GameObject
 
         public void CharacterLife()
         {
+            if (IsLocked)
+            {
+                if (DateTime.Now < LastCheckIsLocked.AddSeconds(1))
+                {
+                    ServerManager.Instance.JoinMiniland(Session, Session);
+                }
+                if (DateTime.Now > LastCheckIsLocked.AddMinutes(2))
+                {
+                    ServerManager.Instance.Kick(Name);
+                }
+            }
             if (Hp == 0 && LastHealth.AddSeconds(2) <= DateTime.Now)
             {
                 Mp = 0;
@@ -1977,6 +1995,11 @@ namespace OpenNos.GameObject
                     }
                 }
             }
+        }
+
+        public byte SwitchLevel()
+        {
+            return Level;
         }
 
         public void CheckHuntQuest()
@@ -3487,9 +3510,36 @@ namespace OpenNos.GameObject
 
             void _handleItemDrop(DropDTO drop, long? owner, short posX, short posY)
             {
-                Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
+                if (ServerManager.Instance.Configuration.AccountLock)
                 {
-                    if (Session.HasCurrentMapInstance)
+                    Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
+                    {
+                        if (Session.HasCurrentMapInstance)
+                        {
+                            if (CharacterId == owner && StaticBonusList.Any(s => s.StaticBonusType == StaticBonusType.AutoLoot))
+                            {
+                                if (!Session.Character.VerifiedLock)
+                                {
+                                    Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("CANT_DO_THIS_ACTION_CHARACTER_IS_LOCKED"), 10));
+                                    return;
+                                }
+                                GiftAdd(drop.ItemVNum, (byte)drop.Amount);
+                            }
+                            else
+                            {
+                                if (!Session.Character.VerifiedLock)
+                                {
+                                    Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("CANT_DO_THIS_ACTION_CHARACTER_IS_LOCKED"), 10));
+                                    return;
+                                }
+                                GiftAdd(drop.ItemVNum, (byte)drop.Amount);
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
                     {
                         if (CharacterId == owner &&
                             StaticBonusList.Any(s => s.StaticBonusType == StaticBonusType.AutoLoot))
@@ -3520,8 +3570,8 @@ namespace OpenNos.GameObject
                                       MapInstance.Map.MapTypes.Any(s => s.MapTypeId != (short) MapTypeEnum.Act4))) &&
                                     q.Quest.QuestObjectives.Any(qst => qst.Data == drop.ItemVNum)));
                         }
-                    }
-                });
+                    });
+                }
             }
 
             lock (_syncObj)

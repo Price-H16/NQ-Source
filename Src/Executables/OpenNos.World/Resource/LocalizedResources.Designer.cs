@@ -1474,6 +1474,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your character is locked. Use $Unlock to unlock it..
+        /// </summary>
+        internal static string CHARACTER_LOCKED_USE_UNLOCK {
+            get {
+                return ResourceManager.GetString("CHARACTER_LOCKED_USE_UNLOCK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} has logged in..
         /// </summary>
         internal static string CHARACTER_LOGGED_IN {
@@ -5466,6 +5475,33 @@ namespace OpenNos.World.Resource {
         internal static string RAID_UNREGISTERED {
             get {
                 return ResourceManager.GetString("RAID_UNREGISTERED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RainbowBattle starts in {0} minutes!.
+        /// </summary>
+        internal static string RAINBOW_MINUTES {
+            get {
+                return ResourceManager.GetString("RAINBOW_MINUTES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RainbowBattle starts in {0} seconds!.
+        /// </summary>
+        internal static string RAINBOW_SECONDS {
+            get {
+                return ResourceManager.GetString("RAINBOW_SECONDS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RainbowBattle Started!.
+        /// </summary>
+        internal static string RAINBOW_STARTED {
+            get {
+                return ResourceManager.GetString("RAINBOW_STARTED", resourceCulture);
             }
         }
         

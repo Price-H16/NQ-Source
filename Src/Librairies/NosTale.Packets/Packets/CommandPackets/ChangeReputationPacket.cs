@@ -6,7 +6,7 @@ using OpenNos.Domain;
 namespace NosTale.Packets.Packets.CommandPackets
 {
     [PacketHeader("$ChangeReputation", "$Reputation", PassNonParseablePacket = true,
-        Authorities = new[] {AuthorityType.Administrator})]
+        Authorities = new[] {AuthorityType.Administrator, AuthorityType.BetaTester })]
     public class ChangeReputationPacket : PacketDefinition
     {
         #region Properties

@@ -33,7 +33,24 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
         public void BuyBazaar(CBuyPacket cBuyPacket)
         {
             if (Session == null || Session.Character == null) return;
-            
+
+            if (Session.Character == null || Session.Character.InExchangeOrTrade)
+            {
+                return;
+            }
+
+            if (cBuyPacket.Price * cBuyPacket.Amount < 501)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("MINIMUM_BUY_PRICE_IS_501")));
+                return;
+            }
+
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             if (Session.Account.IsLimited)
             {
                 Session.SendPacket(

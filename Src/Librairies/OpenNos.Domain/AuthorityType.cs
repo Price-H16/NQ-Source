@@ -20,6 +20,7 @@
         TM = 60,
         CM = 70,
         DEV = 80,
+        BetaTester = 90,
         Administrator = 100
     }
 }

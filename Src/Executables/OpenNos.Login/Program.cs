@@ -1,7 +1,12 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using ChickenAPI.Plugins;
+using ChickenAPI.Plugins.Exceptions;
+using ChickenAPI.Plugins.Modules;
 using log4net;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
@@ -19,34 +24,72 @@ namespace OpenNos.Login
     {
         #region Members
 
-        private static bool _isDebug;
-
         private static int _port;
 
         #endregion
 
         #region Methods
 
+        private static void InitializeMasterCommunication()
+        {
+            var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
+
+            if (CommunicationServiceClient.Instance.Authenticate(a.MasterAuthKey))
+            {
+                Logger.Info(Language.Instance.GetMessageFromKey("API_INITIALIZED"));
+            }
+        }
+        private static void InitializeDatabase()
+        {
+            if (!DataAccessHelper.Initialize())
+            {
+                Console.ReadKey();
+                return;
+            }
+        }
+        private static void InitializePacketSerialization()
+        {
+            PacketFactory.Initialize<WalkPacket>();
+            var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
+            var port = a.LoginPort;
+            var networkManager = new NetworkManager<LoginCryptography>(a.IPAddress, port,
+                typeof(LoginPacketHandler), typeof(LoginCryptography), false);
+        }
+        private static void InitializeLogger()
+        {
+            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+        }
+        private static void PrintHeader()
+        {
+            Console.Title = "NosQuest - Login";
+            const string text = @"
+
+███╗░░██╗░█████╗░░██████╗░██████╗░██╗░░░██╗███████╗░██████╗████████╗
+████╗░██║██╔══██╗██╔════╝██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝
+██╔██╗██║██║░░██║╚█████╗░██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░
+██║╚████║██║░░██║░╚═══██╗╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░
+██║░╚███║╚█████╔╝██████╔╝░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░
+╚═╝░░╚══╝░╚════╝░╚═════╝░░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░
+";
+            string separator = new string('=', Console.WindowWidth);
+            string logo = text.Split('\n').Select(s => string.Format("{0," + (Console.WindowWidth / 2 + s.Length / 2) + "}\n", s))
+                .Aggregate("", (current, i) => current + i);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(separator + logo + separator);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
         public static void Main(string[] args)
         {
             checked
             {
                 try
                 {
-#if DEBUG
-                    _isDebug = true;
-#endif
-                    CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
-                    Console.Title = $"OpenNos Login Server{(_isDebug ? " Development Environment" : "")}";
-
-                    var ignoreStartupMessages = false;
-                    foreach (var arg in args)
-                    {
-                        ignoreStartupMessages |= arg == "--nomsg";
-                    }
+                    PrintHeader();
 
                     // initialize Logger
-                    Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+
+                    InitializeLogger();
+
                     ConfigurationHelper.CustomisationRegistration();
                     var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
 
@@ -60,28 +103,11 @@ namespace OpenNos.Login
                     }
 
                     _port = port;
-                    if (!ignoreStartupMessages)
-                    {
-                        var assembly = Assembly.GetExecutingAssembly();
-                        var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                        var text = $"LOGIN SERVER v{fileVersionInfo.ProductVersion}dev - PORT : {port} by OpenNos Team";
-                        var offset = Console.WindowWidth / 2 + text.Length / 2;
-                        var separator = new string('=', Console.WindowWidth);
-                        Console.WriteLine(separator + string.Format("{0," + offset + "}\n", text) + separator);
-                    }
-
                     // initialize api
-                    if (CommunicationServiceClient.Instance.Authenticate(a.MasterAuthKey))
-                    {
-                        Logger.Info(Language.Instance.GetMessageFromKey("API_INITIALIZED"));
-                    }
+                    InitializeMasterCommunication();
 
                     // initialize DB
-                    if (!DataAccessHelper.Initialize())
-                    {
-                        Console.ReadKey();
-                        return;
-                    }
+                    InitializeDatabase();
 
                     Logger.Info(Language.Instance.GetMessageFromKey("CONFIG_LOADED"));
 
@@ -96,11 +122,7 @@ namespace OpenNos.Login
 
                     try
                     {
-                        // initialize PacketSerialization
-                        PacketFactory.Initialize<WalkPacket>();
-
-                        var networkManager = new NetworkManager<LoginCryptography>(a.IPAddress, port,
-                            typeof(LoginPacketHandler), typeof(LoginCryptography), false);
+                        InitializePacketSerialization();
                     }
                     catch (Exception ex)
                     {
@@ -114,7 +136,6 @@ namespace OpenNos.Login
                 }
             }
         }
-
         private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
             Logger.Error((Exception) e.ExceptionObject);

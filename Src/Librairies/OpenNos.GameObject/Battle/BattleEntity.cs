@@ -3275,23 +3275,23 @@ namespace OpenNos.GameObject.Battle
                                 Character.Session?.SendPacket(Character.GeneratePairy());
                                 break;
 
-                            //case 340:
-                            //    if (MapInstance?.Map?.MapTypes != null &&
-                            //        MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act52))
+                            case 340:
+                                if (MapInstance?.Map?.MapTypes != null &&
+                                    MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act52))
 
-                            //    {
-                            //        Character.AddStaticBuff(new StaticBuffDTO
-                            //        {
-                            //            CardId = 339,
-                            //            CharacterId = Character.CharacterId,
-                            //            RemainingTime = -1
-                            //        });
-                            //        Character.Session?.SendPacket(
-                            //                UserInterfaceHelper.GenerateInfo(
-                            //                        Language.Instance.GetMessageFromKey("ENCASED_BURNING_SWORD")));
-                            //    }
+                                {
+                                    Character.AddStaticBuff(new StaticBuffDTO
+                                    {
+                                        CardId = 339,
+                                        CharacterId = Character.CharacterId,
+                                        RemainingTime = -1
+                                    });
+                                    Character.Session?.SendPacket(
+                                            UserInterfaceHelper.GenerateInfo(
+                                                    Language.Instance.GetMessageFromKey("ENCASED_BURNING_SWORD")));
+                                }
 
-                            //    break;
+                                break;
 
                             case 617:
                                 {

@@ -58,21 +58,21 @@ namespace OpenNos.GameObject
             IsAlive = true;
             BattleEntity = new BattleEntity(this);
             if (IsTeamMember) AddTeamMember();
-            if (Monster.CriticalChance == 0 && Monster.CriticalRate == 0)
-                try
-                {
-                    var streamWriter = new StreamWriter("MissingMateStats.txt", true)
-                    {
-                        AutoFlush = true
-                    };
-                    streamWriter.WriteLine($"{Monster.NpcMonsterVNum} is missing critical stats.");
-                    streamWriter.Close();
-                }
-                catch (IOException)
-                {
-                    Logger.Warn("MissingMateStats.txt was in use, but i was able to catch this exception", null,
-                        "MissingMateStats");
-                }
+            //if (Monster.CriticalChance == 0 && Monster.CriticalRate == 0) // Generate Lag , stupid code
+            //    try
+            //    {
+            //        var streamWriter = new StreamWriter("MissingMateStats.txt", true)
+            //        {
+            //            AutoFlush = true
+            //        };
+            //        streamWriter.WriteLine($"{Monster.NpcMonsterVNum} is missing critical stats.");
+            //        streamWriter.Close();
+            //    }
+            //    catch (IOException)
+            //    {
+            //        Logger.Warn("MissingMateStats.txt was in use, but i was able to catch this exception", null,
+            //            "MissingMateStats");
+            //    }
         }
 
         public Mate(Character owner, NpcMonster npcMonster, byte level, MateType matetype, bool temporal = false,
@@ -267,6 +267,11 @@ namespace OpenNos.GameObject
 
         public void AddTeamMember()
         {
+            if (Owner?.Session?.CurrentMapInstance?.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                return;
+            }
+
             if (Owner.Mates.Any(m => m.IsTeamMember && m.MateType == MateType)) return;
 
             if (Owner.MapInstance.MapInstanceType == MapInstanceType.EventGameInstance) return;

@@ -115,10 +115,13 @@
     <Compile Include="Guri\Handler\G44.cs" />
     <Compile Include="Guri\Handler\G5.cs" />
     <Compile Include="Guri\Handler\G501.cs" />
+    <Compile Include="Guri\Handler\G503.cs" />
+    <Compile Include="Guri\Handler\G504.cs" />
     <Compile Include="Guri\Handler\G502.cs" />
     <Compile Include="Guri\Handler\G506.cs" />
     <Compile Include="Guri\Handler\G513.cs" />
     <Compile Include="Guri\Handler\G710.cs" />
+    <Compile Include="Guri\Handler\G720.cs" />
     <Compile Include="Guri\Handler\G711.cs" />
     <Compile Include="Guri\Handler\G750.cs" />
     <Compile Include="ItemUsage\Handler\Box\DefaultBox.cs" />

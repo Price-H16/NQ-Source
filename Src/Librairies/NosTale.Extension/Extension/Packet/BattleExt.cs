@@ -13,6 +13,7 @@ using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
+using OpenNos.GameObject.RainbowBattle;
 using static OpenNos.Domain.BCardType;
 
 namespace NosTale.Extension.Extension.Packet
@@ -455,6 +456,46 @@ namespace NosTale.Extension.Extension.Packet
                             });
                         }
                     }
+                    else if (target.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+                    {
+                        var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(target));
+
+                        IDisposable obs = Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(s =>
+                        {
+                            target.CurrentMapInstance?.Broadcast(target.Character?.GenerateEff(35));
+                        });
+
+                        rbb.SecondTeam.Score += 1;
+                        RainbowBattleManager.SendFbs(target.CurrentMapInstance);
+
+                        isAlive = true;
+                        hitRequest.Session.CurrentMapInstance?.Broadcast((UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_KILL"),
+                        hitRequest.Session.Character.Name, target.Character.Name), 0)));
+                        target.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("RESP_RBB"), target.Character.Name), 10));
+
+                        target.Character.Hp = (int)target.Character.HPLoad();
+                        target.Character.Mp = (int)target.Character.MPLoad();
+                        target.SendPacket(target?.Character?.GenerateStat());
+                        target.Character.NoMove = true;
+                        target.Character.NoAttack = true;
+                        target.Character.isFreezed = true;
+                        target.SendPacket(target?.Character?.GenerateCond());
+
+                        Observable.Timer(TimeSpan.FromSeconds(20)).Subscribe(o =>
+                        {
+                            if (target.Character.isFreezed)
+                            {
+                                target.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(30, 32) : ServerManager.RandomNumber<short>(83, 85);
+                                target.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(73, 76) : ServerManager.RandomNumber<short>(2, 4);
+                                target?.CurrentMapInstance?.Broadcast(target.Character.GenerateTp());
+                                target.Character.NoAttack = false;
+                                target.Character.NoMove = false;
+                                target.Character.isFreezed = false;
+                                target?.SendPacket(target.Character.GenerateCond());
+                            }
+                            obs?.Dispose();
+                        });
+                    }
                     else
                     {
                         hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(
@@ -728,7 +769,7 @@ namespace NosTale.Extension.Extension.Packet
                                 (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                 hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
-                                hitRequest.Session.Character.PositionY, isAlive,
+                                hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
@@ -741,7 +782,7 @@ namespace NosTale.Extension.Extension.Packet
                                 (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                 hitRequest.SkillCombo.Animation,
                                 hitRequest.SkillCombo.Effect, hitRequest.Session.Character.PositionX,
-                                hitRequest.Session.Character.PositionY, isAlive,
+                                hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
@@ -764,8 +805,7 @@ namespace NosTale.Extension.Extension.Packet
                                     hitRequest.Skill.SkillVNum,
                                     (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                     hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                    hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY,
-                                    isAlive,
+                                    hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                     (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage,
                                     hitmode,
                                     (byte)(hitRequest.Skill.SkillType - 1)));
@@ -798,8 +838,7 @@ namespace NosTale.Extension.Extension.Packet
                                     -1,
                                     (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                     hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                    hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY,
-                                    isAlive,
+                                    hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                     (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage,
                                     hitmode,
                                     (byte)(hitRequest.Skill.SkillType - 1)));
@@ -835,7 +874,7 @@ namespace NosTale.Extension.Extension.Packet
                                 (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                 hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
-                                hitRequest.Session.Character.PositionY, isAlive,
+                                hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
@@ -847,7 +886,7 @@ namespace NosTale.Extension.Extension.Packet
                                 hitRequest.Skill.SkillVNum,
                                 (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                 hitRequest.Skill.AttackAnimation,
-                                hitRequest.SkillEffect, hitRequest.MapX, hitRequest.MapY, isAlive,
+                                hitRequest.SkillEffect, hitRequest.MapX, hitRequest.MapY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
@@ -860,7 +899,7 @@ namespace NosTale.Extension.Extension.Packet
                                 (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
                                 hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
-                                hitRequest.Session.Character.PositionY, isAlive,
+                                hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
@@ -1874,6 +1913,23 @@ namespace NosTale.Extension.Extension.Packet
                                     {
                                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                                         return;
+                                    }
+                                }
+                                else if (playerToAttack.Character.isFreezed)
+                                {
+                                    Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                    var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(playerToAttack));
+                                    var rbb2 = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+
+                                    if (rbb != rbb2)
+                                    {
+                                        return;
+                                    }
+
+                                    if (playerToAttack.Character.LastPvPKiller == null
+                                        || playerToAttack.Character.LastPvPKiller != Session)
+                                    {
+                                        Session.SendPacket($"delay 2000 5 #guri^504^1^{playerToAttack.Character.CharacterId}");
                                     }
                                 }
                                 else if (IceBreaker.FrozenPlayers.Contains(playerToAttack))

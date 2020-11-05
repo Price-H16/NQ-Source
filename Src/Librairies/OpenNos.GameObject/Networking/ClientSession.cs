@@ -9,8 +9,11 @@ using ChickenAPI.Events;
 using OpenNos.Core;
 using OpenNos.Core.Handling;
 using OpenNos.Core.Networking.Communication.Scs.Communication.Messages;
+using OpenNos.DAL;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject._Event;
+using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 
@@ -167,6 +170,27 @@ namespace OpenNos.GameObject
             // do everything necessary before removing client, DB save, Whatever
             if (HasSelectedCharacter)
             {
+                if (Character?.MapInstance?.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+                {
+                    CharacterDTO characterToMute = DAOFactory.CharacterDAO.LoadByName(Character?.Name);
+                    if (Character?.IsMuted() == false)
+                    {
+                        Character?.Session?.SendPacket(UserInterfaceHelper.GenerateInfo(
+                            string.Format(Language.Instance.GetMessageFromKey("MUTED_PLURAL"), "RBB DISCONNECT", "120")));
+                    }
+
+                    PenaltyLogDTO log = new PenaltyLogDTO
+                    {
+                        AccountId = characterToMute.AccountId,
+                        Reason = "RBB DISCONNECT",
+                        Penalty = PenaltyType.Muted,
+                        DateStart = DateTime.Now,
+                        DateEnd = DateTime.Now.AddMinutes(120),
+                        AdminName = "SYSTEM"
+                    };
+                    Character.InsertOrUpdatePenalty(log);
+                    Character?.Session?.SendPacket(Character?.Session?.Character?.GenerateSay(Language.Instance.GetMessageFromKey("DONE"), 10));
+                }
                 Logger.LogUserEvent("CHARACTER_LOGOUT", GenerateIdentity(), "");
                 Character.Dispose();
 
@@ -213,6 +237,27 @@ namespace OpenNos.GameObject
 
         public void Disconnect()
         {
+            if (Character?.MapInstance?.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                CharacterDTO characterToMute = DAOFactory.CharacterDAO.LoadByName(Character?.Name);
+                if (Character?.IsMuted() == false)
+                {
+                    Character?.Session?.SendPacket(UserInterfaceHelper.GenerateInfo(
+                        string.Format(Language.Instance.GetMessageFromKey("MUTED_PLURAL"), "RBB DISCONNECT", "120")));
+                }
+
+                PenaltyLogDTO log = new PenaltyLogDTO
+                {
+                    AccountId = characterToMute.AccountId,
+                    Reason = "RBB DISCONNECT",
+                    Penalty = PenaltyType.Muted,
+                    DateStart = DateTime.Now,
+                    DateEnd = DateTime.Now.AddMinutes(120),
+                    AdminName = "SYSTEM"
+                };
+                Character.InsertOrUpdatePenalty(log);
+                Character?.Session?.SendPacket(Character?.Session?.Character?.GenerateSay(Language.Instance.GetMessageFromKey("DONE"), 10));
+            }
             _client.Disconnect();
         }
 

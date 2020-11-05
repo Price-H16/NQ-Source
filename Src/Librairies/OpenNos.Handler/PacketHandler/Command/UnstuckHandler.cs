@@ -38,13 +38,19 @@ namespace OpenNos.Handler.PacketHandler.Command
 
             if (Session?.Character != null)
             {
+                if (Session.CurrentMapInstance.MapInstanceType.Equals(MapInstanceType.RainbowBattleInstance))
+                {
+                    Session.SendPacket(StaticPacketHelper.Cancel(2));
+                }
+
                 if (Session.Character.Miniland == Session.Character.MapInstance)
                 {
                     ServerManager.Instance.JoinMiniland(Session, Session);
                 }
                 else if (!Session.Character.IsSeal
                          && !Session.CurrentMapInstance.MapInstanceType.Equals(MapInstanceType.TalentArenaMapInstance)
-                         && !Session.CurrentMapInstance.MapInstanceType.Equals(MapInstanceType.IceBreakerInstance))
+                      && !Session.CurrentMapInstance.MapInstanceType.Equals(MapInstanceType.IceBreakerInstance)
+                      && !Session.CurrentMapInstance.MapInstanceType.Equals(MapInstanceType.RainbowBattleInstance))
                 {
                     ServerManager.Instance.ChangeMapInstance(Session.Character.CharacterId,
                         Session.Character.MapInstanceId, Session.Character.PositionX, Session.Character.PositionY,

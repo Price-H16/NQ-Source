@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using OpenNos.GameObject._Event;
 using static OpenNos.Domain.BCardType;
 using System.Data.Entity.Core.Common.CommandTrees;
+using OpenNos.GameObject.RainbowBattle;
 
 namespace OpenNos.GameObject
 {
@@ -3449,6 +3450,29 @@ namespace OpenNos.GameObject
 
         public void GenerateKillBonus(MapMonster monsterToAttack, BattleEntity Killer)
         {
+            #region RBB
+
+            if (Session?.CurrentMapInstance?.MapInstanceType == MapInstanceType.RainbowBattleInstance && monsterToAttack?.MonsterVNum == 2558)
+            {
+                var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+
+                rbb.Score += 5;
+
+                // Give buff mandra
+                if (ServerManager.RandomNumber() < 90)
+                {
+                    Session.Character.AddBuff(new Buff(4, Level), BattleEntity, true);
+                }
+                else
+                {
+                    Session.Character.AddBuff(new Buff(5, Level), BattleEntity, true);
+                }
+
+                Session.CurrentMapInstance.Broadcast($"msg 0 {Session.Character.Name} killed The Mandra and won 5 points!");
+                RainbowBattleManager.SendFbs(Session.CurrentMapInstance);
+            }
+
+            #endregion
             void _handleGoldDrop(DropDTO drop, long maxGold, long? dropOwner, short posX, short posY)
             {
                 int amount = drop.Amount;

@@ -30,6 +30,11 @@ namespace OpenNos.GameObject
                 return;
             }
 
+            if (session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                return;
+            }
+
             if (inv.ItemVNum == 333 || inv.ItemVNum == 334
             ) // Sealed Jajamaru Specialist Card & Sealed Princess Sakura Bead
                 return;

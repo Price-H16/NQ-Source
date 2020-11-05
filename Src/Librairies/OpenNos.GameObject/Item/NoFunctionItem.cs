@@ -30,6 +30,11 @@ namespace OpenNos.GameObject
                 return;
             }
 
+            if (session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                return;
+            }
+
             if (session.CurrentMapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance) return;
 
             switch (inv.ItemVNum)

@@ -1685,7 +1685,7 @@ namespace OpenNos.GameObject.Networking
 
         public void GroupLeave(ClientSession session)
         {
-            if (Groups != null)
+            if (Groups != null && session?.CurrentMapInstance?.MapInstanceType != MapInstanceType.RainbowBattleInstance)
             {
                 var grp = Instance.Groups.Find(s => s.IsMemberOfGroup(session.Character.CharacterId));
                 if (grp != null)

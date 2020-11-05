@@ -1,4 +1,6 @@
-﻿namespace OpenNos.GameObject._Algorithm
+﻿using OpenNos.GameObject.Battle;
+
+namespace OpenNos.GameObject._Algorithm
 {
     public interface IDamageAlgorithm
     {
@@ -8,6 +10,6 @@
         /// <param name="entity"></param>
         /// <param name="targetEntity"></param>
         /// <returns></returns>
-        //uint GenerateDamage(HitRequest hit);
+        uint GenerateDamage(HitRequest hit);
     }
 }

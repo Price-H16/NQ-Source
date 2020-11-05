@@ -97,16 +97,16 @@ namespace OpenNos.GameObject
             switch (skillelement)
             {
                 case 0:
-                    return FireResistance / 100;
+                    return FireResistance / 150;
 
                 case 1:
-                    return WaterResistance / 100;
+                    return WaterResistance / 150;
 
                 case 2:
-                    return LightResistance / 100;
+                    return LightResistance / 150;
 
                 case 3:
-                    return DarkResistance / 100;
+                    return DarkResistance / 150;
 
                 default:
                     return 0f;

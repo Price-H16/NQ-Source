@@ -7,6 +7,7 @@ using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
+using OpenNos.GameObject.RainbowBattle;
 
 namespace OpenNos.Handler.PacketHandler.Npc
 {

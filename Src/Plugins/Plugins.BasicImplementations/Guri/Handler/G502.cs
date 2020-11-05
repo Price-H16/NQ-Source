@@ -39,7 +39,7 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     return;
                 }
 
-                if (target.Character.MapInstance.MapInstanceType == MapInstanceType.IceBreakerInstance)
+                if (target.Character.MapInstance.MapInstanceType == MapInstanceType.IceBreakerInstance || target.Character.MapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
                 {
                     if (target.Character.LastPvPKiller == null
                         || target.Character.LastPvPKiller != Session)

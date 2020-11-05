@@ -1,7 +1,9 @@
 ﻿using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
+using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject._Guri.Event;
+using OpenNos.GameObject.Networking;
 using System;
 
 namespace OpenNos.Handler.PacketHandler.Basic
@@ -44,8 +46,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     Value = guriPacket.Value
                 });
                 return;
-            }*/
-
+            }*/          
             Session.Character.Event.EmitEvent(new GuriEvent
             {
                 Type = guriPacket.Type,

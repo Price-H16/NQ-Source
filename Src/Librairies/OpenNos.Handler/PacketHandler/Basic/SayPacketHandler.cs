@@ -118,6 +118,22 @@ namespace OpenNos.Handler.PacketHandler.Basic
                         .FirstOrDefault(s => s.Any(e => e.Session == Session));
                 }
 
+                var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+
+                type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
+
+                Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), 1), ReceiverType.AllExceptMe);
+                if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance && rbb != null)
+                {
+                    foreach (var ses in rbb.Session)
+                    {
+                        if (ses == Session)
+                        {
+                            continue;
+                        }
+                        ses.SendPacket(Session.Character.GenerateSay(message.Trim(), type, Session.Account.Authority >= AuthorityType.User));
+                    }
+                }
                 if (Session.Character.Authority >= AuthorityType.Supporter)
                 {
                     type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);

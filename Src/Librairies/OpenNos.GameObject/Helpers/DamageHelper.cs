@@ -1471,9 +1471,9 @@ namespace OpenNos.GameObject.Helpers
                     break;
             }
 
-            if (/*skill?.Element == 0 || */(skill?.Element != 0 && skill?.Element != realAttacker.Element && realAttacker.EntityType == EntityType.Player))
+            if (skill?.Element == 0 || (skill?.Element != 0 && skill?.Element != realAttacker.Element && realAttacker.EntityType == EntityType.Player))
             {
-                //elementalBoost = 0;
+                elementalBoost = 0;
             }
 
             #endregion

@@ -150,16 +150,16 @@ namespace OpenNos.GameObject.Helpers
                             break;
 
                         case EventType.RAINBOWBATTLE:
-                            if (ServerManager.Instance.ChannelId != 51)
+                            if (ServerManager.Instance.ChannelId == 4)
                             {
-                                Event.RAINBOWBATTLE.RAINBOWBATTLE.GenerateEvent();
+                                Event.RAINBOWBATTLE.RainbowBattle.GenerateEvent();
                             }
                             else
                             {
                                 ServerManager.Instance.StartedEvents.Remove(type);
                                 return;
                             }
-                            break;                            
+                            break;
 
                         case EventType.ACT4SHIP:
                             ACT4SHIP.GenerateAct4Ship(1);

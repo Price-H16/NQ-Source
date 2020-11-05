@@ -25,11 +25,11 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
         #endregion
     }
 
-    public class RAINBOWBATTLE
+    public class RainbowBattle
     {
         #region Members
 
-        // ↓ 3v3
+        // Team pvp 30 max ( 30 / 2 = 15 vs 15 ) ↓ 3v3
         private static readonly int GroupPlayer = 6;
 
         #endregion
@@ -38,7 +38,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
         public static void CheckAll(List<ClientSession> ses)
         {
-            if (ses.Count() <= GroupPlayer)
+            if (ses.Count() == GroupPlayer)
             {
                 var map = ServerManager.GenerateMapInstance(2010, MapInstanceType.RainbowBattleInstance, new InstanceBag());
                 foreach (var ss in ses)
@@ -91,7 +91,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 if (s.Character.IsMuted() == false)
                 {
                     ServerManager.Instance.Sessions.Where(x => x.CurrentMapInstance.MapInstanceType == MapInstanceType.BaseMapInstance).ToList()
-                        .ForEach(x => x.SendPacket($"qnaml 8 #guri^506 Do you want to do the Rainbow Battle ?"));
+                        .ForEach(x => x.SendPacket($"qnaml 8 #guri^503 Do you want to do the Rainbow Battle ?"));
                 }
             }
             Thread.Sleep(30 * 1000);
@@ -108,7 +108,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
             // Create 3v3 RBB
             foreach (ClientSession s in sessions.OrderBy(s => Guid.NewGuid()).ToList())
             {
-                if (s.Character.Level == 50)
+                if (s.Character.Level == 99)
                 {
                     a.Item1.Add(s);
                 }
@@ -134,7 +134,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 DestinationCharacterId = null,
                 SourceCharacterId = 0,
                 SourceWorldId = ServerManager.Instance.WorldId,
-                Message = $"The Rainbow Battle will start in 5 minutes on the channel {ServerManager.Instance.ChannelId} !",
+                Message = "The Rainbow Battle will start in 5 minutes on the channel 4 !",
                 Type = MessageType.Shout
             });
         }

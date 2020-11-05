@@ -15,10 +15,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static void AddFlag(ClientSession ses, RainbowBattleTeam rbb, RainbowNpcType type, int npcId)
         {
-            if (rbb == null)
-            {
-                return;
-            }
+            if (rbb == null) return;
 
             rbb.Score += (byte)type;
 
@@ -28,10 +25,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
             var RainbowTeam2 = rbb.SecondTeam;
 
-            if (RainbowTeam2 == null)
-            {
-                return;
-            }
+            if (RainbowTeam2 == null) return;
 
             if (AlreadyHaveFlag(RainbowTeam2, type, npcId)) RemoveFlag(RainbowTeam2, type, npcId);
 
@@ -41,10 +35,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static bool AlreadyHaveFlag(RainbowBattleTeam RainbowBattleTeam, RainbowNpcType type, int NpcId)
         {
-            if (RainbowBattleTeam == null)
-            {
-                return false;
-            }
+            if (RainbowBattleTeam == null) return false;
 
             var a = RainbowBattleTeam.TotalFlag.FindAll(s => s.Item1 == NpcId && s.Item2 == type).Count();
 
@@ -69,10 +60,7 @@ namespace OpenNos.GameObject.RainbowBattle
             map.IsPVP = false;
             var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(ses));
 
-            if (rbb == null || rbb.SecondTeam == null)
-            {
-                return;
-            }
+            if (rbb == null || rbb.SecondTeam == null) return;
 
             bool teamWinner = (rbb.Score > rbb.SecondTeam.Score ? true : false);
 
@@ -93,9 +81,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static void GenerateScore(RainbowBattleTeam RainbowBattle)
         {
-            if (RainbowBattle == null){
-                return;
-                }
+            if (RainbowBattle == null) return;
 
             var first = GetFlag(RainbowBattle, RainbowNpcType.Small);
             var Second = GetFlag(RainbowBattle, RainbowNpcType.Second);
@@ -121,19 +107,13 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static void ReceiveFbs(RainbowBattleTeam rbb)
         {
-            if (rbb == null)
-            {
-                return;
-            }
+            if (rbb == null) return;
 
             var output = (rbb.TeamEntity == RainbowTeamBattleType.Red ? rbb.SecondTeam : rbb);
 
             foreach (var bb in rbb.Session)
             {
-                if (bb == null && AreNotInMap(bb))
-                {
-                    continue;
-                }
+                if (bb == null && AreNotInMap(bb)) continue;
 
                 bb?.SendPacket(
                     $"fbs " +
@@ -150,34 +130,22 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static void RemoveFlag(RainbowBattleTeam RainbowBattle, RainbowNpcType type, int NpcId)
         {
-            if (RainbowBattle == null)
-            {
-                return;
-            }
+            if (RainbowBattle == null) return;
 
             RainbowBattle.TotalFlag.RemoveAll(s => s.Item1 == NpcId && s.Item2 == type);
         }
 
         public static void SendFbs(MapInstance map)
         {
-            if (map == null)
-            {
-                return;
-            }
+            if (map == null) return;
 
             foreach (var ses in map.Sessions)
             {
-                if (AreNotInMap(ses))
-                {
-                    continue;
-                }
+                if (AreNotInMap(ses)) continue;
 
                 var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(ses));
 
-                if (rbb == null)
-                {
-                    continue;
-                }
+                if (rbb == null) continue;
 
                 ReceiveFbs(rbb);
             }
@@ -190,11 +158,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
         private static int GetFlag(RainbowBattleTeam RainbowBattleTeam, RainbowNpcType type)
         {
-            if (RainbowBattleTeam == null)
-            {
-                return 0;
-            }
-
+            if (RainbowBattleTeam == null) return 0;
             return RainbowBattleTeam.TotalFlag.FindAll(s => s.Item2 == type).Count();
         }
 
@@ -202,15 +166,8 @@ namespace OpenNos.GameObject.RainbowBattle
         {
             foreach (var ses in sess)
             {
-                if (sess == null)
-                {
-                    continue;
-                }
-
-                if (AreNotInMap(ses))
-                {
-                    continue;
-                }
+                if (sess == null) continue;
+                if (AreNotInMap(ses)) continue;
 
                 ses.Character.Group?.LeaveGroup(ses);
                 ServerManager.Instance.UpdateGroup(ses.Character.CharacterId);
@@ -221,12 +178,12 @@ namespace OpenNos.GameObject.RainbowBattle
                     ServerManager.Instance.ChangeMap(ses.Character.CharacterId, ses.Character.MapId, ses.Character.MapX, ses.Character.MapY);
                 });
 
-                // Lose
+                // Loose
                 if (winner == 0)
                 {
                     ses.Character.GiftAdd(2361, 1);
                     ses.Character.RBBLose++;
-                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("You lost the rainbow battle !", 1));
+                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("You lost The Rainbow Battle!", 1));
                 }
 
                 // Win
@@ -239,14 +196,14 @@ namespace OpenNos.GameObject.RainbowBattle
                     {
                         ses.Character.HeroLevel++;
                     }
-                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("You won the rainbow battle !", 1));
+                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("You won The Rainbow Battle!", 1));
                 }
 
                 // Equal
                 if (winner == 2)
                 {
                     ses.Character.GiftAdd(2361, 2);
-                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("The rainbow battle is tied !", 1));
+                    ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg("The Rainbow Battle ended in a draw!", 1));
                 }
             }
         }

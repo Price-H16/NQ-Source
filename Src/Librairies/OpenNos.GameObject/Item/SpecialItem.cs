@@ -56,6 +56,11 @@ namespace OpenNos.GameObject
 
             #endregion
 
+            if (session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                return;
+            }
+
             if (session.Character.IsVehicled && Effect != 1000)
             {
                 if (VNum == 5119 || VNum == 9071) // Speed Booster

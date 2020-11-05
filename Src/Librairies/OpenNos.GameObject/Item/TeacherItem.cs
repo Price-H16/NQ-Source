@@ -23,6 +23,12 @@ namespace OpenNos.GameObject
         public override void Use(ClientSession session, ref ItemInstance inv, byte Option = 0,
             string[] packetsplit = null)
         {
+
+            if (session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance)
+            {
+                return;
+            }
+
             if (session.Character.IsVehicled)
             {
                 session.SendPacket(

@@ -3284,40 +3284,14 @@ namespace OpenNos.GameObject
 
             return str;
         }
+
+
         public string GenerateGidx()
         {
             if (Family == null || FamilyCharacter == null || Family.FamilySkillMissions == null)
             {
                 Session.SendPacket(Session.Character.Family.GenerateFmi());
 
-                int badge1 = 0;
-                int badge2 = 0;
-                int badge3 = 0;
-                var questbadge1 = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9000));
-                //var questbadge2 = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9000));
-                var questbadge3angels = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9002));
-                var questbadge3demon = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9003));
-
-                var faction = (Family.FamilyLevel >= 5
-                    ? Family.FamilyFaction == 0 ? "1" : Family.FamilyFaction.ToString()
-                    : "0");
-
-                //if (questbadge1 != null)
-                //{
-                //    badge1 = 1;
-                //}
-
-                //if (questbadge3angels != null || questbadge3demon != null)
-                //{
-                //    if (questbadge3angels != null)
-                //    {
-                //        badge3 = 1;
-                //    }
-                //    else if (questbadge3demon != null)
-                //    {
-                //        badge3 = 2;
-                //    }
-                //}
              return
                 $"gidx 1 " +
                 $"{CharacterId} " +
@@ -3336,43 +3310,6 @@ namespace OpenNos.GameObject
                 $"- 0 " +
                 $"0|0|0";
         }
-
-        /*public string GenerateGidx()
-        {
-            if (Family != null && FamilyCharacter != null)
-            {
-                Session.SendPacket(Session.Character.Family.GenerateFmi());
-
-                /*int badge1 = 0;
-                int badge2 = 0;
-                int badge3 = 0;
-                var questbadge1 = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9000));
-                //var questbadge2 = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9000));
-                var questbadge3angels = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9002));
-                var questbadge3demon = DAOFactory.FamilyQuestsDAO.LoadAllByFamilyId(Family.FamilyId).Where(s => s.Do == true && s.QuestId.Equals(9003));
-
-        var faction = (Family.FamilyLevel >= 5
-                    ? Family.FamilyFaction == 0 ? "1" : Family.FamilyFaction.ToString()
-                    : "0");
-                return
-                    $"gidx 1 " +
-                    $"{CharacterId} " +
-                    $"{Family.FamilyId} " +
-                    $"{Family.Name}" +
-                    $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
-                    $"{Family.FamilyLevel} " +
-                    $"{(IsFamilyTop(true) ? 1 : 0)}|" +
-                    $"{(IsFamilyTop(false) ? 1 : 0)}|" +
-                    $"{faction}";
-            }
-
-            return
-                $"gidx 1 " +
-                $"{CharacterId} " +
-                $"-1 " +
-                $"- 0 " +
-                $"0|0|0";
-        }*/
 
         public string GenerateGInfo()
         {

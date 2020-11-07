@@ -377,7 +377,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
                                                 Session.Character.Family.AddStaticExtension(iteminfo.VNum);
                                                 Session.Character.Family.SendPacket(UserInterfaceHelper.GenerateMsg("Your Family successfully purchased " + iteminfo.Name, 10));
                                                 Session.SendPacket(Session.Character.GenerateFmp());
-                                                //GenerateNInvForExtensions(npc.MapNpcId);
+                                                GenerateNInvForExtensions(npc.MapNpcId);
                                             }
                                             return;
                                         }
@@ -399,32 +399,32 @@ namespace OpenNos.Handler.PacketHandler.Npc
                     break;
             }
         }
-        //public static void GenerateNInvForExtensions(int id)
-        //{
-        //    MapNpc mapnpc = Session.CurrentMapInstance.Npcs.Find(n => n.MapNpcId.Equals(id));
-        //    if (mapnpc?.Shop == null)
-        //    {
-        //        return;
-        //    }
+        public void GenerateNInvForExtensions(int id)
+        {
+            MapNpc mapnpc = Session.CurrentMapInstance.Npcs.Find(n => n.MapNpcId.Equals(id));
+            if (mapnpc?.Shop == null)
+            {
+                return;
+            }
 
-        //    string shoplist = "";
-        //    foreach (ShopItemDTO item in mapnpc.Shop.ShopItems.Where(s => s.Type.Equals(0)))
-        //    {
-        //        if (mapnpc.Shop.ShopType == 48)
-        //        {
-        //            var mv = FamilySystemHelper.GetMissValues(item.ItemVNum);
-        //            if (mv == null) continue;
+            string shoplist = "";
+            foreach (ShopItemDTO item in mapnpc.Shop.ShopItems.Where(s => s.Type.Equals(0)))
+            {
+                if (mapnpc.Shop.ShopType == 48)
+                {
+                    var mv = FamilySystemHelper.GetMissValues(item.ItemVNum);
+                    if (mv == null) continue;
 
-        //            shoplist += $" {item.ItemVNum}|{(mv[1] > Session.Character.Family?.FamilyLevel ? 2 : Session.Character.Family?.FamilySkillMissions.Any(s => s.ItemVNum == item.ItemVNum) ?? false ? 1 : 0)}|{item.Slot}";
-        //        }
-        //    }
+                    shoplist += $" {item.ItemVNum}|{(mv[1] > Session.Character.Family?.FamilyLevel ? 2 : Session.Character.Family?.FamilySkillMissions.Any(s => s.ItemVNum == item.ItemVNum) ?? false ? 1 : 0)}|{item.Slot}";
+                }
+            }
 
-        //    session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {shoplist}");
-        //    session.SendPacket($"wopen 37 0");
+            Session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {shoplist}");
+            Session.SendPacket($"wopen 37 0");
 
 
 
-        //}
+        }
 
         #endregion
     }

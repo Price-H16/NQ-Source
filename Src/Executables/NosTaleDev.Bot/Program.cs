@@ -87,6 +87,7 @@ namespace NosTale.Bot
             };
 
             Commands = Client.UseCommandsNext(ccfg);
+            
             //Commands.CommandExecuted += Commands_CommandExecuted;
             //Commands.CommandErrored += Commands_CommandErrored;
 

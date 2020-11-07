@@ -139,7 +139,6 @@
     <Compile Include="Helpers\ShellGeneratorHelper.cs" />
     <Compile Include="Helpers\StaticPacketHelper.cs" />
     <Compile Include="Battle\BattleEntity.cs" />
-    <Compile Include="Helpers\DamageHelper2.cs" />
     <Compile Include="Event\EventContainer.cs" />
     <Compile Include="Event\Schedule.cs" />
     <Compile Include="Helpers\EventHelper.cs" />

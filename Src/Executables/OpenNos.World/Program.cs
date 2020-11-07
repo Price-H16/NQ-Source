@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Sockets;
@@ -83,23 +84,64 @@ namespace OpenNos.World
 
         private static EventHandler _exitHandler;
 
-        private static bool _ignoreTelemetry;
-        private static bool _isDebug = false;
         private static int _port;
 
         #endregion
 
         #region Methods
+        private static void PrintHeader()
+        {
+            Console.Title = "NosQuest - World";
+            const string text = @"
 
+███╗░░██╗░█████╗░░██████╗░██████╗░██╗░░░██╗███████╗░██████╗████████╗
+████╗░██║██╔══██╗██╔════╝██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝
+██╔██╗██║██║░░██║╚█████╗░██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░
+██║╚████║██║░░██║░╚═══██╗╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░
+██║░╚███║╚█████╔╝██████╔╝░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░
+╚═╝░░╚══╝░╚════╝░╚═════╝░░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░
+";
+            string separator = new string('=', Console.WindowWidth);
+            string logo = text.Split('\n').Select(s => string.Format("{0," + (Console.WindowWidth / 2 + s.Length / 2) + "}\n", s))
+                .Aggregate("", (current, i) => current + i);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(separator + logo + separator);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+        private static void InitializeMasterCommunication()
+        {
+            var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
+
+            var authKey = a.MasterAuthKey;
+            if (CommunicationServiceClient.Instance.Authenticate(authKey))
+            {
+                Logger.Info(Language.Instance.GetMessageFromKey("API_INITIALIZED"));
+            }
+
+        }
+        private static void InitializeDatabase()
+        {
+            if (!DataAccessHelper.Initialize())
+            {
+                Console.ReadKey();
+                return;
+            }
+
+        }
+        private static void InitializeMaps()
+        {
+            ServerManager.Instance.Initialize();
+
+        }
+        private static void InitializeLogger()
+        {
+            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+
+        }
         public static void Main(string[] args)
         {
-#if DEBUG
-            _isDebug = true;
-            Thread.Sleep(1000);
-#endif
-
             // initialize Logger
-            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+            InitializeLogger();
 
             using var coreContainer = BuildCoreContainer();
             var gameBuilder = new ContainerBuilder();
@@ -125,13 +167,10 @@ namespace OpenNos.World
                     gamePlugin.OnEnable();
                 }
             }
-
+            PrintHeader();
             ConfigurationHelper.CustomisationRegistration();
                              
             var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
-
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
-            Console.Title = $"TestServer World Server{(_isDebug ? " Development Environment" : "")}";
 
             var ignoreStartupMessages = false;
             _port = Convert.ToInt32(a.WorldPort);
@@ -150,41 +189,19 @@ namespace OpenNos.World
                     case "--nomsg":
                         ignoreStartupMessages = true;
                         break;
-
-                    case "--notelemetry":
-                        _ignoreTelemetry = true;
-                        break;
                 }
             }
 
-            if (!ignoreStartupMessages)
-            {
-                var assembly = Assembly.GetExecutingAssembly();
-                var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                var text = $"WORLD SERVER v{fileVersionInfo.ProductVersion}dev - PORT : {_port} by OpenNos Team";
-                var offset = Console.WindowWidth / 2 + text.Length / 2;
-                var separator = new string('=', Console.WindowWidth);
-                Console.WriteLine(separator + string.Format("{0," + offset + "}\n", text) + separator);
-            }
-
             // initialize api
-            var authKey = a.MasterAuthKey;
-            if (CommunicationServiceClient.Instance.Authenticate(authKey))
-            {
-                Logger.Info(Language.Instance.GetMessageFromKey("API_INITIALIZED"));
-            }
+            InitializeMasterCommunication();
 
             // initialize DB
-            if (!DataAccessHelper.Initialize())
-            {
-                Console.ReadKey();
-                return;
-            }
+            InitializeDatabase();
 
             EventEntity.InitializeEventPipeline(gameContainer.Resolve<IEventPipeline>());
 
             // initialilize maps
-            ServerManager.Instance.Initialize();
+            InitializeMaps();
 
             // TODO: initialize ClientLinkManager initialize PacketSerialization
             PacketFactory.Initialize<WalkPacket>();
@@ -222,7 +239,7 @@ namespace OpenNos.World
                 Logger.Error("General Error", ex);
                 Environment.Exit(ex.ErrorCode);
             }
-
+            var authKey = a.MasterAuthKey;
             ServerManager.Instance.ServerGroup = a.ServerGroupS1;
             const int sessionLimit = 100; // Needs workaround
             var newChannelId = CommunicationServiceClient.Instance.RegisterWorldServer(

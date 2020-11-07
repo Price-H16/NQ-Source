@@ -87,6 +87,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LoginServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource\LocalizedResources.de.Designer.cs">
@@ -174,6 +175,10 @@
     <Content Include="on-logo-icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenApi.Plugins\ChickenApi.Plugins.csproj">
+      <Project>{A8289E58-4507-4614-8A28-9FF936BEE009}</Project>
+      <Name>ChickenApi.Plugins</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dal\OpenNos.DAL.EF\OpenNos.DAL.EF.csproj">
       <Project>{4AECC47D-098A-4493-8E1E-D10EDBB7A189}</Project>
       <Name>OpenNos.DAL.EF</Name>

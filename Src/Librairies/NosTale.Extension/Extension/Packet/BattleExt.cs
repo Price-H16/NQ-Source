@@ -52,13 +52,13 @@ namespace NosTale.Extension.Extension.Packet
                 var damage = DamageHelper.Instance.CalculateDamage(battleEntity, battleEntityDefense, hitRequest.Skill,
                     ref hitmode, ref onyxWings, ref zephyrWings);
 
-                if (target.Character.HasGodMode)
+                if (target.Character.HasGodMode || target.Character.isFreezed)
                 {
                     damage = 0;
                     hitmode = 4;
                 }
-                else if (target.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10)
-                         || hitRequest.Session.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10))
+
+                else if (target.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10) || hitRequest.Session.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10))
                 {
                     damage = 0;
                     hitmode = 4;
@@ -82,8 +82,6 @@ namespace NosTale.Extension.Extension.Packet
 
                     damage = 0;
                 }
-
-
 
                 if (hitmode != 4 && hitmode != 2)
                 {
@@ -469,9 +467,9 @@ namespace NosTale.Extension.Extension.Packet
                         RainbowBattleManager.SendFbs(target.CurrentMapInstance);
 
                         isAlive = true;
-                        hitRequest.Session.CurrentMapInstance?.Broadcast((UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_KILL"),
+                        hitRequest.Session.CurrentMapInstance?.Broadcast((UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_KILL"), //Add Resource
                         hitRequest.Session.Character.Name, target.Character.Name), 0)));
-                        target.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("RESP_RBB"), target.Character.Name), 10));
+                        target.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("RESP_RBB"), target.Character.Name), 10)); //Add Resource
 
                         target.Character.Hp = (int)target.Character.HPLoad();
                         target.Character.Mp = (int)target.Character.MPLoad();
@@ -485,8 +483,8 @@ namespace NosTale.Extension.Extension.Packet
                         {
                             if (target.Character.isFreezed)
                             {
-                                target.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(30, 32) : ServerManager.RandomNumber<short>(83, 85);
-                                target.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(73, 76) : ServerManager.RandomNumber<short>(2, 4);
+                                target.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(117, 117) : ServerManager.RandomNumber<short>(0, 0);
+                                target.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(27, 59) : ServerManager.RandomNumber<short>(20, 51);
                                 target?.CurrentMapInstance?.Broadcast(target.Character.GenerateTp());
                                 target.Character.NoAttack = false;
                                 target.Character.NoMove = false;
@@ -1646,7 +1644,7 @@ namespace NosTale.Extension.Extension.Packet
                                 //ClientSession playerToAttack = ServerManager.Instance.GetSessionByCharacterId(targetId);
                                 var playerToAttack = targetEntity.Character?.Session;
 
-                                if (playerToAttack != null && !IceBreaker.FrozenPlayers.Contains(playerToAttack))
+                                if (playerToAttack != null && !IceBreaker.FrozenPlayers.Contains(playerToAttack) && !playerToAttack.Character.isFreezed)
                                 {
                                     if (Map.GetDistance(
                                             new MapCell

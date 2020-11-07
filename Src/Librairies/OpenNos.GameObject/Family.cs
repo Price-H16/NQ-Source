@@ -17,6 +17,7 @@ namespace OpenNos.GameObject
 
         public Family(FamilyDTO input)
         {
+            FamilySkillMissions = new List<FamilySkillMission>();
             FamilyCharacters = new List<FamilyCharacter>();
             FamilyExperience = input.FamilyExperience;
             FamilyFaction = input.FamilyFaction;
@@ -44,6 +45,8 @@ namespace OpenNos.GameObject
         public MapInstance Act4Raid { get; set; }
 
         public MapInstance Act4RaidBossMap { get; set; }
+
+        public List<FamilySkillMission> FamilySkillMissions { get; set; }
 
         public List<FamilyCharacter> FamilyCharacters { get; set; }
 
@@ -138,10 +141,18 @@ namespace OpenNos.GameObject
                     value = $"{characterName}|{(byte) authority}|{righttype}|{rightvalue}";
                     break;
 
-                case FamilyLogType.WareHouseAdded:
-                case FamilyLogType.WareHouseRemoved:
-                    value = $"{characterName}|{message}";
+                case FamilyLogType.FamilyMission:
+                    value = $"{itemVNum}";
                     break;
+
+                case FamilyLogType.FamilyExtension: 
+                    value = $"{itemVNum}";
+                    break;
+
+                case FamilyLogType.SkillUse:
+                    value = $"{characterName}|{level}";
+                    break;
+
             }
 
             var log = new FamilyLogDTO

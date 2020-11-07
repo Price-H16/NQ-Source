@@ -5,8 +5,8 @@
         Group = 3,
         TalentArena = 6,
         Team = 8,
-        RBBBlue = 10,
-        RBBRed = 11,
+        RBBRed = 3,
+        RBBBlue = 3,
         BigTeam = 15,
         GiantTeam = 40
 

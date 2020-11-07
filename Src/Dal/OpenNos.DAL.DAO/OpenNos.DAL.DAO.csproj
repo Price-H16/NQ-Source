@@ -56,6 +56,7 @@
     <Compile Include="CharacterRelationDAO.cs" />
     <Compile Include="CharacterSkillDAO.cs" />
     <Compile Include="CharacterVisitedMapsDAO.cs" />
+    <Compile Include="FamilySkillMissionDAO.cs" />
     <Compile Include="FamilyQuestsDAO.cs" />
     <Compile Include="Generic\GenericDAO.cs" />
     <Compile Include="Logs\ChatLogDAO.cs" />
@@ -137,7 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework">
-      <Version>6.4.0</Version>
+      <Version>6.4.4</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />

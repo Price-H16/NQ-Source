@@ -13,8 +13,9 @@
         AuthorityChanged = 9,
         FamilyManaged = 10,
         UserManaged = 11,
-        WareHouseAdded = 12,
-        WareHouseRemoved = 13,
-        HeroLevelUp = 14
+        FamilyMission = 12,
+        FamilyExtension = 13,
+        HeroLevelUp = 14,
+        SkillUse = 15
     }
 }

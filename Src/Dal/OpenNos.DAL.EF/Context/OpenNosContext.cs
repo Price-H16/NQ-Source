@@ -449,6 +449,8 @@ namespace OpenNos.DAL.EF
 
         public virtual DbSet<LogCommands> LogCommands { get; set; }
 
+        public virtual DbSet<FamilySkillMission> FamilySkillMission { get; set; }
+
         public virtual DbSet<Combo> Combo { get; set; }
 
         public virtual DbSet<Drop> Drop { get; set; }

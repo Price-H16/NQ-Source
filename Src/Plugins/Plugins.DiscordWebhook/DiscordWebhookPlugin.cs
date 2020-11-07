@@ -18,7 +18,7 @@ namespace Plugins.DiscordWebhook
 
         public void OnLoad(ContainerBuilder builder)
         {
-            var webhook = "https://discordapp.com/api/webhooks/676941880247975973/uMI0T85omzo5OBcCNCVVryObx1btUbibX9jvaXjziwCUUAdMQvvZ5lG50Lto0Q_EBcWZ";
+            var webhook = "https://discord.com/api/webhooks/760122073363513354/MQkt4p7fLzXmqDgq6Ya7DR0T5pPwfh1enjPeXqyKYDNnYiCy43HsDOT_hQ_RbUvLaCDn";
             builder.Register(s => new DiscordWebhookClient(webhook));
             builder.Register(s => new DiscordWebHookNotifier(new DiscordWebhookNotifierConfig(), null, s.Resolve<DiscordWebhookClient>()));
         }

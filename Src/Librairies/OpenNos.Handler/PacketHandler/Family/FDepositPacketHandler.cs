@@ -141,7 +141,7 @@ namespace OpenNos.Handler.PacketHandler.Family
             DAOFactory.ItemInstanceDAO.InsertOrUpdate(itemInFamilyWarehouse);
             Session.Character.Family.SendPacket(originalItem != null ? originalItem.GenerateInventoryAdd() : UserInterfaceHelper.Instance.GenerateInventoryRemove(fDepositPacket.Inventory, fDepositPacket.Slot));
             Session.Character.Family.SendPacket(itemInFamilyWarehouse.GenerateFStash());
-            Session.Character.Family?.InsertFamilyLog(FamilyLogType.WareHouseAdded, Session.Character.Name, message: $"{itemInFamilyWarehouse.ItemVNum}|{fDepositPacket.Amount}");
+            //Session.Character.Family?.InsertFamilyLog(FamilyLogType.WareHouseAdded, Session.Character.Name, message: $"{itemInFamilyWarehouse.ItemVNum}|{fDepositPacket.Amount}");
             Session.Character.Inventory.DeleteById(itemInFamilyWarehouse.Id);
         }
 

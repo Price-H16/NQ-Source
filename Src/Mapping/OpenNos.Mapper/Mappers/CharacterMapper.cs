@@ -80,6 +80,8 @@ namespace OpenNos.Mapper.Mappers
             output.UiBlocked = input.UiBlocked;
             output.LockCode = input.LockCode;
             output.VerifiedLock = input.VerifiedLock;
+            output.RBBWin = input.RBBWin;
+            output.RBBLose = input.RBBLose;
 
             return true;
         }
@@ -154,6 +156,8 @@ namespace OpenNos.Mapper.Mappers
             output.UiBlocked = input.UiBlocked;
             output.LockCode = input.LockCode;
             output.VerifiedLock = input.VerifiedLock;
+            output.RBBWin = input.RBBWin;
+            output.RBBLose = input.RBBLose;
 
             return true;
         }

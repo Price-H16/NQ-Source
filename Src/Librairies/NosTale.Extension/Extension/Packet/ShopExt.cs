@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using OpenNos.Core;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
@@ -11,6 +12,7 @@ namespace NosTale.Extension.Extension.Packet
     public static class ShopExt
     {
         #region Methods
+
 
         public static bool BuyValidate(this ClientSession Session, ClientSession clientSession,
             KeyValuePair<long, MapShop> shop, short slot, short amount)
@@ -101,7 +103,7 @@ namespace NosTale.Extension.Extension.Packet
             }
 
             return true;
-        }
+        }      
 
         public static void LoadShopItem(this ClientSession Session, long owner, KeyValuePair<long, MapShop> shop)
         {

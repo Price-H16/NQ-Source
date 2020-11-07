@@ -43,6 +43,10 @@ namespace OpenNos.DAL.EF
 
         public int Act4Points { get; set; }
 
+        public long RBBWin { get; set; }
+
+        public long RBBLose { get; set; }
+
         public int ArenaWinner { get; set; }
 
         public virtual ICollection<BazaarItem> BazaarItem { get; set; }

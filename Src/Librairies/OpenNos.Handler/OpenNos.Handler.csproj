@@ -279,6 +279,7 @@
     <Compile Include="PacketHandler\Family\FReposPacketHandler.cs" />
     <Compile Include="PacketHandler\Family\FWithdrawPacketHandler.cs" />
     <Compile Include="PacketHandler\Family\GListPacketHandler.cs" />
+    <Compile Include="PacketHandler\Family\UseFamilySkill.cs" />
     <Compile Include="PacketHandler\Family\JoinFamilyPacketHandler.cs" />
     <Compile Include="PacketHandler\Family\TodayPacketHandler.cs" />
     <Compile Include="PacketHandler\Inventory\BIPacketHandler.cs" />
@@ -391,7 +392,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DSharpPlus">
-      <Version>3.2.3</Version>
+      <Version>4.0.0-nightly-00711</Version>
     </PackageReference>
     <PackageReference Include="DSharpPlus.CommandsNext">
       <Version>4.0.0-nightly-00743</Version>
@@ -400,10 +401,10 @@
       <Version>4.0.0-nightly-00743</Version>
     </PackageReference>
     <PackageReference Include="DSharpPlus.Rest">
-      <Version>4.0.0-nightly-00711</Version>
+      <Version>4.0.0-nightly-00743</Version>
     </PackageReference>
     <PackageReference Include="System.Reactive">
-      <Version>4.3.2</Version>
+      <Version>4.4.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

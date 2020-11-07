@@ -83,12 +83,12 @@ namespace NosTale.Bot
                 StringPrefixes = new[] {DefaultPrefix},
                 EnableDms = true,
                 EnableMentionPrefix = true,
-                EnableDefaultHelp = true
+                EnableDefaultHelp = false
             };
 
             Commands = Client.UseCommandsNext(ccfg);
-            Commands.CommandExecuted += Commands_CommandExecuted;
-            Commands.CommandErrored += Commands_CommandErrored;
+            //Commands.CommandExecuted += Commands_CommandExecuted;
+            //Commands.CommandErrored += Commands_CommandErrored;
 
             Commands.RegisterCommands(typeof(DiscordBotCommand).GetTypeInfo().Assembly);
 
@@ -188,7 +188,7 @@ namespace NosTale.Bot
 
                 try
                 {
-                    var ipAddress = "127.0.0.1";
+                    var ipAddress = "89.203.249.171";
                     var _server = ScsServiceBuilder.CreateService(new ScsTcpEndPoint(ipAddress, port));
                     _server.ClientConnected += OnClientConnected;
                     _server.ClientDisconnected += OnClientDisconnected;

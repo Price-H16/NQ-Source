@@ -87,6 +87,14 @@ namespace OpenNos.Master.Library.Data
 
         public int EventTattoUp { get; set; }
 
+        public bool FamilyExpBuff { get; set; } = false;
+
+        public bool FamilyGoldBuff { get; set; } = false;
+
+        public DateTime TimeExpBuff { get; set; } = DateTime.Now.AddHours(-2);
+
+        public DateTime TimeGoldBuff { get; set; } = DateTime.Now.AddHours(-2);
+
         #endregion
     }
 }

@@ -114,11 +114,15 @@
     <Compile Include="Extension\Inventory\UpgradeSpExtension.cs" />
     <Compile Include="Extension\Inventory\UpgradeSpFunExtension.cs" />
     <Compile Include="Extension\Inventory\UpgradeTattooExtension.cs" />
+    <Compile Include="Extension\FamilySystemExtensions.cs" />
+    <Compile Include="Extension\FamilyExtensions.cs" />
     <Compile Include="Extension\ItemExtension.cs" />
     <Compile Include="Extension\LogsExtension.cs" />
     <Compile Include="Extension\NumberExtension.cs" />
+    <Compile Include="FamilySkillMission.cs" />
     <Compile Include="Helpers\ChangeClassHelper.cs" />
     <Compile Include="Helpers\DamageHelper.cs" />
+    <Compile Include="Helpers\FamilySystemHelper.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\MallAPIHelper.cs" />
     <Compile Include="Helpers\MateHelper.cs" />
@@ -287,13 +291,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="log4net">
-      <Version>2.0.8</Version>
+      <Version>2.0.12</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
     </PackageReference>
     <PackageReference Include="System.Reactive">
-      <Version>4.3.2</Version>
+      <Version>4.4.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

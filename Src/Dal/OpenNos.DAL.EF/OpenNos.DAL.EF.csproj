@@ -87,6 +87,7 @@
     <Compile Include="CharacterQuest.cs" />
     <Compile Include="CharacterTitle.cs" />
     <Compile Include="CharacterVisitedMaps.cs" />
+    <Compile Include="FamilySkillMission.cs" />
     <Compile Include="FamilyQuests.cs" />
     <Compile Include="Logs\ChatLog.cs" />
     <Compile Include="Logs\LogsCommands.cs" />
@@ -202,6 +203,14 @@
     <Compile Include="Migrations\202010211122450_Lock.cs" />
     <Compile Include="Migrations\202010211122450_Lock.designer.cs">
       <DependentUpon>202010211122450_Lock.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011051900424_RbbStat.cs" />
+    <Compile Include="Migrations\202011051900424_RbbStat.designer.cs">
+      <DependentUpon>202011051900424_RbbStat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011052337542_FamilyMissions.cs" />
+    <Compile Include="Migrations\202011052337542_FamilyMissions.designer.cs">
+      <DependentUpon>202011052337542_FamilyMissions.cs</DependentUpon>
     </Compile>
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="Quest.cs" />
@@ -370,10 +379,16 @@
     <EmbeddedResource Include="Migrations\202010211122450_Lock.resx">
       <DependentUpon>202010211122450_Lock.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011051900424_RbbStat.resx">
+      <DependentUpon>202011051900424_RbbStat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011052337542_FamilyMissions.resx">
+      <DependentUpon>202011052337542_FamilyMissions.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework">
-      <Version>6.4.0</Version>
+      <Version>6.4.4</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>

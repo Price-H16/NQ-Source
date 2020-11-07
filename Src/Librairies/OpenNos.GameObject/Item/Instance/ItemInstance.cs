@@ -329,10 +329,10 @@ namespace OpenNos.GameObject
                 }
             }
 
-            ShellEffects.Clear();
+            ShellEffects.Clear(); //Lose Shells
             DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(EquipmentSerialId);
             var shellLevel = Item.LevelMinimum == 25 ? 101 : 106;
-            ShellEffects.AddRange(
+            ShellEffects.AddRange( //Dupe
                 ShellGeneratorHelper.Instance.GenerateShell(shellType, Rare == 8 ? 7 : Rare, shellLevel));
         }
 

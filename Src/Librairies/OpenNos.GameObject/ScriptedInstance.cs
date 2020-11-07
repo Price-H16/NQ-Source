@@ -52,6 +52,8 @@ namespace OpenNos.GameObject
 
         public List<Gift> DrawItems { get; set; }
 
+        public List<int> FamMissions { get; set; }
+
         public int FamExp { get; set; }
 
         public MapInstance FirstMap { get; set; }
@@ -193,6 +195,7 @@ namespace OpenNos.GameObject
                 if (Model?.Globals != null)
                 {
                     RequiredItems = new List<Gift>();
+                    FamMissions = new List<int>();
                     DrawItems = new List<Gift>();
                     SpecialItems = new List<Gift>();
                     GiftItems = new List<Gift>();
@@ -208,6 +211,8 @@ namespace OpenNos.GameObject
                     StartX = Model.Globals.StartX?.Value ?? 0;
                     StartY = Model.Globals.StartY?.Value ?? 0;
                     Lives = Model.Globals.Lives?.Value ?? 0;
+                    FamMissions.Add(Model.Globals.FamMission?.Mission1 ?? 0);
+                    FamMissions.Add(Model.Globals.FamMission?.Mission2 ?? 0);
                     LevelMinimum = Model.Globals.LevelMinimum?.Value ?? 1;
                     LevelMaximum = Model.Globals.LevelMaximum?.Value ?? 99;
                     Name = Model.Globals.Name?.Value ?? "No Name";

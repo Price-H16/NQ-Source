@@ -513,7 +513,6 @@ namespace OpenNos.GameObject.Helpers
                         definitivelist = definitivelist.OrderBy(s => s.Item.Item.Name).ToList();
                         break;
                 }
-
                 foreach (var bzlink in definitivelist
                     .Where(s =>
                         (s.BazaarItem.DateStart.AddHours(s.BazaarItem.Duration) - DateTime.Now).TotalMinutes > 0 &&
@@ -524,19 +523,12 @@ namespace OpenNos.GameObject.Helpers
                     var info = "";
                     if (bzlink.Item.Item.Type == InventoryType.Equipment)
                     {
-                        info = (bzlink.Item.Item.EquipmentSlot != EquipmentType.Sp
-                                        ? bzlink.Item?.GenerateEInfo()
-                                        :
-                                        bzlink.Item.Item.SpType == 0 && bzlink.Item.Item.ItemSubType == 4
-                                                ?
-                                                bzlink.Item?.GeneratePslInfo()
-                                                : bzlink.Item?.GenerateSlInfo()).Replace(' ', '^').Replace("slinfo^", "")
-                                                                                .Replace("e_info^", "");
+                        info = (bzlink.Item.Item.EquipmentSlot != EquipmentType.Sp ? 
+                                bzlink.Item?.GenerateEInfo():bzlink.Item.Item.SpType == 0 && bzlink.Item.Item.ItemSubType == 4 ?
+                                bzlink.Item?.GeneratePslInfo(): bzlink.Item?.GenerateSlInfo()).Replace(' ', '^').Replace("slinfo^", "").Replace("e_info^", "");
                     }
-
-                    // {TotalRune}|{Idk}|
                     itembazar +=
-                        $"{bzlink.BazaarItem.BazaarItemId}|{bzlink.BazaarItem.SellerId}|{bzlink.Owner}|{bzlink.Item.Item.VNum}|{bzlink.Item.Amount}|{(bzlink.BazaarItem.IsPackage ? 1 : 0)}|{bzlink.BazaarItem.Price}|{time}|2|0|{bzlink.Item.Rare}|{bzlink.Item.Upgrade}|0|0|{info} ";
+                        $"{bzlink.BazaarItem.BazaarItemId}|{bzlink.BazaarItem.SellerId}|{bzlink.Owner}|{bzlink.Item.Item.VNum}|{bzlink.Item.Amount}|{(bzlink.BazaarItem.IsPackage ? 1 : 0)}|{bzlink.BazaarItem.Price}|{time}|2|0|{bzlink.Item.Rare}|{bzlink.Item.Upgrade}|0|0|{info}|{bzlink.Item.RuneAmount}|0|{info} ";
                 }
 
                 return $"rc_blist {packet.Index} {itembazar} ";

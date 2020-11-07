@@ -30,7 +30,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
         #region Members
 
         // Team pvp 30 max ( 30 / 2 = 15 vs 15 ) ↓ 3v3
-        private static readonly int GroupPlayer = 6;
+        private static readonly int GroupPlayer = 4;
 
         #endregion
 

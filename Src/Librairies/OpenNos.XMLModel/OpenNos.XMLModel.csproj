@@ -84,6 +84,7 @@
     <Compile Include="Objects\Bool.cs" />
     <Compile Include="Objects\DailyEntries.cs" />
     <Compile Include="Objects\GiantTeam.cs" />
+    <Compile Include="Objects\FamilyMission.cs" />
     <Compile Include="Objects\PetsRewards.cs" />
     <Compile Include="Objects\SpNeeded.cs" />
     <Compile Include="Objects\FamExp.cs" />

@@ -77,20 +77,20 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (cRegPacket.Inventory != 0 && cRegPacket.Inventory != 1 && cRegPacket.Inventory != 2 &&
-                cRegPacket.Inventory != 4) return; //DUPE
+            if (cRegPacket.Inventory != 0 && cRegPacket.Inventory != 1 && cRegPacket.Inventory != 2 && cRegPacket.Inventory != 4)
+            {
+                return; //DUPE
+            }
 
             if (Session.Account.IsLimited)
             {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
+                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
                 return;
             }
 
             if (!Session.Character.CanUseNosBazaar())
             {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("INFO_BAZAAR")));
+                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("INFO_BAZAAR")));
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
             // This is done on purpose, because when an item is fresh created and has shell (hero eq), its shell effects are being deleted cause they're not being saved in DB before adding items to NB.
             // TODO: Find a better way to do it, ending the issue from the root.
-            Session.Character.PerformItemSave(it);
+            Session.Character.PerformItemSave(it);//pogg
 
             if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable ||
                 it.IsBound && it.ItemDeleteTime != null) return;
@@ -124,8 +124,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             if (Session.Character.Inventory.CountItemInAnInventory(InventoryType.Bazaar)
                 >= 10 * (medal == null ? 2 : 10))
             {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LIMIT_EXCEEDED"), 0));
+                Session.SendPacket( UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LIMIT_EXCEEDED"), 0));
                 return;
             }
 
@@ -136,8 +135,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
             if (cRegPacket.Price >= (medal == null ? 1000000 : maxGold))
             {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("PRICE_EXCEEDED"), 0));
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("PRICE_EXCEEDED"), 0));
                 return;
             }
 

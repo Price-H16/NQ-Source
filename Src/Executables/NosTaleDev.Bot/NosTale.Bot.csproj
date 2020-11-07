@@ -368,7 +368,7 @@
       <Version>4.0.0-nightly-00711</Version>
     </PackageReference>
     <PackageReference Include="DSharpPlus.CommandsNext">
-      <Version>4.0.0-nightly-00711</Version>
+      <Version>4.0.0-nightly-00743</Version>
     </PackageReference>
     <PackageReference Include="DSharpPlus.Rest">
       <Version>4.0.0-nightly-00743</Version>
@@ -380,7 +380,7 @@
       <Version>6.4.4</Version>
     </PackageReference>
     <PackageReference Include="log4net">
-      <Version>2.0.8</Version>
+      <Version>2.0.12</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
       <Version>3.1.9</Version>

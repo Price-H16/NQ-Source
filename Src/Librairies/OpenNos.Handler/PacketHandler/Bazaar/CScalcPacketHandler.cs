@@ -72,10 +72,9 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
                 var name = itemInstance.Item?.Name ?? "None";
                 
-                if (bazaarItemDTO.DateStart.AddMinutes(10) >= DateTime.Now)
+                if (bazaarItemDTO.DateStart.AddMinutes(2) >= DateTime.Now)
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateInfo("You have to wait at least 10 minutes after publishing the item to take it out from NosBazaar"));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo("You have to wait at least 10 minutes after publishing the item to take it out from NosBazaar"));
                     return;
                 }
 

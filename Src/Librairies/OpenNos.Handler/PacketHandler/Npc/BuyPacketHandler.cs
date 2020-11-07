@@ -3,8 +3,10 @@ using System.Linq;
 using NosTale.Extension.Extension.Packet;
 using NosTale.Packets.Packets.ServerPackets;
 using OpenNos.Core;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
+using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 
@@ -357,6 +359,33 @@ namespace OpenNos.Handler.PacketHandler.Npc
                                             string.Format(Language.Instance.GetMessageFromKey("REPUT_DECREASED"),
                                                 reputprice), 11));
                                 }
+                                if (iteminfo.VNum > 9678 && iteminfo.VNum < 9698)
+                                {
+                                    if (Session.Character.FamilyCharacter.Authority == FamilyAuthority.Head)
+                                    {
+                                        if (Session.Character.Family.FamilySkillMissions.Any(s => s.ItemVNum == iteminfo.VNum))
+                                        {
+                                            Session.SendPacket(UserInterfaceHelper.GenerateInfo("You can't buy this!"));
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            if (!(Session.Character.Gold < price))
+                                            {
+                                                Session.Character.Gold -= price;
+                                                Session.SendPacket(Session.Character.GenerateGold());
+                                                Session.Character.Family.AddStaticExtension(iteminfo.VNum);
+                                                Session.Character.Family.SendPacket(UserInterfaceHelper.GenerateMsg("Your Family successfully purchased " + iteminfo.Name, 10));
+                                                Session.SendPacket(Session.Character.GenerateFmp());
+                                                //GenerateNInvForExtensions(npc.MapNpcId);
+                                            }
+                                            return;
+                                        }
+                                    }
+                                    else
+                                        Session.SendPacket(UserInterfaceHelper.GenerateInfo("You're not family head!"));
+                                    return;
+                                }
                             }
                             else
                             {
@@ -370,6 +399,32 @@ namespace OpenNos.Handler.PacketHandler.Npc
                     break;
             }
         }
+        //public static void GenerateNInvForExtensions(int id)
+        //{
+        //    MapNpc mapnpc = Session.CurrentMapInstance.Npcs.Find(n => n.MapNpcId.Equals(id));
+        //    if (mapnpc?.Shop == null)
+        //    {
+        //        return;
+        //    }
+
+        //    string shoplist = "";
+        //    foreach (ShopItemDTO item in mapnpc.Shop.ShopItems.Where(s => s.Type.Equals(0)))
+        //    {
+        //        if (mapnpc.Shop.ShopType == 48)
+        //        {
+        //            var mv = FamilySystemHelper.GetMissValues(item.ItemVNum);
+        //            if (mv == null) continue;
+
+        //            shoplist += $" {item.ItemVNum}|{(mv[1] > Session.Character.Family?.FamilyLevel ? 2 : Session.Character.Family?.FamilySkillMissions.Any(s => s.ItemVNum == item.ItemVNum) ?? false ? 1 : 0)}|{item.Slot}";
+        //        }
+        //    }
+
+        //    session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {shoplist}");
+        //    session.SendPacket($"wopen 37 0");
+
+
+
+        //}
 
         #endregion
     }

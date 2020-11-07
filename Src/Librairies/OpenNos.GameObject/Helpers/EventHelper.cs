@@ -12,6 +12,7 @@ using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ARENA;
 using OpenNos.GameObject.Event.GAMES;
+using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
@@ -652,6 +653,16 @@ namespace OpenNos.GameObject.Helpers
                                                 }
 
                                                 s.Character.IncrementQuests(QuestType.WinRaid, @group.Raid.Id);
+                                            }
+
+                                            //FAMILY MISSIONS IN RAID
+                                            foreach (var Family in FamilyExtensions.SessionsToFamilies(group.Sessions.Where(s => s?.Character?.MapInstance?.Monsters.Any(e => e.IsBoss) ?? false)))
+                                            {
+                                                foreach (var fsm in group.Raid.FamMissions)
+                                                {
+                                                    if (fsm == 0) continue;
+                                                    Family.AddMissionProgress((short)fsm, (short)(group.Sessions.Where(s => (s?.Character?.MapInstance?.Monsters.Any(e => e.IsBoss) ?? false) && (s?.Character?.Family?.FamilyId.Equals(Family.FamilyId) ?? false)).Count()));
+                                                }
                                             }
 
 

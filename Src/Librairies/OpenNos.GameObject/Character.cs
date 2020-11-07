@@ -1657,6 +1657,29 @@ namespace OpenNos.GameObject
                     BubbleMessage = null;
                 }
 
+                #region Server global family buffs
+                if (ServerManager.Instance.Configuration.FamilyExpBuff && !HasBuff(360))
+                {
+                    AddStaticBuff(new StaticBuffDTO
+                    {
+                        CardId = 360,
+                        CharacterId = CharacterId,
+                        RemainingTime = (int)(ServerManager.Instance.Configuration.TimeExpBuff - DateTime.Now).TotalSeconds
+                    });
+                }
+
+                if (ServerManager.Instance.Configuration.FamilyGoldBuff && !HasBuff(361))
+                {
+                    AddStaticBuff(new StaticBuffDTO
+                    {
+                        CardId = 361,
+                        CharacterId = CharacterId,
+                        RemainingTime = (int)(ServerManager.Instance.Configuration.TimeExpBuff - DateTime.Now).TotalSeconds
+                    });
+                }
+                #endregion
+
+
                 if (CurrentMinigame != 0 && LastEffect.AddSeconds(3) <= DateTime.Now)
                 {
                     Session.CurrentMapInstance?.Broadcast(
@@ -2824,6 +2847,15 @@ namespace OpenNos.GameObject
                         }
                     }
                 }
+                if (Family != null)
+                {
+
+                    foreach (FamilySkillMission famskill in Family.FamilySkillMissions)
+                    {
+                        Item effect = ServerManager.GetItem(famskill.ItemVNum);
+                        EquipmentBCards.AddRange(effect.BCards);
+                    }
+                }
             });
 
             return $"equip {GenerateEqRareUpgradeForPacket()}{eqlist}";
@@ -2913,40 +2945,40 @@ namespace OpenNos.GameObject
             return str;
         }
 
-        public List<string> GenerateFamilyWarehouseHist()
-        {
-            if (Family != null)
-            {
-                List<string> packetList = new List<string>();
-                string packet = "";
-                int i = 0;
-                int amount = -1;
-                List<FamilyLogDTO> warehouseLogs = Family.FamilyLogs
-                    .Where(s => s.FamilyLogType == FamilyLogType.WareHouseAdded ||
-                                s.FamilyLogType == FamilyLogType.WareHouseRemoved).OrderByDescending(s => s.Timestamp)
-                    .Take(100).ToList();
-                foreach (FamilyLogDTO log in warehouseLogs)
-                {
-                    packet +=
-                        $" {(log.FamilyLogType == FamilyLogType.WareHouseAdded ? 0 : 1)}|{log.FamilyLogData}|{(int) (DateTime.Now - log.Timestamp).TotalHours}";
-                    i++;
-                    if (i == 50)
-                    {
-                        i = 0;
-                        packetList.Add($"fslog_stc {amount}{packet}");
-                        amount++;
-                    }
-                    else if (i == warehouseLogs.Count)
-                    {
-                        packetList.Add($"fslog_stc {amount}{packet}");
-                    }
-                }
+        //public List<string> GenerateFamilyWarehouseHist()
+        //{
+        //    if (Family != null)
+        //    {
+        //        List<string> packetList = new List<string>();
+        //        string packet = "";
+        //        int i = 0;
+        //        int amount = -1;
+        //        List<FamilyLogDTO> warehouseLogs = Family.FamilyLogs
+        //            .Where(s => s.FamilyLogType == FamilyLogType.WareHouseAdded ||
+        //                        s.FamilyLogType == FamilyLogType.WareHouseRemoved).OrderByDescending(s => s.Timestamp)
+        //            .Take(100).ToList();
+        //        foreach (FamilyLogDTO log in warehouseLogs)
+        //        {
+        //            packet +=
+        //                $" {(log.FamilyLogType == FamilyLogType.WareHouseAdded ? 0 : 1)}|{log.FamilyLogData}|{(int) (DateTime.Now - log.Timestamp).TotalHours}";
+        //            i++;
+        //            if (i == 50)
+        //            {
+        //                i = 0;
+        //                packetList.Add($"fslog_stc {amount}{packet}");
+        //                amount++;
+        //            }
+        //            else if (i == warehouseLogs.Count)
+        //            {
+        //                packetList.Add($"fslog_stc {amount}{packet}");
+        //            }
+        //        }
 
-                return packetList;
-            }
+        //        return packetList;
+        //    }
 
-            return new List<string>();
-        }
+        //    return new List<string>();
+        //}
 
         public bool GenerateFamilyXp(int FXP, short InstanceId = -1)
         {
@@ -3254,7 +3286,7 @@ namespace OpenNos.GameObject
         }
         public string GenerateGidx()
         {
-            if (Family != null && FamilyCharacter != null)
+            if (Family == null || FamilyCharacter == null || Family.FamilySkillMissions == null)
             {
                 Session.SendPacket(Session.Character.Family.GenerateFmi());
 
@@ -3287,16 +3319,15 @@ namespace OpenNos.GameObject
                 //    }
                 //}
              return
-                    $"gidx 1 " +
-                    $"{CharacterId} " +
-                    $"{Family.FamilyId} " +
-                    $"{Family.Name}" +
-                    $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
-                    $"{Family.FamilyLevel} " +
-                    $"{badge1}|" +
-                    $"{badge2}|" +
-                    $"{badge3}";
-                
+                $"gidx 1 " +
+                $"{CharacterId} " +
+                $"{Family.FamilyId}.{this.GetFamilyNameType()} " +
+                $"{Family.Name} " +
+                $"{Family.FamilyLevel} " +
+                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
+                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
+                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9602 || s.ItemVNum == 9603) ? Family.FamilyFaction == 1 ? 1 : Family.FamilyFaction == 2 ? 2 : 0 : 0)}";
+
             }
             return
                 $"gidx 1 " +
@@ -5500,10 +5531,7 @@ namespace OpenNos.GameObject
                 string packet = "";
                 int i = 0;
                 int amount = 0;
-                foreach (FamilyLogDTO log in Family.FamilyLogs
-                    .Where(s => s.FamilyLogType != FamilyLogType.WareHouseAdded &&
-                                s.FamilyLogType != FamilyLogType.WareHouseRemoved).OrderByDescending(s => s.Timestamp)
-                    .Take(100))
+                foreach (FamilyLogDTO log in Family.FamilyLogs.Take(100).OrderByDescending(l => l.Timestamp))
                 {
                     packet +=
                         $" {(byte) log.FamilyLogType}|{log.FamilyLogData}|{(int) (DateTime.Now - log.Timestamp).TotalHours}";
@@ -6927,7 +6955,8 @@ namespace OpenNos.GameObject
                 return packetList;
             }
 
-            return GenerateFamilyWarehouseHist();
+            //return GenerateFamilyWarehouseHist();
+            return new List<string>();
         }
 
         public void RemoveBuff(short cardId, bool removePermaBuff = false) =>
@@ -7564,6 +7593,8 @@ namespace OpenNos.GameObject
                 {
                     foreach (Buff buff in Buff.Where(s => s.StaticBuff).ToArray())
                     {
+                        if (buff.Card.CardId == 360 || buff.Card.CardId == 361) //GLOBAL FAMILY BUFFS
+                            continue;
                         StaticBuffDTO bf = new StaticBuffDTO
                         {
                             CharacterId = CharacterId,

@@ -14,6 +14,8 @@ namespace OpenNos.XMLModel.Models.ScriptedInstance
 
         public FamExp FamExp { get; set; }
 
+        public FamMission FamMission { get; set; }
+
         public GiantTeam GiantTeam { get; set; }
 
         public Item[] GiftItems { get; set; }

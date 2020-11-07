@@ -18,6 +18,10 @@ namespace OpenNos.Data
 
         public int ArenaWinner { get; set; }
 
+        public long RBBWin { get; set; }
+
+        public long RBBLose { get; set; }
+
         public string Biography { get; set; }
 
         public bool BuffBlocked { get; set; }

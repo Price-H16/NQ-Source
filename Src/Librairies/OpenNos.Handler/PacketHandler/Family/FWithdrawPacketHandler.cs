@@ -125,7 +125,7 @@ namespace OpenNos.Handler.PacketHandler.Family
                 DAOFactory.ItemInstanceDAO.InsertOrUpdate(familyWarehouseItem);
             }
 
-            Session.Character.Family.InsertFamilyLog(FamilyLogType.WareHouseRemoved, Session.Character.Name, message: $"{item2.ItemVNum}|{fWithdrawPacket.Amount}");
+            //Session.Character.Family.InsertFamilyLog(FamilyLogType.WareHouseRemoved, Session.Character.Name, message: $"{item2.ItemVNum}|{fWithdrawPacket.Amount}");
         }
 
         #endregion

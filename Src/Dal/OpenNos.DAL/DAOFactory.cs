@@ -25,6 +25,7 @@ namespace OpenNos.DAL
         private static IFamilyCharacterDAO _familyCharacterDAO;
         private static IFamilyDAO _familyDAO;
         private static IFamilyLogDAO _familyLogDAO;
+        private static IFamilySkillMissionDAO _familySkillMissionDAO;
         private static IGeneralLogDAO _generalLogDAO;
         private static IItemDAO _itemDAO;
         private static IItemInstanceDAO _itemInstanceDAO;
@@ -85,6 +86,8 @@ namespace OpenNos.DAL
         public static ICardDAO CardDAO => _cardDAO ?? (_cardDAO = new CardDAO());
 
         public static ICellonOptionDAO CellonOptionDAO => _cellonOptionDAO ?? (_cellonOptionDAO = new CellonOptionDAO());
+
+        public static IFamilySkillMissionDAO FamilySkillMissionDAO => _familySkillMissionDAO ?? (_familySkillMissionDAO = new FamilySkillMissionDAO());
 
         public static ICharacterDAO CharacterDAO => _characterDAO ?? (_characterDAO = new CharacterDAO());
 

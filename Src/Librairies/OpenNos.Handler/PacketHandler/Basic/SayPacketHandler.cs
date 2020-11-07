@@ -99,31 +99,37 @@ namespace OpenNos.Handler.PacketHandler.Basic
             }
             else
             {
-                ServerManager.Instance.ChatLogs.Add(new ChatLogDTO
-                {
-                    AccountId = (int)Session.Account.AccountId,
-                    CharacterId = (int)Session.Character.CharacterId,
-                    CharacterName = Session.Character.Name,
-                    DateTime = DateTime.Now,
-                    Message = message,
-                    Type = DialogType.Normal
-                });
-
-                var type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
+                byte type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
 
                 ConcurrentBag<ArenaTeamMember> member = null;
                 lock (ServerManager.Instance.ArenaTeams)
                 {
-                    member = ServerManager.Instance.ArenaTeams.ToList()
-                        .FirstOrDefault(s => s.Any(e => e.Session == Session));
+                    member = ServerManager.Instance.ArenaTeams.ToList().FirstOrDefault(s => s.Any(e => e.Session == Session));
                 }
 
                 var rbb = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
 
-                type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
+                if (Session.Character.Authority >= AuthorityType.GM)
+                {
+                    type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
+                    if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance && member != null)
+                    {
+                        ArenaTeamMember member2 = member.FirstOrDefault(o => o.Session == Session);
+                        member.Replace(s => member2 != null && s.ArenaTeamType == member2.ArenaTeamType && s != member2).Replace(s => s.ArenaTeamType == member.FirstOrDefault(o => o.Session == Session)?.ArenaTeamType).ToList().ForEach(o => o.Session.SendPacket(Session.Character.GenerateSay(message.Trim(), 1)));
+                    }
+                    else
+                    {
+                        Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), 1), ReceiverType.AllExceptMe);
+                    }
+                    message = $"[{Session.Character.Authority} {Session.Character.Name}]: " + message;
+                }
 
-                Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), 1), ReceiverType.AllExceptMe);
-                if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance && rbb != null)
+                if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance && member != null)
+                {
+                    ArenaTeamMember member2 = member.FirstOrDefault(o => o.Session == Session);
+                    member.Where(s => s.ArenaTeamType == member2?.ArenaTeamType && s != member2).ToList().ForEach(o => o.Session.SendPacket(Session.Character.GenerateSay(message.Trim(), type, Session.Account.Authority >= AuthorityType.GM)));
+                }
+                else if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance && rbb != null)
                 {
                     foreach (var ses in rbb.Session)
                     {
@@ -131,51 +137,27 @@ namespace OpenNos.Handler.PacketHandler.Basic
                         {
                             continue;
                         }
-                        ses.SendPacket(Session.Character.GenerateSay(message.Trim(), type, Session.Account.Authority >= AuthorityType.User));
+                        ses.SendPacket(Session.Character.GenerateSay(message.Trim(), type, Session.Account.Authority >= AuthorityType.GM));
                     }
                 }
-                if (Session.Character.Authority >= AuthorityType.Supporter)
+                else if (ServerManager.Instance.ChannelId == 51 && Session.Account.Authority < AuthorityType.MOD)
                 {
-                    type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
-                    if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance &&
-                        member != null)
-                    {
-                        var member2 = member.FirstOrDefault(o => o.Session == Session);
-                        member.Replace(s => member2 != null && s.ArenaTeamType == member2.ArenaTeamType && s != member2)
-                            .Replace(s =>
-                                s.ArenaTeamType == member.FirstOrDefault(o => o.Session == Session)?.ArenaTeamType)
-                            .ToList().ForEach(o =>
-                                o.Session.SendPacket(Session.Character.GenerateSay(message.Trim(), 1)));
-                    }
-                    else
-                    {
-                        Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), 1),
-                            ReceiverType.AllExceptMe);
-                    }
-
-                    message = $"[{Session.Character.Authority} {Session.Character.Name}]: " + message;
-                }
-
-                if (Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance &&
-                    member != null)
-                {
-                    var member2 = member.FirstOrDefault(o => o.Session == Session);
-                    member.Where(s => s.ArenaTeamType == member2?.ArenaTeamType && s != member2).ToList().ForEach(o =>
-                        o.Session.SendPacket(Session.Character.GenerateSay(message.Trim(), type,
-                            Session.Account.Authority >= AuthorityType.Supporter)));
-                }
-                else if (ServerManager.Instance.ChannelId == 51 && Session.Account.Authority < AuthorityType.DSGM)
-                {
-                    Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), type),
-                        ReceiverType.AllExceptMeAct4);
+                    Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), type, false), ReceiverType.AllExceptMeAct4);
                 }
                 else
                 {
-                    Session.CurrentMapInstance?.Broadcast(Session,
-                        Session.Character.GenerateSay(message.Trim(), type,
-                            Session.Character.Authority >= AuthorityType.Supporter), ReceiverType.AllExceptMe);
+                    Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GenerateSay(message.Trim(), type, Session.Character.Authority >= AuthorityType.GM), ReceiverType.AllExceptMe);
                 }
             }
+            ServerManager.Instance.ChatLogs.Add(new ChatLogDTO
+            {
+                AccountId = (int)Session.Account.AccountId,
+                CharacterId = (int)Session.Character.CharacterId,
+                CharacterName = Session.Character.Name,
+                DateTime = DateTime.Now,
+                Message = message,
+                Type = DialogType.Normal
+            });
         }
 
         #endregion

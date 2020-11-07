@@ -30,7 +30,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
         #region Methods
 
-        public void BuyBazaar(CBuyPacket cBuyPacket)
+        public void BuyBazaar(CBuyPacket cBuyPacket) //Multiple dupes
         {
             if (Session == null || Session.Character == null) return;
 
@@ -45,7 +45,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (!Session.Character.VerifiedLock)
+            if (!Session.Character.VerifiedLock) //Shit
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
                 return;

@@ -4,6 +4,7 @@ using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ACT6;
+using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.RainbowBattle;
 using OpenNos.Master.Library.Client;
@@ -1314,6 +1315,8 @@ namespace OpenNos.GameObject.Networking
                     session.CurrentMapInstance.Broadcast(session.Character.GenerateTitInfo());
                     session.SendPacket(Character.GenerateAct());
                     session.SendPacket(session.Character.GenerateScpStc());
+                    Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmp()); });
+                    Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmi()); });
 
                     if (session.CurrentMapInstance.OnSpawnEvents.Any())
                     {
@@ -2743,12 +2746,19 @@ namespace OpenNos.GameObject.Networking
 
         public void SaveAll(bool onShutDown)
         {
-            foreach (ClientSession sess in Sessions)
+            try
             {
-                sess.Character.Save();
+                CommunicationServiceClient.Instance.CleanupOutdatedSession();
+                foreach (ClientSession sess in Sessions)
+                {
+                    sess.Character?.Save();
+                }
+                DAOFactory.BazaarItemDAO.RemoveOutDated();
             }
-
-            DAOFactory.BazaarItemDAO.RemoveOutDated();
+            finally
+            {
+                Logger.LogEvent("SAVING COMPLETED!", null);
+            }
         }
 
         public async Task ShutdownTaskAsync(int Time = 5)
@@ -3352,6 +3362,11 @@ namespace OpenNos.GameObject.Networking
                     family.FamilyCharacters.Add(new FamilyCharacter(famchar));
                 }
 
+                foreach (FamilySkillMissionDTO famskill in DAOFactory.FamilySkillMissionDAO.LoadByFamilyId(family.FamilyId).ToList())
+                {
+                    family.FamilySkillMissions.Add(new FamilySkillMission(famskill));
+                }
+
                 var familyCharacter =
                     family.FamilyCharacters.Find(s => s.Authority == FamilyAuthority.Head);
                 if (familyCharacter != null)
@@ -3603,6 +3618,8 @@ namespace OpenNos.GameObject.Networking
                         }
 
                         session?.CurrentMapInstance?.Broadcast(session?.Character?.GenerateGidx());
+                        session?.SendPacket(session?.Character.GenerateFmi());
+                        session?.SendPacket(session?.Character.GenerateFmp());
                     }
                 }
                 else if (fam != null)
@@ -3617,6 +3634,8 @@ namespace OpenNos.GameObject.Networking
                     {
                         sess.Character.Family = null;
                         sess.SendPacket(sess.Character.GenerateGidx());
+                        sess?.SendPacket(sess?.Character.GenerateFmi());
+                        sess?.SendPacket(sess?.Character.GenerateFmp());
                     }
                 }
             }

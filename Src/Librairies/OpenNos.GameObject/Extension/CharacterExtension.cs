@@ -94,6 +94,16 @@ namespace OpenNos.GameObject.Extension
             e.RemoveBuff(46, true);
         }
 
+        public static string GetFamilyNameType(this Character e)
+        {
+            var thisRank = e.FamilyCharacter.Authority;
+
+            return thisRank == FamilyAuthority.Member ? "918" :
+                thisRank == FamilyAuthority.Familydeputy ? "916" :
+                thisRank == FamilyAuthority.Familykeeper ? "917" :
+                thisRank == FamilyAuthority.Head ? "915" : "-1 -";
+        }
+
         public static void SendShopEnd(this ClientSession s)
         {
             s.SendPacket("shop_end 2");

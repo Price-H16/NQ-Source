@@ -148,7 +148,7 @@
     <Compile Include="Networking\Communication\Scs\Server\Tcp\ScsTcpServer.cs" />
     <Compile Include="Language.cs" />
     <Compile Include="Cryptography\CryptographyBase.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Logging\Logger.cs" />
     <Compile Include="Handling\PacketAttribute.cs" />
     <Compile Include="Networking\WireProtocol.cs" />
     <Compile Include="Networking\WireProtocolFactory.cs" />
@@ -168,6 +168,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenAPI.Core\ChickenAPI.Core.csproj">
+      <Project>{a6d06310-4228-4afa-894d-69283976e810}</Project>
+      <Name>ChickenAPI.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NosTale.Configuration\NosTale.Configuration.csproj">
       <Project>{011EE023-E1B8-4645-BBE9-94AC35B55390}</Project>
       <Name>NosTale.Configuration</Name>

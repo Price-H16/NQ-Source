@@ -37,21 +37,6 @@ namespace OpenNos.Handler.PacketHandler.Mate
                 return;
             }
 
-            if (suctlPacket.TargetType != UserType.Npc
-                && !Session.Character.VerifiedLock)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
-
-            if (suctlPacket.TargetType != UserType.Npc
-                && Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT"), 0));
-                return;
-            }
-
             var penalty = Session.Account.PenaltyLogs.OrderByDescending(s => s.DateEnd).FirstOrDefault();
             if (Session.Character.IsMuted() && penalty != null)
             {

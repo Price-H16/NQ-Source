@@ -149,6 +149,8 @@
     <Compile Include="Helpers\UserInterfaceHelper.cs" />
     <Compile Include="Item\Instance\FusionItemExt.cs" />
     <Compile Include="Item\TitleItem.cs" />
+    <Compile Include="Networking\BasicSpamProtector.cs" />
+    <Compile Include="Networking\ISpamProtector.cs" />
     <Compile Include="PartnerSp.cs" />
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="PossibleTypeAndSubtype.cs" />
@@ -240,6 +242,10 @@
     <Compile Include="_NpcDialog\INpcDialogHandlerContainer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenAPI.Core\ChickenAPI.Core.csproj">
+      <Project>{A6D06310-4228-4AFA-894D-69283976E810}</Project>
+      <Name>ChickenAPI.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ChickenApi\ChickenApi.Events\ChickenApi.Events.csproj">
       <Project>{decb5668-600c-49f1-a5c8-cde5a12c9f5a}</Project>
       <Name>ChickenApi.Events</Name>

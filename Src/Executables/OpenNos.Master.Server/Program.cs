@@ -1,9 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Autofac;
+using ChickenAPI.Core.Logging;
+using ChickenAPI.Plugins;
+using ChickenAPI.Plugins.Exceptions;
+using ChickenAPI.Plugins.Modules;
 using log4net;
+using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
 using NosTale.Configuration.Utilities;
@@ -12,6 +20,12 @@ using OpenNos.DAL.EF.Helpers;
 using OpenNos.Master.Library.Interface;
 using OpenNos.SCS.Communication.Scs.Communication.EndPoints.Tcp;
 using OpenNos.SCS.Communication.ScsServices.Service;
+using Plugins.BasicImplementations.Algorithm;
+using Plugins.BasicImplementations.BCards;
+using Plugins.BasicImplementations.Event;
+using Plugins.BasicImplementations.Guri;
+using Plugins.BasicImplementations.ItemUsage;
+using Plugins.BasicImplementations.NpcDialog;
 
 namespace OpenNos.Master.Server
 {
@@ -26,49 +40,78 @@ namespace OpenNos.Master.Server
         #endregion
 
         #region Methods
+        private static void InitializeLogger()
+        {
+            Logger.InitializeLogger(new SerilogLogger());
+            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
 
+        }
+        private static void InitializePlugins()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces().AsSelf();
+            pluginBuilder.RegisterType<LoggingPlugin>().AsImplementedInterfaces().AsSelf();
+            IContainer container = pluginBuilder.Build();
+
+            var coreBuilder = new ContainerBuilder();
+            foreach (ICorePlugin plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                plugin.OnLoad(coreBuilder);
+            }
+
+            using (IContainer coreContainer = coreBuilder.Build())
+            {
+                var gameBuilder = new ContainerBuilder();
+                gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
+                gameBuilder.RegisterModule(new CoreContainerModule(coreContainer));
+                IContainer gameContainer = gameBuilder.Build();
+                IEnumerable<IGamePlugin> plugins = gameContainer.Resolve<IEnumerable<IGamePlugin>>();
+                if (plugins != null)
+                {
+                    foreach (IGamePlugin gamePlugin in plugins)
+                    {
+                        gamePlugin.OnEnable();
+                        gamePlugin.OnDisable();
+                    }
+                }
+
+                Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
+            }
+        }
+
+        private static void PrintHeader()
+        {
+            Console.Title = "NosQuest - Master";
+            const string text = @"
+
+███╗░░██╗░█████╗░░██████╗░██████╗░██╗░░░██╗███████╗░██████╗████████╗
+████╗░██║██╔══██╗██╔════╝██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝
+██╔██╗██║██║░░██║╚█████╗░██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░
+██║╚████║██║░░██║░╚═══██╗╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░
+██║░╚███║╚█████╔╝██████╔╝░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░
+╚═╝░░╚══╝░╚════╝░╚═════╝░░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░
+";
+            string separator = new string('=', Console.WindowWidth);
+            string logo = text.Split('\n').Select(s => string.Format("{0," + (Console.WindowWidth / 2 + s.Length / 2) + "}\n", s))
+                .Aggregate("", (current, i) => current + i);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(separator + logo + separator);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
         public static void Main(string[] args)
         {
             try
             {
-#if DEBUG
-                _isDebug = true;
-#endif
-                CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
-                Console.Title = $"OpenNos Master Server{(_isDebug ? " Development Environment" : "")}";
-
-                var ignoreStartupMessages = false;
-                var ignoreTelemetry = false;
-                foreach (var arg in args)
-                {
-                    switch (arg)
-                    {
-                        case "--nomsg":
-                            ignoreStartupMessages = true;
-                            break;
-
-                        case "--notelemetry":
-                            ignoreTelemetry = true;
-                            break;
-                    }
-                }
-
+                PrintHeader();
                 // initialize Logger
-                Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+                InitializeLogger();
+                // initialize Plugins
+                InitializePlugins();
 
                 ConfigurationHelper.CustomisationRegistration();
                 var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>();
 
                 var port = a.Server.MasterPort;
-                if (!ignoreStartupMessages)
-                {
-                    var assembly = Assembly.GetExecutingAssembly();
-                    var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                    var text = $"MASTER SERVER v{fileVersionInfo.ProductVersion}dev - PORT : {port} by OpenNos Team";
-                    var offset = Console.WindowWidth / 2 + text.Length / 2;
-                    var separator = new string('=', Console.WindowWidth);
-                    Console.WriteLine(separator + string.Format("{0," + offset + "}\n", text) + separator);
-                }
 
                 // initialize DB
                 if (!DataAccessHelper.Initialize())
@@ -96,9 +139,7 @@ namespace OpenNos.Master.Server
 
                     _server.Start();
                     Logger.Info(Language.Instance.GetMessageFromKey("STARTED"));
-                    if (!ignoreTelemetry)
-                    {
-                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -111,7 +152,6 @@ namespace OpenNos.Master.Server
                 Console.ReadKey();
             }
         }
-
         private static void OnClientConnected(object sender, ServiceClientEventArgs e)
         {
             Logger.Info(Language.Instance.GetMessageFromKey("NEW_CONNECT") + e.Client.ClientId);

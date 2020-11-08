@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using ChickenAPI.Core.Logging;
 using log4net;
 
 namespace OpenNos.Core
@@ -7,13 +8,24 @@ namespace OpenNos.Core
     public static class Logger
     {
         #region Properties
-
-        public static ILog Log { get; set; }
+        public static ILogger Log { get; set; }
+        //public static ILog Log { get; set; }
 
         #endregion
 
         #region Methods
-
+        /// <summary>
+        ///     Wraps up the error message with the CallerMemberName
+        /// </summary>
+        /// <param name="memberName"></param>
+        /// <param name="innerException"></param>
+        public static void Error(Exception innerException = null, [CallerMemberName] string memberName = "")
+        {
+            if (innerException != null)
+            {
+                Log?.Error($"{memberName}: {innerException.Message}", innerException);
+            }
+        }
         /// <summary>
         ///     Wraps up the error message with the CallerMemberName
         /// </summary>
@@ -27,16 +39,6 @@ namespace OpenNos.Core
         /// <summary>
         ///     Wraps up the error message with the CallerMemberName
         /// </summary>
-        /// <param name="memberName"></param>
-        /// <param name="ex"></param>
-        public static void Error(Exception ex, [CallerMemberName] string memberName = "")
-        {
-            Log?.Error($"[{memberName}]: {ex.Message}", ex);
-        }
-
-        /// <summary>
-        ///     Wraps up the error message with the CallerMemberName
-        /// </summary>
         /// <param name="data"></param>
         /// <param name="ex"></param>
         /// <param name="memberName"></param>
@@ -44,8 +46,6 @@ namespace OpenNos.Core
         {
             if (ex != null)
                 Log?.Error($"[{memberName}]: {data} {ex.InnerException}", ex);
-            else
-                Log?.Error($"[{memberName}]: {data}");
         }
 
         /// <summary>
@@ -58,8 +58,6 @@ namespace OpenNos.Core
         {
             if (ex != null)
                 Log?.Fatal($"[{memberName}]: {data} {ex.InnerException}", ex);
-            else
-                Log?.Fatal($"[{memberName}]: {data}");
         }
 
         /// <summary>
@@ -73,13 +71,16 @@ namespace OpenNos.Core
             if (ex != null)
                 Log?.Info($"[{memberName}]: {message}", ex);
             else
-                Log?.Info($"[{memberName}]: {message}");
+                Log?.InfoFormat($"[{memberName}]: {message}");
         }
-
-        public static void InitializeLogger(ILog log)
+        public static void InitializeLogger(ILogger log)
         {
             Log = log;
         }
+        //public static void InitializeLogger(ILog log)
+        //{
+        //    Log = log;
+        //}
 
         /// <summary>
         ///     Wraps up the error message with the Logging Event
@@ -92,7 +93,7 @@ namespace OpenNos.Core
             [CallerMemberName] string memberName = "")
         {
             if (ex != null)
-                Log?.Info($"[{memberName}]: [{logEvent}]{data}");
+                Log?.InfoFormat($"[{memberName}]: [{logEvent}]{data}");
             else
                 Log?.Info($"[{memberName}]: [{logEvent}]{data}", ex);
         }
@@ -109,8 +110,6 @@ namespace OpenNos.Core
         {
             if (ex != null)
                 Log?.Error($"[{memberName}]: [{logEvent}]{data}", ex);
-            else
-                Log?.Error($"[{memberName}]: [{logEvent}]{data}");
         }
 
         /// <summary>
@@ -121,7 +120,7 @@ namespace OpenNos.Core
         /// <param name="data"></param>
         public static void LogUserEvent(string logEvent, string caller, string data)
         {
-            Log?.Info($"[{logEvent}][{caller}]{data}");
+            Log?.InfoFormat($"[{logEvent}][{caller}]{data}");
         }
 
         /// <summary>
@@ -156,7 +155,7 @@ namespace OpenNos.Core
         public static void Warn(string data, Exception innerException = null, [CallerMemberName] string memberName = "")
         {
             if (innerException != null)
-                Log?.Warn($"[{memberName}]: {data} {innerException.InnerException}", innerException);
+                Log?.WarnFormat($"[{memberName}]: {data} {innerException.InnerException}", innerException);
             else
                 Log?.Warn($"[{memberName}]: {data}");
         }

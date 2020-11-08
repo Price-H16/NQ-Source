@@ -86,8 +86,7 @@ namespace OpenNos.GameObject.Helpers
         public void DailyReward(ClientSession session)
         {
             var isMartial = session.Character.Class.Equals(ClassType.MartialArtist);
-            var count = DAOFactory.GeneralLogDAO.LoadByAccount(session.Account.AccountId)
-                .Count(s => s.LogData == (isMartial ? "DAILY_REWARD" : "DAILY_REWARD") && s.Timestamp.Day >= DateTime.Now.Day);
+            var count = DAOFactory.GeneralLogDAO.LoadByAccount(session.Account.AccountId).Count(s => s.LogData == (isMartial ? "DAILY_REWARD" : "DAILY_REWARD") && s.Timestamp.Day >= DateTime.Now.Day);
 
             if (count != 0)
             {

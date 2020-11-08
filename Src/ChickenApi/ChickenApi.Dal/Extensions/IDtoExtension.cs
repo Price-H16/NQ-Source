@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace ChickenAPI.DAL.Extensions
@@ -33,7 +34,7 @@ namespace ChickenAPI.DAL.Extensions
 
                 KeyProperty = keyProperty ?? throw new ArgumentException("Dto should at least contain one");
 
-                /*
+                
                 ParameterExpression par = Expression.Parameter(typeof(T));
 
                 MethodInfo get = typeof(PropertyInfo).GetMethod("GetValue", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(object) }, null);
@@ -42,8 +43,8 @@ namespace ChickenAPI.DAL.Extensions
 
                 Expression<Func<T, object>> lambda = Expression.Lambda<Func<T, object>>(getValueExpr, par);
 
-                GetKey = lambda.Compile();
-                */
+                //GetKey = lambda.Compile();
+                
             }
         }
     }

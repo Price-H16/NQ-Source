@@ -29,17 +29,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void PutItem(PutPacket putPacket)
         {
-            if (Session.Character.IsLocked)
-            {
-                Session.SendPacket(Session.Character.GenerateSay("Your character is locked. First, use $Unlock", 10));
-                return;
-            }
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
 
             if (putPacket == null || Session.Character.HasShopOpened) return;
 

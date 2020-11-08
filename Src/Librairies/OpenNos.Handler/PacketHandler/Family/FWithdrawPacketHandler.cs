@@ -41,17 +41,6 @@ namespace OpenNos.Handler.PacketHandler.Family
 
             Session.Character.LastWithdraw = DateTime.Now;
 
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
-
-            if (!Session.Character.VerifiedLock)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
 
             if (fWithdrawPacket == null)
             {

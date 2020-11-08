@@ -43,14 +43,6 @@ namespace OpenNos.Handler.PacketHandler.Battle
                 return;
             }
 
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT"), 0));
-                Session.SendPacket(StaticPacketHelper.Cancel());
-                return;
-            }
-
             Session.Character.WalkDisposable?.Dispose();
             Session.Character.Direction = Session.Character.BeforeDirection;
 

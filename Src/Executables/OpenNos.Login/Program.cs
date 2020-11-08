@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Autofac;
+using ChickenAPI.Core.Logging;
 using ChickenAPI.Plugins;
 using ChickenAPI.Plugins.Exceptions;
 using ChickenAPI.Plugins.Modules;
 using log4net;
+using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
 using NosTale.Configuration.Utilities;
@@ -52,12 +56,44 @@ namespace OpenNos.Login
             PacketFactory.Initialize<WalkPacket>();
             var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
             var port = a.LoginPort;
-            var networkManager = new NetworkManager<LoginCryptography>(a.IPAddress, port,
-                typeof(LoginPacketHandler), typeof(LoginCryptography), false);
+            var networkManager = new NetworkManager<LoginCryptography>(a.IPAddress, port, typeof(LoginPacketHandler), typeof(LoginCryptography), false);
         }
         private static void InitializeLogger()
         {
-            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+            Logger.InitializeLogger(new SerilogLogger());
+            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+        }
+        private static void InitializePlugins()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces().AsSelf();
+            pluginBuilder.RegisterType<LoggingPlugin>().AsImplementedInterfaces().AsSelf();
+            IContainer container = pluginBuilder.Build();
+
+            var coreBuilder = new ContainerBuilder();
+            foreach (ICorePlugin plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                plugin.OnLoad(coreBuilder);
+            }
+
+            using (IContainer coreContainer = coreBuilder.Build())
+            {
+                var gameBuilder = new ContainerBuilder();
+                gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
+                gameBuilder.RegisterModule(new CoreContainerModule(coreContainer));
+                IContainer gameContainer = gameBuilder.Build();
+                IEnumerable<IGamePlugin> plugins = gameContainer.Resolve<IEnumerable<IGamePlugin>>();
+                if (plugins != null)
+                {
+                    foreach (IGamePlugin gamePlugin in plugins)
+                    {
+                        gamePlugin.OnEnable();
+                        gamePlugin.OnDisable();
+                    }
+                }
+
+                Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
+            }
         }
         private static void PrintHeader()
         {
@@ -85,10 +121,10 @@ namespace OpenNos.Login
                 try
                 {
                     PrintHeader();
-
                     // initialize Logger
-
                     InitializeLogger();
+                    // initialize Plugins
+                    InitializePlugins();
 
                     ConfigurationHelper.CustomisationRegistration();
                     var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;

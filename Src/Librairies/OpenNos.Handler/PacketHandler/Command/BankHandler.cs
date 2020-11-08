@@ -25,12 +25,6 @@ namespace OpenNos.Handler.PacketHandler.Command
 
         public void BankManagement(BankPacket bankPacket)
         {
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
             Session.AddLogsCmd(bankPacket);
             Session.OpenBank();
         }

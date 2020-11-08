@@ -87,7 +87,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoginServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource\LocalizedResources.de.Designer.cs">
@@ -175,6 +174,10 @@
     <Content Include="on-logo-icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenAPI.Core\ChickenAPI.Core.csproj">
+      <Project>{A6D06310-4228-4AFA-894D-69283976E810}</Project>
+      <Name>ChickenAPI.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ChickenApi\ChickenApi.Plugins\ChickenApi.Plugins.csproj">
       <Project>{A8289E58-4507-4614-8A28-9FF936BEE009}</Project>
       <Name>ChickenApi.Plugins</Name>
@@ -206,6 +209,10 @@
     <ProjectReference Include="..\..\Librairies\OpenNos.Master.Library\OpenNos.Master.Library.csproj">
       <Project>{8FABDA5B-C873-4E32-A78F-08A9A4768595}</Project>
       <Name>OpenNos.Master.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NosQuest.LoggingPlugin\NosQuest.Plugins.Logging.csproj">
+      <Project>{C788BD5E-E8C2-47D1-BEF9-51A1809A7BFE}</Project>
+      <Name>NosQuest.Plugins.Logging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

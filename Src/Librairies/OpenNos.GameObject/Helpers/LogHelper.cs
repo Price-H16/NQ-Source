@@ -9,6 +9,7 @@ namespace OpenNos.GameObject.Helpers
 {
     public class LogHelper
     {
+
         #region Members
 
         private static LogHelper _instance;
@@ -22,6 +23,30 @@ namespace OpenNos.GameObject.Helpers
         #endregion
 
         #region Methods
+        //public void InsertRaidLog(RaidLogDTO log)
+        //{
+        //    DAOFactory.RaidLogDAO.InsertOrUpdate(log);
+        //}
+
+        //public void InsertRaidLog(RaidLogDTO log)
+        //{
+        //    DAOFactory.RaidLogDAO.InsertOrUpdate(log);
+        //}
+
+        //public void InsertUpgradeLog(UpgradeLogDTO log)
+        //{
+        //    DAOFactory.UpgradeLogDAO.InsertOrUpdate(log);
+        //}
+
+        //public void InsertExchangeLog(ExchangeLogDTO log)
+        //{
+        //    DAOFactory.ExchangeLogDAO.InsertOrUpdate(log);
+        //}
+
+        //public void InsertAntiBotLog(AntiBotLogDTO log)
+        //{
+        //    DAOFactory.AntiBotLogDAO.InsertOrUpdate(log);
+        //}
 
         public void InsertChatLog(ChatLogDTO log)
         {

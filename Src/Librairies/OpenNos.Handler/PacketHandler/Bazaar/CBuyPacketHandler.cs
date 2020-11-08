@@ -45,19 +45,6 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (!Session.Character.VerifiedLock) //Shit
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
-
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
-
             
             var bz = DAOFactory.BazaarItemDAO.LoadById(cBuyPacket.BazaarId);
             if (bz != null && cBuyPacket.Amount > 0)

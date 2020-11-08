@@ -27,9 +27,6 @@ namespace OpenNos.GameObject
         #endregion
 
         #region Properties
-
-        public bool IsLimited => Authority >= AuthorityType.DEV && Authority != AuthorityType.Administrator;
-
         public List<PenaltyLogDTO> PenaltyLogs
         {
             get

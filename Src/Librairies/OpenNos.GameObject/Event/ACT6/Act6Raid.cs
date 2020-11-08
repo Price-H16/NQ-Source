@@ -41,7 +41,7 @@ namespace OpenNos.GameObject.Event.ACT6
 
             if (RaidInstance == null)
             {
-                Logger.Log.Info(Language.Instance.GetMessageFromKey("CANT_CREATE_RAIDS"));
+                Logger.Log.InfoFormat(Language.Instance.GetMessageFromKey("CANT_CREATE_RAIDS"));
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace OpenNos.GameObject.Event.ACT6
 
             if (EntryMap == null)
             {
-                Logger.Log.Info(Language.Instance.GetMessageFromKey("MAP_MISSING"));
+                Logger.Log.InfoFormat(Language.Instance.GetMessageFromKey("MAP_MISSING"));
                 return;
             }
 

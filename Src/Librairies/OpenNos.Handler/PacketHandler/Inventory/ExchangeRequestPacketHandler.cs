@@ -31,24 +31,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void ExchangeRequest(ExchangeRequestPacket exchangeRequestPacket)
         {
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
 
-            if (!Session.Character.VerifiedLock)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
-
-            /*if (Session.Account?.Authority >= AuthorityType.GM && Session.Account?.Authority < AuthorityType.Administrator) // this is useless
+            if (Session.Account?.Authority >= AuthorityType.GM && Session.Account?.Authority < AuthorityType.Administrator)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("GM_CANNOT_TRADE")));
                 return;
-            }*/
+            }
 
             if (exchangeRequestPacket != null)
             {
@@ -69,19 +57,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                             var targetSession =
                                 Session.CurrentMapInstance.GetSessionByCharacterId(exchangeRequestPacket.CharacterId);
                             if (targetSession?.Account == null) return;
-
-                            if (!targetSession.Character.VerifiedLock)
-                            {
-                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                                return;
-                            }
-
-                            if (targetSession.Account.IsLimited)
-                            {
-                                Session.SendPacket(UserInterfaceHelper.GenerateInfo(
-                                    Language.Instance.GetMessageFromKey("CANNOT_TRADE_LIMITED_ACCOUNT")));
-                                return;
-                            }
 
                             if (targetSession.CurrentMapInstance?.MapInstanceType ==
                                 MapInstanceType.TalentArenaMapInstance) return;

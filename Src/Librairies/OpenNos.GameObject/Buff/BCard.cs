@@ -379,9 +379,7 @@ namespace OpenNos.GameObject
                                         {
                                             x = (short) (ServerManager.RandomNumber(-1, 1) + sender.PositionX);
                                             y = (short) (ServerManager.RandomNumber(-1, 1) + sender.PositionY);
-                                            summonParameters.Add(new MonsterToSummon((short) SecondData,
-                                                new MapCell {X = x, Y = y}, null, move, aliveTimeMp: aliveTime,
-                                                owner: sender));
+                                            summonParameters.Add(new MonsterToSummon((short) SecondData, new MapCell {X = x, Y = y}, null, move, aliveTimeMp: aliveTime, owner: sender));
                                         }
 
                                         EventHelper.Instance.RunEvent(new EventContainer(sender.MapInstance,
@@ -389,10 +387,7 @@ namespace OpenNos.GameObject
                                         break;
 
                                     default:
-                                        if (!sender.OnDeathEvents.ToList().Any(s =>
-#warning check this, s is null by some reason when loading worldserver, but just sometimes
-                                            s != null &&
-                                            s.EventActionType == EventActionType.SPAWNMONSTERS))
+                                        if (!sender.OnDeathEvents.ToList().Any(s => s != null && s.EventActionType == EventActionType.SPAWNMONSTERS))
                                         {
                                             sender.OnDeathEvents.Add(new EventContainer(sender.MapInstance,
                                                 EventActionType.SPAWNMONSTERS, summonParameters));

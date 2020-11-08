@@ -31,19 +31,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
         public void ExchangeList(ExcListPacket packet)
         {
 
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
-
-            if (!Session.Character.VerifiedLock)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
-
             Logger.LogUserEvent("EXC_LIST", Session.GenerateIdentity(),
                 $"Packet string: {packet}");
 

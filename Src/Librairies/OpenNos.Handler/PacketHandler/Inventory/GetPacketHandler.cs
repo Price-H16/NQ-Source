@@ -27,18 +27,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void GetItem(GetPacket getPacket)
         {
-            if (!Session.Character.VerifiedLock)
-            {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
-                return;
-            }
-
-            if (Session.Account.IsLimited)
-            {
-                Session.SendPacket(
-                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("LIMITED_ACCOUNT")));
-                return;
-            }
 
             if (getPacket == null || Session.Character.LastSkillUse.AddSeconds(1) > DateTime.Now
                                   || Session.Character.IsVehicled

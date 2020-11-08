@@ -10,11 +10,13 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Autofac;
+using ChickenAPI.Core.Logging;
 using ChickenAPI.Events;
 using ChickenAPI.Plugins;
 using ChickenAPI.Plugins.Exceptions;
 using ChickenAPI.Plugins.Modules;
 using log4net;
+using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
 using NosTale.Configuration.Utilities;
@@ -135,7 +137,8 @@ namespace OpenNos.World
         }
         private static void InitializeLogger()
         {
-            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+            Logger.InitializeLogger(new SerilogLogger());
+            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
 
         }
         public static void Main(string[] args)
@@ -167,6 +170,7 @@ namespace OpenNos.World
                     gamePlugin.OnEnable();
                 }
             }
+            Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
             PrintHeader();
             ConfigurationHelper.CustomisationRegistration();
                              
@@ -205,7 +209,7 @@ namespace OpenNos.World
 
             // TODO: initialize ClientLinkManager initialize PacketSerialization
             PacketFactory.Initialize<WalkPacket>();
-
+            
             try
             {
                 _exitHandler += ExitHandler;
@@ -242,9 +246,7 @@ namespace OpenNos.World
             var authKey = a.MasterAuthKey;
             ServerManager.Instance.ServerGroup = a.ServerGroupS1;
             const int sessionLimit = 100; // Needs workaround
-            var newChannelId = CommunicationServiceClient.Instance.RegisterWorldServer(
-                new SerializableWorldServer(ServerManager.Instance.WorldId, ipAddress, _port, sessionLimit,
-                    ServerManager.Instance.ServerGroup));
+            var newChannelId = CommunicationServiceClient.Instance.RegisterWorldServer(new SerializableWorldServer(ServerManager.Instance.WorldId, ipAddress, _port, sessionLimit, ServerManager.Instance.ServerGroup));
             if (newChannelId.HasValue)
             {
                 ServerManager.Instance.ChannelId = newChannelId.Value;
@@ -264,11 +266,11 @@ namespace OpenNos.World
         private static IContainer BuildCoreContainer()
         {
             var pluginBuilder = new ContainerBuilder();
-            /*pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces();
-            pluginBuilder.RegisterType<DatabasePlugin>().AsImplementedInterfaces().AsSelf();
-            pluginBuilder.RegisterType<RedisMultilanguagePlugin>().AsImplementedInterfaces().AsSelf();
-            pluginBuilder.RegisterType<GamePacketHandlersCorePlugin>().AsImplementedInterfaces().AsSelf();
-            pluginBuilder.RegisterType<CharScreenPacketHandlerCorePlugin>().AsImplementedInterfaces().AsSelf();*/
+            pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces();
+            //pluginBuilder.RegisterType<DatabasePlugin>().AsImplementedInterfaces().AsSelf();
+            //pluginBuilder.RegisterType<RedisMultilanguagePlugin>().AsImplementedInterfaces().AsSelf();
+            //pluginBuilder.RegisterType<GamePacketHandlersCorePlugin>().AsImplementedInterfaces().AsSelf();
+            //pluginBuilder.RegisterType<CharScreenPacketHandlerCorePlugin>().AsImplementedInterfaces().AsSelf();
             pluginBuilder.RegisterType<ItemUsagePluginCore>().AsImplementedInterfaces().AsSelf();
             pluginBuilder.RegisterType<GenericEventPluginCore>().AsImplementedInterfaces().AsSelf();
             pluginBuilder.RegisterType<NpcDialogPluginCore>().AsImplementedInterfaces().AsSelf();
@@ -288,6 +290,7 @@ namespace OpenNos.World
                 {
                 }
             }
+            
 
             return coreBuilder.Build();
         }

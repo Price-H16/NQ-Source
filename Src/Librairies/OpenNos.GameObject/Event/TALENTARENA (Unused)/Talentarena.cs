@@ -171,8 +171,7 @@ namespace OpenNos.GameObject.Event
                                 RegisteredGroups.Remove(g);
                                 RegisteredGroups.Remove(prevGroup);
 
-                                var mapInstance = ServerManager.GenerateMapInstance(2015,
-                                        MapInstanceType.NormalInstance, new InstanceBag());
+                                var mapInstance = ServerManager.GenerateMapInstance(2015, MapInstanceType.NormalInstance, new InstanceBag());
                                 mapInstance.IsPVP = true;
 
                                 g.TalentArenaBattle.MapInstance         = mapInstance;
@@ -207,10 +206,8 @@ namespace OpenNos.GameObject.Event
                                         x = 15;
                                     }
 
-                                    ServerManager.Instance.ChangeMapInstance(sess.Character.CharacterId,
-                                            mapInstance.MapInstanceId, x, 39);
-                                    sess.SendPacketAfter(UserInterfaceHelper.GenerateTeamArenaMenu(3, 0, 0, 60, 0),
-                                            5000);
+                                    ServerManager.Instance.ChangeMapInstance(sess.Character.CharacterId,mapInstance.MapInstanceId, x, 39);
+                                    sess.SendPacketAfter(UserInterfaceHelper.GenerateTeamArenaMenu(3, 0, 0, 60, 0),5000);
                                 }
 
                                 #warning TODO: Other Setup stuff
@@ -218,8 +215,7 @@ namespace OpenNos.GameObject.Event
                                 PlayingGroups[g.GroupId] = new List<Group> {g, prevGroup};
 
                                 var battleThread = new BattleThread();
-                                Observable.Timer(TimeSpan.FromSeconds(0)).Subscribe(observer =>
-                                        battleThread.Run(PlayingGroups[g.GroupId]));
+                                Observable.Timer(TimeSpan.FromSeconds(0)).Subscribe(observer => battleThread.Run(PlayingGroups[g.GroupId]));
 
                                 prevGroup = null;
                             }

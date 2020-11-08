@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace ChickenAPI.Core.Logging
 {
@@ -6,6 +7,8 @@ namespace ChickenAPI.Core.Logging
     {
         void Debug(string msg);
         void DebugFormat(string msg, params object[] objs);
+
+        void DebugHandler(string data, [CallerMemberName] string memberName = "");
 
         void Info(string msg, Exception ex);
         void InfoFormat(string msg, params object[] objs);

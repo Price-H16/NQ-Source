@@ -70,7 +70,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.TeleporterDAO.Insert(teleporters);
-            Logger.Log.Info($"{teleporterCounter} Teleporters parsed");
+            Logger.Log.InfoFormat($"{teleporterCounter} Teleporters parsed");
         }
     }
 }

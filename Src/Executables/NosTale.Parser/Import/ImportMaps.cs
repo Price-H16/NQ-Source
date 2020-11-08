@@ -113,7 +113,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.MapDAO.Insert(maps);
-            Logger.Log.Info($"{i} Maps parsed");
+            Logger.Log.InfoFormat($"{i} Maps parsed");
         }
     }
 }

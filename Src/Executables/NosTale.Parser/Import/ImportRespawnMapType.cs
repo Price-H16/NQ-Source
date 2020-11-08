@@ -86,7 +86,7 @@ namespace NosTale.Parser.Import
             var toImport = respawnmaptypemaps.Where(x => !existingRespawnMapTypes.Contains(x.Name)).ToList();
             DAOFactory.RespawnMapTypeDAO.Insert(toImport);
 
-            Logger.Log.Info($"{toImport.Count} RespawnMapType parsed");
+            Logger.Log.InfoFormat($"{toImport.Count} RespawnMapType parsed");
         }
 
         #endregion

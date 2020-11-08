@@ -44,7 +44,7 @@ namespace NosTale.Parser.Import
                 DAOFactory.NpcMonsterDAO.InsertOrUpdate(ref npcMonster);
             }
 
-            Logger.Log.Info("X NpcMonsters STATS parsed");
+            Logger.Log.InfoFormat("X NpcMonsters STATS parsed");
         }
     }
 }

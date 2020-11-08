@@ -131,7 +131,7 @@ namespace NosTale.Parser.Import
 
             DAOFactory.PortalDAO.Insert(nonExistingPortals);
 
-            Logger.Log.Info($"{nonExistingPortals.Count} Portals parsed");
+            Logger.Log.InfoFormat($"{nonExistingPortals.Count} Portals parsed");
         }
     }
 }

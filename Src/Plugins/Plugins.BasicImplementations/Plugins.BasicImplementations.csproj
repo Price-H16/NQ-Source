@@ -72,6 +72,7 @@
     <Compile Include="Algorithm\DamageAlgorithm.cs" />
     <Compile Include="Algorithm\FamilyAlgorithms\FamilyLevelBasedAlgorithm.cs" />
     <Compile Include="Algorithm\ILevelBasedDataAlgorithm.cs" />
+    <Compile Include="Algorithm\IoC\AlgorithmDependenciesInjector.cs" />
     <Compile Include="Algorithm\NpcMonsterAlgorithmService.cs" />
     <Compile Include="Algorithm\NpcMonsterAlgorithms\HeroXp.cs" />
     <Compile Include="Algorithm\NpcMonsterAlgorithms\HpMax.cs" />

@@ -101,7 +101,7 @@ namespace NosTale.Parser.Import
                 itemVNum = -1;
             }
 
-            Logger.Log.Info($"{count} Recipes parsed");
+            Logger.Log.InfoFormat($"{count} Recipes parsed");
         }
     }
 }

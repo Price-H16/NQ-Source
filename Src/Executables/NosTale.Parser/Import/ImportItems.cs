@@ -125,8 +125,8 @@ namespace NosTale.Parser.Import
                 DAOFactory.ItemDAO.Insert(items);
                 DAOFactory.BCardDAO.Insert(itemCards);
 
-                Logger.Log.Info($"{itemCounter} Items parsed");
-                Logger.Log.Info($"{itemCards.Count} Items BCARD parsed");
+                Logger.Log.InfoFormat($"{itemCounter} Items parsed");
+                Logger.Log.InfoFormat($"{itemCards.Count} Items BCARD parsed");
 
                 return items;
             }

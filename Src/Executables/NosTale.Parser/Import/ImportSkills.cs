@@ -206,9 +206,9 @@ namespace NosTale.Parser.Import
                 DAOFactory.ComboDAO.Insert(combo);
                 DAOFactory.BCardDAO.Insert(skillCards);
 
-                Logger.Log.Info($"{counter} Skills parsed");
-                Logger.Log.Info($"{combo.Count} Skills COMBO parsed");
-                Logger.Log.Info($"{skillCards.Count} Skills BCARD parsed");
+                Logger.Log.InfoFormat($"{counter} Skills parsed");
+                Logger.Log.InfoFormat($"{combo.Count} Skills COMBO parsed");
+                Logger.Log.InfoFormat($"{skillCards.Count} Skills BCARD parsed");
             }
         }
 

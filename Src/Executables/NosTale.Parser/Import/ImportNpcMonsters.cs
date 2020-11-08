@@ -451,10 +451,10 @@ namespace NosTale.Parser.Import
                 DAOFactory.BCardDAO.Insert(monsterCards);
                 DAOFactory.DropDAO.Insert(drops);
 
-                Logger.Log.Info($"{counter} NpcMonsters parsed");
-                Logger.Log.Info($"{skills.Count} NpcMonsters SKILL parsed");
-                Logger.Log.Info($"{drops.Count} NpcMonsters DROPS parsed");
-                Logger.Log.Info($"{monsterCards.Count} NpcMonsters BCARD parsed");
+                Logger.Log.InfoFormat($"{counter} NpcMonsters parsed");
+                Logger.Log.InfoFormat($"{skills.Count} NpcMonsters SKILL parsed");
+                Logger.Log.InfoFormat($"{drops.Count} NpcMonsters DROPS parsed");
+                Logger.Log.InfoFormat($"{monsterCards.Count} NpcMonsters BCARD parsed");
             }
         }
 

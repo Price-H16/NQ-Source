@@ -58,7 +58,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.ShopSkillDAO.Insert(shopSkills);
-            Logger.Log.Info($"{itemCounter} Shops SKILL parsed");
+            Logger.Log.InfoFormat($"{itemCounter} Shops SKILL parsed");
         }
     }
 }

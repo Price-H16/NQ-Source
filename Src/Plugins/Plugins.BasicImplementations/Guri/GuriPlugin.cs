@@ -32,7 +32,7 @@ namespace Plugins.BasicImplementations.Guri
                     var tmp = _container.Resolve(handlerType);
                     if (!(tmp is IGuriHandler real)) continue;
 
-                    Logger.Log.Debug($"[GURI][ADD_HANDLER] {handlerType}");
+                    Logger.Log.InfoFormat($"[GURI][ADD_HANDLER] {handlerType}");
                     _handlers.Register(real).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
                 catch (Exception e)

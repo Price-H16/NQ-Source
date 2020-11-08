@@ -104,7 +104,7 @@ namespace NosTale.Parser.Import
             
             DAOFactory.ScriptedInstanceDAO?.Insert(listtimespace);
 
-            Logger.Log.Info($"{listtimespace.Count} Timespaces parsed");
+            Logger.Log.InfoFormat($"{listtimespace.Count} Timespaces parsed");
         }
     }
 }

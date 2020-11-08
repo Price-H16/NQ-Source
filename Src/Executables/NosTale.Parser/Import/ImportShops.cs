@@ -49,7 +49,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.ShopDAO.Insert(shops);
-            Logger.Log.Info($"{shopCounter} Shops parsed");
+            Logger.Log.InfoFormat($"{shopCounter} Shops parsed");
         }
     }
 }

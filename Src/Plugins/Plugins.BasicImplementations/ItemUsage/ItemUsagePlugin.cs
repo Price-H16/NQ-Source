@@ -33,7 +33,7 @@ namespace Plugins.BasicImplementations.ItemUsage
                     var tmp = _container.Resolve(handlerType);
                     if (!(tmp is IUseItemRequestHandlerAsync real)) continue;
 
-                    Logger.Log.Debug($"[ITEM_USAGE][ADD_HANDLER] {handlerType}");
+                    Logger.Log.InfoFormat($"[ITEM_USAGE][ADD_HANDLER] {handlerType}");
                     _handlers.RegisterItemUsageCallback(real).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
                 catch (Exception e)

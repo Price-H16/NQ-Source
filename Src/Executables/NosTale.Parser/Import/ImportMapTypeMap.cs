@@ -154,7 +154,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.MapTypeMapDAO.Insert(maptypemaps);
-            Logger.Log.Info($"{maptypemaps.Count} MapTypeMaps parsed");
+            Logger.Log.InfoFormat($"{maptypemaps.Count} MapTypeMaps parsed");
         }
     }
 }

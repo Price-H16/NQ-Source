@@ -32,7 +32,7 @@ namespace NosTale.Parser.Import
             ;
 
             DAOFactory.AccountDAO.Insert(accounts);
-            Logger.Log.Info($"{accounts.Count} Accounts parsed");
+            Logger.Log.InfoFormat($"{accounts.Count} Accounts parsed");
         }
     }
 }

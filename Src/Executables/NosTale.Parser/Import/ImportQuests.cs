@@ -290,9 +290,9 @@ namespace NosTale.Parser.Import
                 DAOFactory.QuestRewardDAO.Insert(rewards);
                 DAOFactory.QuestObjectiveDAO.Insert(questObjectives);
 
-                Logger.Log.Info($"{qstCounter} Quests parsed");
-                Logger.Log.Info($"{rewards.Count} Quests REWARDS parsed");
-                Logger.Log.Info($"{questObjectives.Count} Quests OBJECTIVE parsed");
+                Logger.Log.InfoFormat($"{qstCounter} Quests parsed");
+                Logger.Log.InfoFormat($"{rewards.Count} Quests REWARDS parsed");
+                Logger.Log.InfoFormat($"{questObjectives.Count} Quests OBJECTIVE parsed");
             }
         }
 

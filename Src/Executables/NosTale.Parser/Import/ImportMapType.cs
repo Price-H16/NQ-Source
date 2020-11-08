@@ -193,7 +193,7 @@ namespace NosTale.Parser.Import
 
             mapTypes.RemoveAll(x => existingMapTypes.Any(s => s.MapTypeName == x.MapTypeName));
             DAOFactory.MapTypeDAO.Insert(mapTypes);
-            Logger.Log.Info($"{mapTypes.Count} MapTypes parsed");
+            Logger.Log.InfoFormat($"{mapTypes.Count} MapTypes parsed");
         }
 
         #endregion

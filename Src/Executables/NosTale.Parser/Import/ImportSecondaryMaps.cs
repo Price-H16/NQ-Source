@@ -87,7 +87,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.MapDAO.Insert(maps);
-            Logger.Log.Info($"{i} Secondary Maps parsed");
+            Logger.Log.InfoFormat($"{i} Secondary Maps parsed");
         }
     }
 }

@@ -74,7 +74,7 @@ namespace NosTale.Parser.Import
                 }
 
             DAOFactory.ShopItemDAO.Insert(shopItems);
-            Logger.Log.Info($"{itemCounter} Shop ITEMS parsed");
+            Logger.Log.InfoFormat($"{itemCounter} Shop ITEMS parsed");
         }
     }
 }

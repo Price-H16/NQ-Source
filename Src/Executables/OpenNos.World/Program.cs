@@ -145,7 +145,8 @@ namespace OpenNos.World
         {
             // initialize Logger
             InitializeLogger();
-
+            var pluginBuilder = new ContainerBuilder();
+            IContainer container = pluginBuilder.Build();
             using var coreContainer = BuildCoreContainer();
             var gameBuilder = new ContainerBuilder();
             gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
@@ -266,7 +267,8 @@ namespace OpenNos.World
         private static IContainer BuildCoreContainer()
         {
             var pluginBuilder = new ContainerBuilder();
-            pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces();
+            pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces().AsSelf();
+            pluginBuilder.RegisterType<LoggingPlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<DatabasePlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<RedisMultilanguagePlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<GamePacketHandlersCorePlugin>().AsImplementedInterfaces().AsSelf();

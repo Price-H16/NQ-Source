@@ -109,6 +109,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenAPI.Core\ChickenAPI.Core.csproj">
+      <Project>{A6D06310-4228-4AFA-894D-69283976E810}</Project>
+      <Name>ChickenAPI.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Dal\OpenNos.DAL.EF\OpenNos.DAL.EF.csproj">
       <Project>{4aecc47d-098a-4493-8e1e-d10edbb7a189}</Project>
       <Name>OpenNos.DAL.EF</Name>
@@ -136,6 +140,10 @@
     <ProjectReference Include="..\..\Librairies\OpenNos.Domain\OpenNos.Domain.csproj">
       <Project>{20addddd-dad9-44f3-9beb-026c73090660}</Project>
       <Name>OpenNos.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NosQuest.LoggingPlugin\NosQuest.Plugins.Logging.csproj">
+      <Project>{C788BD5E-E8C2-47D1-BEF9-51A1809A7BFE}</Project>
+      <Name>NosQuest.Plugins.Logging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Serilog;
 using Serilog.Events;
 using ILogger = ChickenAPI.Core.Logging.ILogger;
@@ -18,7 +19,10 @@ namespace NosQuest.Plugins.Logging
         {
             _logger.Debug(msg);
         }
-
+        public void DebugHandler(string data, [CallerMemberName] string memberName = "")
+        {
+            _logger.Debug($"[{memberName}]: {data}");
+        }
         public void DebugFormat(string msg, params object[] objs)
         {
             _logger.Debug(msg, objs);

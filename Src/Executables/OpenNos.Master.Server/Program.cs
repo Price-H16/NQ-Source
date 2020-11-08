@@ -103,10 +103,11 @@ namespace OpenNos.Master.Server
             try
             {
                 PrintHeader();
-                // initialize Logger
-                InitializeLogger();
                 // initialize Plugins
                 InitializePlugins();
+                // initialize Logger
+                InitializeLogger();
+
 
                 ConfigurationHelper.CustomisationRegistration();
                 var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>();

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using log4net;
+using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
 using NosTale.Configuration.Utilities;
@@ -27,7 +28,9 @@ namespace NosTale.Parser
         private static void Init()
         {
             // initialize logger
-            Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
+            Logger.InitializeLogger(new SerilogLogger());
+
+            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
             ConfigurationHelper.CustomisationRegistration();
             configuration = new ImportConfiguration
             {

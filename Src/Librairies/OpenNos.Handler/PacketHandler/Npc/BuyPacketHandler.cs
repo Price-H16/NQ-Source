@@ -389,9 +389,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
                             }
                             else
                             {
-                                Session.SendPacket(
-                                    UserInterfaceHelper.GenerateMsg(
-                                        Language.Instance.GetMessageFromKey("NOT_ENOUGH_PLACE"), 0));
+                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("NOT_ENOUGH_PLACE"), 0));
                             }
                         }
                     }

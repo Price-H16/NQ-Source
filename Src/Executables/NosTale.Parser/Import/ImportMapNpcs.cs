@@ -233,7 +233,7 @@ namespace NosTale.Parser.Import
                 DAOFactory.TeleporterDAO.Insert(tp);
             }
 
-            Logger.Log.Info($"{npcCounter} MapNpcs parsed");
+            Logger.Log.InfoFormat($"{npcCounter} MapNpcs parsed");
         }
     }
 }

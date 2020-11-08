@@ -72,7 +72,7 @@ namespace NosTale.Parser.Import
             }
 
             DAOFactory.MapMonsterDAO.Insert(monsters);
-            Logger.Log.Info($"{monsterCounter} MapMonsters parsed");
+            Logger.Log.InfoFormat($"{monsterCounter} MapMonsters parsed");
         }
     }
 }

@@ -37,7 +37,7 @@ namespace NosTale.Parser.Import
 
             AddAct6Drops(drops);
 
-            Logger.Log.Info($"{drops.Count} Drops parsed");
+            Logger.Log.InfoFormat($"{drops.Count} Drops parsed");
             DAOFactory.DropDAO.Insert(drops);
         }
 

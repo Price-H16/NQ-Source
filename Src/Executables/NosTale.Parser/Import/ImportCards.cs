@@ -188,8 +188,8 @@ namespace NosTale.Parser.Import
                 DAOFactory.CardDAO.Insert(cards);
                 DAOFactory.BCardDAO.Insert(bcards);
 
-                Logger.Log.Info($"{counter} Cards parsed");
-                Logger.Log.Info($"{bcards.Count} Cards BCARD parsed");
+                Logger.Log.InfoFormat($"{counter} Cards parsed");
+                Logger.Log.InfoFormat($"{bcards.Count} Cards BCARD parsed");
             }
         }
     }

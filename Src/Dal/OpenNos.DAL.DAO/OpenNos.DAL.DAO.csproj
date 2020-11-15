@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountDAO.cs" />
-    <Compile Include="Base\MappingBaseDAO.cs" />
+    <Compile Include="Base\MappingBaseDao.cs" />
     <Compile Include="BazaarItemDAO.cs" />
     <Compile Include="BCardDAO.cs" />
     <Compile Include="BotAuthorityDAO.cs" />

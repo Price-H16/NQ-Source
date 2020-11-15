@@ -1402,7 +1402,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}.
+        ///   Looks up a localized string similar to CH.
         /// </summary>
         internal static string CH {
             get {
@@ -5479,6 +5479,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Killed {0}.
+        /// </summary>
+        internal static string RAINBOW_KILL {
+            get {
+                return ResourceManager.GetString("RAINBOW_KILL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RainbowBattle starts in {0} minutes!.
         /// </summary>
         internal static string RAINBOW_MINUTES {
@@ -5799,6 +5808,15 @@ namespace OpenNos.World.Resource {
         internal static string REQUIREMENTS {
             get {
                 return ResourceManager.GetString("REQUIREMENTS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player {0} Respawned..
+        /// </summary>
+        internal static string RESP_RBB {
+            get {
+                return ResourceManager.GetString("RESP_RBB", resourceCulture);
             }
         }
         
@@ -6483,6 +6501,15 @@ namespace OpenNos.World.Resource {
         internal static string TEAM_LEADER_CHANGE {
             get {
                 return ResourceManager.GetString("TEAM_LEADER_CHANGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Join team..
+        /// </summary>
+        internal static string TEAM_RBB {
+            get {
+                return ResourceManager.GetString("TEAM_RBB", resourceCulture);
             }
         }
         

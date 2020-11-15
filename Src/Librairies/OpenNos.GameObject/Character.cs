@@ -30,6 +30,7 @@ using OpenNos.GameObject._Event;
 using static OpenNos.Domain.BCardType;
 using System.Data.Entity.Core.Common.CommandTrees;
 using OpenNos.GameObject.RainbowBattle;
+using OpenNos.GameObject.Extensions;
 
 namespace OpenNos.GameObject
 {
@@ -2445,7 +2446,7 @@ namespace OpenNos.GameObject
 
             var name = (Authority > AuthorityType.User && !Undercover ? Authority == AuthorityType.Supporter ? $"[{Authority}]" + Name : Name : Name);
             return
-                $"c_info {name} - -1 {(Family != null && FamilyCharacter != null && !Undercover ? $"{Family.FamilyId} {Family.Name}({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())})" : "-1 -")} " +
+                $"c_info {name} - -1 {(Family != null && FamilyCharacter != null && !Undercover ?$"{Family.FamilyId}.{this.GetFamilyNameType()} {Family.Name}" : "-1 -")} " +
                 $"{CharacterId} {(Invisible && Authority >= AuthorityType.MOD ? 6 : 0)} " +
                 $"{(byte) Gender} {(byte) HairStyle} " +
                 $"{(byte) HairColor} {(byte) Class} " +
@@ -2767,41 +2768,6 @@ namespace OpenNos.GameObject
             return str;
         }
 
-        //public List<string> GenerateFamilyWarehouseHist()
-        //{
-        //    if (Family != null)
-        //    {
-        //        List<string> packetList = new List<string>();
-        //        string packet = "";
-        //        int i = 0;
-        //        int amount = -1;
-        //        List<FamilyLogDTO> warehouseLogs = Family.FamilyLogs
-        //            .Where(s => s.FamilyLogType == FamilyLogType.WareHouseAdded ||
-        //                        s.FamilyLogType == FamilyLogType.WareHouseRemoved).OrderByDescending(s => s.Timestamp)
-        //            .Take(100).ToList();
-        //        foreach (FamilyLogDTO log in warehouseLogs)
-        //        {
-        //            packet +=
-        //                $" {(log.FamilyLogType == FamilyLogType.WareHouseAdded ? 0 : 1)}|{log.FamilyLogData}|{(int) (DateTime.Now - log.Timestamp).TotalHours}";
-        //            i++;
-        //            if (i == 50)
-        //            {
-        //                i = 0;
-        //                packetList.Add($"fslog_stc {amount}{packet}");
-        //                amount++;
-        //            }
-        //            else if (i == warehouseLogs.Count)
-        //            {
-        //                packetList.Add($"fslog_stc {amount}{packet}");
-        //            }
-        //        }
-
-        //        return packetList;
-        //    }
-
-        //    return new List<string>();
-        //}
-
         public bool GenerateFamilyXp(int FXP, short InstanceId = -1)
         {
             if (!Session.Account.PenaltyLogs.Any(s => s.Penalty == PenaltyType.BlockFExp && s.DateEnd > DateTime.Now) && Family != null && FamilyCharacter != null && (InstanceId == -1 || Session.Character.GeneralLogs.CountLinq(s => s.LogType == "InstanceEntry" && short.Parse(s.LogData) == InstanceId && s.Timestamp.Date == DateTime.Today) == 0))
@@ -2815,6 +2781,7 @@ namespace OpenNos.GameObject
                 {
                     fam.FamilyExperience -= CharacterHelper.LoadFamilyXPData(Family.FamilyLevel);
                     fam.FamilyLevel++;
+                    Family.AddMissionProgress((short)(9616 + fam.FamilyLevel), 1);
                     Family.InsertFamilyLog(FamilyLogType.FamilyLevelUp, level: fam.FamilyLevel);
                     CommunicationServiceClient.Instance.SendMessageToCharacter(new SCSCharacterMessage
                     {
@@ -3069,31 +3036,23 @@ namespace OpenNos.GameObject
             return str;
         }
 
-
-        public string GenerateGidx()
+        public string GenerateGidx() //Left Faction
         {
             if (Family == null || FamilyCharacter == null || Family.FamilySkillMissions == null)
             {
-                Session.SendPacket(Session.Character.Family.GenerateFmi());
-
-             return
-                $"gidx 1 " +
-                $"{CharacterId} " +
-                $"{Family.FamilyId}.{this.GetFamilyNameType()} " +
-                $"{Family.Name} " +
-                $"{Family.FamilyLevel} " +
-                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
-                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
-                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9602 || s.ItemVNum == 9603) ? Family.FamilyFaction == 1 ? 1 : Family.FamilyFaction == 2 ? 2 : 0 : 0)}";
-
+                return $"gidx 1 {CharacterId} -1 - 0 0|0|0";
             }
+
             return
-                $"gidx 1 " +
-                $"{CharacterId} " +
-                $"-1 " +
-                $"- 0 " +
-                $"0|0|0";
-        }
+                    $"gidx 1 " +
+                    $"{CharacterId} " +
+                    $"{Family.FamilyId} " +
+                    $"{Family.Name}" +
+                    $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
+                    $"{Family.FamilyLevel} " +
+                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
+                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|";
+        }     
 
         public string GenerateGInfo()
         {
@@ -6732,9 +6691,22 @@ namespace OpenNos.GameObject
 
                         foreach (ItemInstance itemInstance in saveInventory)
                         {
-                            DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(itemInstance.ShellEffects, itemInstance.EquipmentSerialId);
-                            DAOFactory.RuneEffectDAO.InsertOrUpdateFromList(itemInstance.RuneEffects, itemInstance.EquipmentSerialId);
-                            DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(itemInstance.CellonOptions, itemInstance.EquipmentSerialId);
+                            if (!(itemInstance is ItemInstance instance))
+                            {
+                                continue;
+                            }
+                            if (instance.RuneEffects.Any())
+                            {
+                                DAOFactory.RuneEffectDAO.InsertOrUpdateFromList(itemInstance.RuneEffects, itemInstance.EquipmentSerialId);
+                            }
+                            if (instance.CellonOptions.Any())
+                            {
+                                DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(itemInstance.CellonOptions, itemInstance.EquipmentSerialId);
+                            }
+                            if (instance.ShellEffects.Any())
+                            {
+                                DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(itemInstance.ShellEffects, itemInstance.EquipmentSerialId);
+                            }
                         }
                     }
                 }

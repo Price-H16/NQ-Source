@@ -404,43 +404,43 @@ namespace OpenNos.GameObject
                                 session.Character.Inventory.RemoveItemFromInventory(raidSeal.Id);
                             }
 
-                            //if (raid.Label == "Draco") 
-                            //{
-                            //    var amulet = session.Character.Inventory.LoadBySlotAndType((byte) EquipmentType.Amulet, InventoryType.Wear);
+                            if (raid.Label == "Draco")
+                            {
+                                var amulet = session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.Amulet, InventoryType.Wear);
 
-                            //    if (amulet != null)
-                            //    {
-                            //        if (amulet.ItemVNum != 4503)
-                            //        {
-                            //            session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_DRACO")}");
-                            //            return;
-                            //        }
-                            //    }
-                            //    else
-                            //    {
-                            //        session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_DRACO")}");
-                            //        return;
-                            //    }
-                            //}
+                                if (amulet != null)
+                                {
+                                    if (amulet.ItemVNum != 4503)
+                                    {
+                                        session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_DRACO")}");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_DRACO")}");
+                                    return;
+                                }
+                            }
 
-                            //if (raid.Label == "Glacerus")
-                            //{
-                            //    var amulet = session.Character.Inventory.LoadBySlotAndType((byte) EquipmentType.Amulet, InventoryType.Wear);
+                            if (raid.Label == "Glacerus")
+                            {
+                                var amulet = session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.Amulet, InventoryType.Wear);
 
-                            //    if (amulet != null)
-                            //    {
-                            //        if (amulet.ItemVNum != 4504)
-                            //        {
-                            //            session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_GLACE")}");
-                            //            return;
-                            //        }
-                            //    }
-                            //    else
-                            //    {
-                            //        session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_GLACE")}");
-                            //        return;
-                            //    }
-                            
+                                if (amulet != null)
+                                {
+                                    if (amulet.ItemVNum != 4504)
+                                    {
+                                        session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_GLACE")}");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    session.SendPacket($"info {Language.Instance.GetMessageFromKey("NO_AMULET_GLACE")}");
+                                    return;
+                                }
+                            }
                         }
                     }
 

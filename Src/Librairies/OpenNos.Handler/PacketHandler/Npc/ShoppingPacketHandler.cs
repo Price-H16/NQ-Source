@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
+using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 
 namespace OpenNos.Handler.PacketHandler.Npc
@@ -26,19 +28,29 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
         #region Methods
 
+        /// <summary>
+        /// shopping packet
+        /// </summary>
+        /// <param name="shoppingPacket"></param>
         public void Shopping(ShoppingPacket shoppingPacket)
         {
             byte type = shoppingPacket.Type, typeshop = 0;
-            var npcId = shoppingPacket.NpcId;
-            if (Session.Character.IsShopping || !Session.HasCurrentMapInstance) return;
-
-            var mapnpc = Session.CurrentMapInstance.Npcs.Find(n => n.MapNpcId.Equals(npcId));
-            if (mapnpc?.Shop == null) return;
-
-            var shoplist = "";
-            foreach (var item in mapnpc.Shop.ShopItems.Where(s => s.Type.Equals(type)))
+            int npcId = shoppingPacket.NpcId;
+            if (Session.Character.IsShopping || !Session.HasCurrentMapInstance)
             {
-                var iteminfo = ServerManager.GetItem(item.ItemVNum);
+                return;
+            }
+
+            MapNpc mapnpc = Session.CurrentMapInstance.Npcs.Find(n => n.MapNpcId.Equals(npcId));
+            if (mapnpc?.Shop == null)
+            {
+                return;
+            }
+
+            string shoplist = "";
+            foreach (ShopItemDTO item in mapnpc.Shop.ShopItems.Where(s => s.Type.Equals(type)))
+            {
+                Item iteminfo = ServerManager.GetItem(item.ItemVNum);
                 typeshop = 100;
                 double percent = 1;
                 switch (Session.Character.GetDignityIco())
@@ -64,7 +76,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
                         break;
 
                     default:
-                        if (Session.CurrentMapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act4))
+                        if (Session.CurrentMapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4))
                         {
                             percent *= 1.5;
                             typeshop = 150;
@@ -74,59 +86,81 @@ namespace OpenNos.Handler.PacketHandler.Npc
                 }
 
                 if (Session.CurrentMapInstance.Map.MapTypes.Any(s =>
-                    s.MapTypeId == (short) MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 3))
+                    s.MapTypeId == (short)MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 3))
                 {
                     percent = 1.6;
                     typeshop = 160;
                 }
                 else if (Session.CurrentMapInstance.Map.MapTypes.Any(s =>
-                    s.MapTypeId == (short) MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 4))
+                    s.MapTypeId == (short)MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 4))
                 {
                     percent = 1.7;
                     typeshop = 170;
                 }
                 else if (Session.CurrentMapInstance.Map.MapTypes.Any(s =>
-                    s.MapTypeId == (short) MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 5))
+                    s.MapTypeId == (short)MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 5))
                 {
                     percent = 2;
                     typeshop = 200;
                 }
                 else if
                 (Session.CurrentMapInstance.Map.MapTypes.Any(s =>
-                    s.MapTypeId == (short) MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 6))
+                    s.MapTypeId == (short)MapTypeEnum.Act4 && Session.Character.GetDignityIco() == 6))
                 {
                     percent = 2;
                     typeshop = 200;
                 }
+                //EDIT THIS #FAMILYEXTENSIONS
+                if (mapnpc.Shop.ShopType == 48)
+                {
+                    var mv = FamilySystemHelper.GetMissValues(item.ItemVNum);
+                    if (mv == null) continue;
 
-                if (iteminfo.ReputPrice > 0 && iteminfo.Type == 0)
+                    shoplist += $" {item.ItemVNum}|{(mv[1] > Session.Character.Family?.FamilyLevel ? 2 : Session.Character.Family?.FamilySkillMissions.Any(s => s.ItemVNum == item.ItemVNum) ?? false ? 1 : 0)}|{item.Slot}";
+                }
+                else if (iteminfo.ReputPrice > 0 && iteminfo.Type == 0)
+                {
                     shoplist +=
-                        $" {(byte) iteminfo.Type}.{item.Slot}.{item.ItemVNum}.{item.Rare}.{(iteminfo.IsColored ? item.Color : item.Upgrade)}.{iteminfo.ReputPrice}";
+                        $" {(byte)iteminfo.Type}.{item.Slot}.{item.ItemVNum}.{item.Rare}.{(iteminfo.IsColored ? item.Color : item.Upgrade)}.{iteminfo.ReputPrice}";
+                }
                 else if (iteminfo.ReputPrice > 0 && iteminfo.Type != 0)
-                    shoplist += $" {(byte) iteminfo.Type}.{item.Slot}.{item.ItemVNum}.-1.{iteminfo.ReputPrice}";
+                {
+                    shoplist += $" {(byte)iteminfo.Type}.{item.Slot}.{item.ItemVNum}.-1.{iteminfo.ReputPrice}";
+                }
                 else if (iteminfo.Type != 0)
-                    shoplist += $" {(byte) iteminfo.Type}.{item.Slot}.{item.ItemVNum}.-1.{iteminfo.Price * percent}";
+                {
+                    shoplist += $" {(byte)iteminfo.Type}.{item.Slot}.{item.ItemVNum}.-1.{iteminfo.Price * percent}";
+                }
                 else
+                {
                     shoplist +=
-                        $" {(byte) iteminfo.Type}.{item.Slot}.{item.ItemVNum}.{item.Rare}.{(iteminfo.IsColored ? item.Color : item.Upgrade)}.{iteminfo.Price * percent}";
+                        $" {(byte)iteminfo.Type}.{item.Slot}.{item.ItemVNum}.{item.Rare}.{(iteminfo.IsColored ? item.Color : item.Upgrade)}.{iteminfo.Price * percent}";
+                }
             }
 
-            foreach (var skill in mapnpc.Shop.ShopSkills.Where(s => s.Type.Equals(type)))
+            foreach (ShopSkillDTO skill in mapnpc.Shop.ShopSkills.Where(s => s.Type.Equals(type)))
             {
-                var skillinfo = ServerManager.GetSkill(skill.SkillVNum);
+                Skill skillinfo = ServerManager.GetSkill(skill.SkillVNum);
 
                 if (skill.Type != 0)
                 {
                     typeshop = 1;
-                    if (skillinfo.Class == (byte) Session.Character.Class) shoplist += $" {skillinfo.SkillVNum}";
+                    if (skillinfo.Class == (byte)Session.Character.Class)
+                    {
+                        shoplist += $" {skillinfo.SkillVNum}";
+                    }
                 }
                 else
                 {
                     shoplist += $" {skillinfo.SkillVNum}";
                 }
             }
-
-            Session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {typeshop}{shoplist}");
+            if (mapnpc.Shop.ShopType == 48)
+            {
+                Session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {shoplist}");
+            }
+            else
+                Session.SendPacket($"n_inv 2 {mapnpc.MapNpcId} 0 {typeshop}{shoplist}");
         }
 
         #endregion

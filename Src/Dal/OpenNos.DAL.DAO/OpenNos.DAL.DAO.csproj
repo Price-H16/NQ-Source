@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountDAO.cs" />
+    <Compile Include="Base\MappingBaseDAO.cs" />
     <Compile Include="BazaarItemDAO.cs" />
     <Compile Include="BCardDAO.cs" />
     <Compile Include="BotAuthorityDAO.cs" />
@@ -108,6 +109,10 @@
     <Compile Include="MinigameLogDAO.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenApi.Dal\ChickenApi.Dal.csproj">
+      <Project>{8D199C92-D754-461F-89B0-83C2B4E6DF9F}</Project>
+      <Name>ChickenApi.Dal</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Librairies\OpenNos.Core\OpenNos.Core.csproj">
       <Project>{c93a0a40-0551-4732-b594-171b87679ac1}</Project>
       <Name>OpenNos.Core</Name>

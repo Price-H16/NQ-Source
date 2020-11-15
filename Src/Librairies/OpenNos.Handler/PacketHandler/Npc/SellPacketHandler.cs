@@ -27,6 +27,10 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
         #region Methods
 
+        /// <summary>
+        /// sell packet
+        /// </summary>
+        /// <param name="sellPacket"></param>
         public void SellShop(SellPacket sellPacket)
         {
             if (Session.Character.ExchangeInfo?.ExchangeList.Count > 0 || Session.Character.IsShopping)
@@ -36,22 +40,21 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
             if (sellPacket.Amount.HasValue && sellPacket.Slot.HasValue)
             {
-                var type = (InventoryType) sellPacket.Data;
+                InventoryType type = (InventoryType)sellPacket.Data;
 
                 if (type == InventoryType.Bazaar)
                 {
                     return;
                 }
 
-                short amount = sellPacket.Amount.Value;
-                byte slot = sellPacket.Slot.Value;
+                short amount = sellPacket.Amount.Value, slot = sellPacket.Slot.Value;
 
                 if (amount < 1)
                 {
                     return;
                 }
 
-                var inv = Session.Character.Inventory.LoadBySlotAndType(slot, type);
+                ItemInstance inv = Session.Character.Inventory.LoadBySlotAndType(slot, type);
 
                 if (inv == null || amount > inv.Amount)
                 {
@@ -65,8 +68,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
                 if (!inv.Item.IsSoldable)
                 {
-                    Session.SendPacket(UserInterfaceHelper.GenerateShopMemo(2,
-                        string.Format(Language.Instance.GetMessageFromKey("ITEM_NOT_SOLDABLE"))));
+                    Session.SendPacket(UserInterfaceHelper.GenerateShopMemo(2, string.Format(Language.Instance.GetMessageFromKey("ITEM_NOT_SOLDABLE"))));
                     return;
                 }
 
@@ -77,16 +79,14 @@ namespace OpenNos.Handler.PacketHandler.Npc
                     price = 1;
                 }
 
-                if (Session.Character.Gold + price * amount > ServerManager.Instance.Configuration.MaxGold)
+                if (Session.Character.Gold + (price * amount) > ServerManager.Instance.Configuration.MaxGold)
                 {
-                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MAX_GOLD"),
-                        0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MAX_GOLD"), 0));
                     return;
                 }
 
                 Session.Character.Gold += price * amount;
-                Session.SendPacket(UserInterfaceHelper.GenerateShopMemo(1,
-                    string.Format(Language.Instance.GetMessageFromKey("SELL_ITEM_VALID"), inv.Item.Name, amount)));
+                Session.SendPacket(UserInterfaceHelper.GenerateShopMemo(1, string.Format(Language.Instance.GetMessageFromKey("SELL_ITEM_VALID"), inv.Item.Name, amount)));
 
                 Session.Character.Inventory.RemoveItemFromInventory(inv.Id, amount);
                 Session.SendPacket(Session.Character.GenerateGold());
@@ -95,34 +95,22 @@ namespace OpenNos.Handler.PacketHandler.Npc
             {
                 short vnum = sellPacket.Data;
 
-                var skill = Session.Character.Skills[vnum];
+                CharacterSkill skill = Session.Character.Skills[vnum];
 
-                if (skill == null)
+                if (skill == null || vnum == 200 + (20 * (byte)Session.Character.Class) || vnum == 201 + (20 * (byte)Session.Character.Class))
                 {
                     return;
                 }
 
-                if (vnum == 200 + 20 * (byte) Session.Character.Class)
-                {
-                    return;
-                }
-
-                if (vnum == 201 + 20 * (byte) Session.Character.Class)
-                {
-                    return;
-                }
-
-                Session.Character.Gold += skill.Skill.Price;
+                Session.Character.Gold -= skill.Skill.Price;
                 Session.SendPacket(Session.Character.GenerateGold());
 
-                foreach (var loadedSkill in Session.Character.Skills.GetAllItems())
+                foreach (CharacterSkill loadedSkill in Session.Character.Skills.GetAllItems())
                 {
-                    if (skill.Skill.SkillVNum != loadedSkill.Skill.UpgradeSkill)
+                    if (skill.Skill.SkillVNum == loadedSkill.Skill.UpgradeSkill)
                     {
-                        continue;
+                        Session.Character.Skills.Remove(loadedSkill.SkillVNum);
                     }
-
-                    Session.Character.Skills.Remove(loadedSkill.SkillVNum);
                 }
 
                 Session.Character.Skills.Remove(skill.SkillVNum);

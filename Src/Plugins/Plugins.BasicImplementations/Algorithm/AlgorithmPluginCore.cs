@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using ChickenAPI.Plugins;
+using OpenNos.Core;
 using OpenNos.GameObject._Algorithm;
 
 namespace Plugins.BasicImplementations.Algorithm
@@ -18,9 +19,11 @@ namespace Plugins.BasicImplementations.Algorithm
 
         public void OnLoad(ContainerBuilder builder)
         {
+            Logger.Log.InfoFormat("Loading Algorithms...");
             builder.Register(s => new AlgorithmService()).As<IAlgorithmService>();
             builder.Register(s => new NpcMonsterAlgorithmService()).As<INpcMonsterAlgorithmService>();
             builder.Register(s => new DamageAlgorithm()).As<IDamageAlgorithm>();
+            Logger.Log.InfoFormat("Algorithms initialized");
         }
     }
 }

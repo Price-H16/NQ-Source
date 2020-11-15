@@ -17,8 +17,7 @@ namespace Plugins.BasicImplementations.ItemUsage
         public async Task RegisterItemUsageCallback(IUseItemRequestHandlerAsync handler)
         {
             _handlers.Add((handler.EffectId, handler.Type), handler);
-            Logger.Log.Debug(
-                $"[ITEM_USAGE][REGISTER_HANDLER] UI_EFFECT : {handler.EffectId} && TYPE : {handler.Type} REGISTERED !");
+            Logger.Log.Debug($"[ITEM_USAGE][REGISTER_HANDLER] UI_EFFECT : {handler.EffectId} && TYPE : {handler.Type} REGISTERED !");
         }
 
         public async Task UnregisterAsync(IUseItemRequestHandlerAsync handler)

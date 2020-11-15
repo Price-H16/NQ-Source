@@ -373,7 +373,7 @@ namespace OpenNos.GameObject
 
                                         break;
 
-                                    case (byte) AdditionalTypes.Summons.SummonTrainingDummy:
+                                    case (byte) AdditionalTypes.Summons.SummonTrainingDummy: //Check
                                         summonParameters = new List<MonsterToSummon>();
                                         for (var i = 0; i < amountToSpawn; i++)
                                         {

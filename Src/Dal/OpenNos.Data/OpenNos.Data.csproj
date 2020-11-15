@@ -71,6 +71,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\MappingBaseDTO.cs" />
     <Compile Include="Base\SynchronizableBaseDTO.cs" />
     <Compile Include="BazaarItemDTO.cs" />
     <Compile Include="BCardDTO.cs" />

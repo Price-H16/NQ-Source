@@ -2631,6 +2631,16 @@ namespace OpenNos.GameObject.Networking
             TopReputation = DAOFactory.CharacterDAO.GetTopReputation();
         }
 
+        public void RefreshDailyMissions()
+        {
+            foreach (var fsm in DAOFactory.FamilySkillMissionDAO.LoadAll())
+            {
+                if (!FamilySystemHelper.IsDaily(fsm.ItemVNum) && fsm.ItemVNum > 9603) continue;
+
+                DAOFactory.FamilySkillMissionDAO.DailyReset(fsm);
+            }
+        }
+
         public void RelationRefresh(long relationId)
         {
             _inRelationRefreshMode = true;
@@ -3561,6 +3571,11 @@ namespace OpenNos.GameObject.Networking
                         .ToList())
                     {
                         newFam.FamilyCharacters.Add(new FamilyCharacter(famchar));
+                    }
+
+                    foreach (FamilySkillMissionDTO famskill in DAOFactory.FamilySkillMissionDAO.LoadByFamilyId(famdto.FamilyId).ToList())
+                    {
+                        newFam.FamilySkillMissions.Add(new FamilySkillMission(famskill));
                     }
 
                     var familyHead = newFam.FamilyCharacters.Find(s => s.Authority == FamilyAuthority.Head);

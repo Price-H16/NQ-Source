@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Autofac;
 using ChickenAPI.Core.Logging;
 using ChickenAPI.Plugins;
-using ChickenAPI.Plugins.Exceptions;
 using ChickenAPI.Plugins.Modules;
-using log4net;
 using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
@@ -20,12 +15,7 @@ using OpenNos.DAL.EF.Helpers;
 using OpenNos.Master.Library.Interface;
 using OpenNos.SCS.Communication.Scs.Communication.EndPoints.Tcp;
 using OpenNos.SCS.Communication.ScsServices.Service;
-using Plugins.BasicImplementations.Algorithm;
-using Plugins.BasicImplementations.BCards;
-using Plugins.BasicImplementations.Event;
-using Plugins.BasicImplementations.Guri;
-using Plugins.BasicImplementations.ItemUsage;
-using Plugins.BasicImplementations.NpcDialog;
+
 
 namespace OpenNos.Master.Server
 {
@@ -43,7 +33,6 @@ namespace OpenNos.Master.Server
         private static void InitializeLogger()
         {
             Logger.InitializeLogger(new SerilogLogger());
-            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
 
         }
         private static void InitializePlugins()
@@ -82,14 +71,17 @@ namespace OpenNos.Master.Server
         private static void PrintHeader()
         {
             Console.Title = "NosQuest - Master";
-            const string text = @"
-
-███╗░░██╗░█████╗░░██████╗░██████╗░██╗░░░██╗███████╗░██████╗████████╗
-████╗░██║██╔══██╗██╔════╝██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝
-██╔██╗██║██║░░██║╚█████╗░██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░
-██║╚████║██║░░██║░╚═══██╗╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░
-██║░╚███║╚█████╔╝██████╔╝░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░
-╚═╝░░╚══╝░╚════╝░╚═════╝░░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░
+            const string text = @"                                                                                                                               
+ __    __                    ______                               __          
+|  \  |  \                  /      \                             |  \         
+| ▓▓\ | ▓▓ ______   _______|  ▓▓▓▓▓▓\__    __  ______   _______ _| ▓▓_        
+| ▓▓▓\| ▓▓/      \ /       \ ▓▓  | ▓▓  \  |  \/      \ /       \   ▓▓ \       
+| ▓▓▓▓\ ▓▓  ▓▓▓▓▓▓\  ▓▓▓▓▓▓▓ ▓▓  | ▓▓ ▓▓  | ▓▓  ▓▓▓▓▓▓\  ▓▓▓▓▓▓▓\▓▓▓▓▓▓       
+| ▓▓\▓▓ ▓▓ ▓▓  | ▓▓\▓▓    \| ▓▓ _| ▓▓ ▓▓  | ▓▓ ▓▓    ▓▓\▓▓    \  | ▓▓ __      
+| ▓▓ \▓▓▓▓ ▓▓__/ ▓▓_\▓▓▓▓▓▓\ ▓▓/ \ ▓▓ ▓▓__/ ▓▓ ▓▓▓▓▓▓▓▓_\▓▓▓▓▓▓\ | ▓▓|  \     
+| ▓▓  \▓▓▓\▓▓    ▓▓       ▓▓\▓▓ ▓▓ ▓▓\▓▓    ▓▓\▓▓     \       ▓▓  \▓▓  ▓▓     
+ \▓▓   \▓▓ \▓▓▓▓▓▓ \▓▓▓▓▓▓▓  \▓▓▓▓▓▓\ \▓▓▓▓▓▓  \▓▓▓▓▓▓▓\▓▓▓▓▓▓▓    \▓▓▓▓      
+                                 \▓▓▓                                         
 ";
             string separator = new string('=', Console.WindowWidth);
             string logo = text.Split('\n').Select(s => string.Format("{0," + (Console.WindowWidth / 2 + s.Length / 2) + "}\n", s))

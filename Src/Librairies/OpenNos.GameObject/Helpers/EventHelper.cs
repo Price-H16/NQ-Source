@@ -112,6 +112,11 @@ namespace OpenNos.GameObject.Helpers
                             }
                             break;
 
+                        case EventType.DAILYMISSIONEXTENSIONREFRESH:
+                            ServerManager.Instance.RefreshDailyMissions();
+                            ServerManager.Instance.StartedEvents.Remove(type);
+                            break;
+
                         case EventType.MINILANDREFRESHEVENT:
                             MinilandRefresh.GenerateMinilandEvent();
                             break;
@@ -645,6 +650,7 @@ namespace OpenNos.GameObject.Helpers
                                                 }
 
                                                 s.Character.GetReputation(@group.Raid.Reputation);
+                                                s.SendPacket(s.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REP"), @group.Raid.Reputation), 10));
 
                                                 if (s.Character.GenerateFamilyXp(@group.Raid.FamExp, @group.Raid.Id))
                                                 {
@@ -797,8 +803,7 @@ namespace OpenNos.GameObject.Helpers
 
                                             evt.MapInstance.Broadcast("dance 2");
 
-                                            Logger.LogEvent("FAMILYRAID_SUCCESS",
-                                                    $"[fam.Name]FamilyRaidId: {evt.MapInstance.MapInstanceType.ToString()}");
+                                            Logger.LogEvent("FAMILYRAID_SUCCESS",$"[fam.Name]FamilyRaidId: {evt.MapInstance.MapInstanceType.ToString()}");
 
                                             CommunicationServiceClient.Instance.SendMessageToCharacter(
                                                     new SCSCharacterMessage
@@ -806,8 +811,7 @@ namespace OpenNos.GameObject.Helpers
                                                         DestinationCharacterId = fam.FamilyId,
                                                         SourceCharacterId = client.Character.CharacterId,
                                                         SourceWorldId = ServerManager.Instance.WorldId,
-                                                        Message = UserInterfaceHelper.GenerateMsg(
-                                                                    Language.Instance.GetMessageFromKey("FAMILYRAID_SUCCESS"), 0),
+                                                        Message = UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("FAMILYRAID_SUCCESS"), 0),
                                                         Type = MessageType.Family
                                                     });
 

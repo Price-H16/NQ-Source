@@ -105,7 +105,7 @@ namespace NosTale.Extension.Extension.Packet
             return true;
         }      
 
-        public static void LoadShopItem(this ClientSession Session, long owner, KeyValuePair<long, MapShop> shop)
+        private static void LoadShopItem(this ClientSession Session, long owner, KeyValuePair<long, MapShop> shop)
         {
             var packetToSend = $"n_inv 1 {owner} 0 0";
 

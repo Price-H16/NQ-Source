@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using Autofac;
 using ChickenAPI.Core.Logging;
 using ChickenAPI.Plugins;
-using ChickenAPI.Plugins.Exceptions;
 using ChickenAPI.Plugins.Modules;
-using log4net;
 using NosQuest.Plugins.Logging;
 using NosTale.Configuration;
 using NosTale.Configuration.Helper;
@@ -61,7 +56,6 @@ namespace OpenNos.Login
         private static void InitializeLogger()
         {
             Logger.InitializeLogger(new SerilogLogger());
-            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
         }
         private static void InitializePlugins()
         {
@@ -99,13 +93,12 @@ namespace OpenNos.Login
         {
             Console.Title = "NosQuest - Login";
             const string text = @"
-
-███╗░░██╗░█████╗░░██████╗░██████╗░██╗░░░██╗███████╗░██████╗████████╗
-████╗░██║██╔══██╗██╔════╝██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝
-██╔██╗██║██║░░██║╚█████╗░██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░
-██║╚████║██║░░██║░╚═══██╗╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░
-██║░╚███║╚█████╔╝██████╔╝░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░
-╚═╝░░╚══╝░╚════╝░╚═════╝░░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░
+███╗   ██╗ ██████╗ ███████╗ ██████╗ ██╗   ██╗███████╗███████╗████████╗    ██╗      ██████╗  ██████╗ ██╗███╗   ██╗
+████╗  ██║██╔═══██╗██╔════╝██╔═══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝    ██║     ██╔═══██╗██╔════╝ ██║████╗  ██║
+██╔██╗ ██║██║   ██║███████╗██║   ██║██║   ██║█████╗  ███████╗   ██║       ██║     ██║   ██║██║  ███╗██║██╔██╗ ██║
+██║╚██╗██║██║   ██║╚════██║██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║       ██║     ██║   ██║██║   ██║██║██║╚██╗██║
+██║ ╚████║╚██████╔╝███████║╚██████╔╝╚██████╔╝███████╗███████║   ██║       ███████╗╚██████╔╝╚██████╔╝██║██║ ╚████║
+╚═╝  ╚═══╝ ╚═════╝ ╚══════╝ ╚══▀▀═╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝
 ";
             string separator = new string('=', Console.WindowWidth);
             string logo = text.Split('\n').Select(s => string.Format("{0," + (Console.WindowWidth / 2 + s.Length / 2) + "}\n", s))

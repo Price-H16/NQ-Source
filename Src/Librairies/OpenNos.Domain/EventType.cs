@@ -21,6 +21,7 @@
         FAIRYRATE,
         HERORATE,
         SHEEPGAME, 
-        RAINBOWBATTLE
+        RAINBOWBATTLE,
+        DAILYMISSIONEXTENSIONREFRESH
     }
 }

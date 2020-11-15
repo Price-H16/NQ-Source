@@ -26,6 +26,7 @@ namespace Plugins.BasicImplementations.BCards
 
         public void OnEnable()
         {
+            Logger.Log.InfoFormat("Loading BCards...");
             foreach (var handlerType in typeof(BCardPlugin).Assembly
                 .GetTypesImplementingInterface<IBCardEffectAsyncHandler>())
                 try
@@ -40,6 +41,7 @@ namespace Plugins.BasicImplementations.BCards
                 {
                     Logger.Log.Error("[BCARD][FAIL_ADD]", e);
                 }
+            Logger.Log.InfoFormat("BCards initialized");
         }
 
         public void OnLoad()

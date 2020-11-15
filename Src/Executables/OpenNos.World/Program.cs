@@ -149,6 +149,7 @@ namespace OpenNos.World
             IContainer container = pluginBuilder.Build();
             using var coreContainer = BuildCoreContainer();
             var gameBuilder = new ContainerBuilder();
+            Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
             gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
             gameBuilder.RegisterModule(new CoreContainerModule(coreContainer));
             //gameBuilder.Register(s => new GamePacketHandlersGamePlugin(coreContainer.Resolve<IPacketHandlerContainer<IGamePacketHandler>>(), coreContainer)).As<IGamePlugin>();
@@ -171,7 +172,7 @@ namespace OpenNos.World
                     gamePlugin.OnEnable();
                 }
             }
-            Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
+           
             PrintHeader();
             ConfigurationHelper.CustomisationRegistration();
                              

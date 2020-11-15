@@ -6928,6 +6928,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You&apos;ve earned {0} Reputation!.
+        /// </summary>
+        internal static string WIN_REP {
+            get {
+                return ResourceManager.GetString("WIN_REP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reputation: +{0}.
         /// </summary>
         internal static string WIN_REPUT {

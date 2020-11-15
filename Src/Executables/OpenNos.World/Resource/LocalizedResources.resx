@@ -2449,4 +2449,7 @@
   <data name="RAINBOW_STARTED" xml:space="preserve">
     <value>RainbowBattle Started!</value>
   </data>
+  <data name="WIN_REP" xml:space="preserve">
+    <value>You've earned {0} Reputation!</value>
+  </data>
 </root>

@@ -26,6 +26,7 @@ namespace Plugins.BasicImplementations.NpcDialog
 
         public void OnEnable()
         {
+            Logger.Log.InfoFormat("Loading NpcDialogs...");
             foreach (var handlerType in typeof(NpcDialogPlugin).Assembly
                 .GetTypesImplementingInterface<INpcDialogAsyncHandler>())
                 try
@@ -40,6 +41,7 @@ namespace Plugins.BasicImplementations.NpcDialog
                 {
                     Logger.Log.Error("[NPC_DIALOG][FAIL_ADD]", e);
                 }
+            Logger.Log.InfoFormat("Npc Dialogs initialized");
         }
 
         public void OnLoad()

@@ -26,6 +26,7 @@ namespace Plugins.BasicImplementations.ItemUsage
 
         public void OnEnable()
         {
+            Logger.Log.InfoFormat("Loading ItemUsage...");
             foreach (var handlerType in typeof(ItemUsagePlugin).Assembly
                 .GetTypesImplementingInterface<IUseItemRequestHandlerAsync>())
                 try
@@ -33,13 +34,14 @@ namespace Plugins.BasicImplementations.ItemUsage
                     var tmp = _container.Resolve(handlerType);
                     if (!(tmp is IUseItemRequestHandlerAsync real)) continue;
 
-                    Logger.Log.InfoFormat($"[ITEM_USAGE][ADD_HANDLER] {handlerType}");
+                    Logger.Log.Debug($"[ITEM_USAGE][ADD_HANDLER] {handlerType}");
                     _handlers.RegisterItemUsageCallback(real).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
                 catch (Exception e)
                 {
                     Logger.Log.Error("[ITEM_USAGE][FAIL_ADD]", e);
                 }
+            Logger.Log.InfoFormat("ItemUsage initialized");
         }
 
         public void OnLoad()

@@ -88,6 +88,7 @@ namespace OpenNos.Handler.PacketHandler.Family
                         default:
                             return;
                     }
+                    Session.Character.Family.InsertFamilyLog(FamilyLogType.SkillUse, characterName: Session.Character.Name, itemVNum: (fwsPacket.ItemVNum - 600));
                     fsm.CurrentValue = 0;
                     Session.Character.Family.SaveMission(fsm);
                 }

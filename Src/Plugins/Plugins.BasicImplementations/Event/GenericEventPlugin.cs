@@ -26,6 +26,7 @@ namespace Plugins.BasicImplementations.Event
 
         public void OnEnable()
         {
+            Logger.Log.InfoFormat("Loading GenericEvents...");
             foreach (var handlerType in typeof(GenericEventPlugin).Assembly.GetTypesImplementingGenericClass(
                 typeof(GenericEventHandlerBase<>)))
                 try
@@ -41,6 +42,7 @@ namespace Plugins.BasicImplementations.Event
                 {
                     Logger.Log.Error("[EVENT_HANDLER]", e);
                 }
+            Logger.Log.InfoFormat("GenericEvents initialized");
         }
 
         public void OnLoad()

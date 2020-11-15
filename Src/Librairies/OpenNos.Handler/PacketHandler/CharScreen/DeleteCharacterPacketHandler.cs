@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Data.Entity.Core.Metadata.Edm;
 using System.Linq;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;

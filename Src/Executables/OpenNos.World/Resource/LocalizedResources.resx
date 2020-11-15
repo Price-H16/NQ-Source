@@ -2435,7 +2435,7 @@
     <value>You just used the special food for your pet</value>
   </data>
   <data name="CH" xml:space="preserve">
-    <value>{0}</value>
+    <value>CH</value>
   </data>
   <data name="CHARACTER_LOCKED_USE_UNLOCK" xml:space="preserve">
     <value>Your character is locked. Use $Unlock to unlock it.</value>
@@ -2451,5 +2451,14 @@
   </data>
   <data name="WIN_REP" xml:space="preserve">
     <value>You've earned {0} Reputation!</value>
+  </data>
+  <data name="RAINBOW_KILL" xml:space="preserve">
+    <value>{0} Killed {0}</value>
+  </data>
+  <data name="RESP_RBB" xml:space="preserve">
+    <value>Player {0} Respawned.</value>
+  </data>
+  <data name="TEAM_RBB" xml:space="preserve">
+    <value>{0} Join team.</value>
   </data>
 </root>

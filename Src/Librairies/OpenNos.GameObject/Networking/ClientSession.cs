@@ -595,7 +595,7 @@ namespace OpenNos.GameObject
                 //if (Account?.Name != null && UserLog.Contains(Account.Name))
                 //    try
                 //    {
-                //        File.AppendAllText($"C:\\{Account.Name.Replace(" ", "")}.txt", packet + "\n");
+                //        File.AppendAllText($"C:\\Accounts\\{Account.Name.Replace(" ", "")}.txt", packet + "\n");
                 //    }
                 //    catch (Exception ex)
                 //    {
@@ -604,14 +604,13 @@ namespace OpenNos.GameObject
 
 
                 // Fast made code. Will improve it in a custom logger soon.
-                // WHATS THE HELL ???
                 //try
                 //{
                 //    File.AppendAllText($"C:\\Packetlogging\\Ch{ServerManager.Instance.ChannelId}Packets.txt", $"[{DateTime.Now.ToLongDateString()}] [{Account?.Name ?? "Unspecified"}] - {packet} \n");
                 //}
                 //catch (Exception ex)
                 //{
-                //    //Logger.Error(ex);
+                //    Logger.Error(ex);
                 //}
 
                 var key = HandlerMethods.Keys.FirstOrDefault(s =>

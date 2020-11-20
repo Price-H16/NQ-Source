@@ -309,6 +309,7 @@
     <Compile Include="Packets\ServerPackets\BfPacket.cs" />
     <Compile Include="Packets\ServerPackets\BuyPacket.cs" />
     <Compile Include="Packets\ServerPackets\CListPacket.cs" />
+    <Compile Include="Packets\ServerPackets\CListStartPacket.cs" />
     <Compile Include="Packets\ServerPackets\DialogPacket.cs" />
     <Compile Include="Packets\ServerPackets\EffectPacket.cs" />
     <Compile Include="Packets\ServerPackets\EqPacket.cs" />

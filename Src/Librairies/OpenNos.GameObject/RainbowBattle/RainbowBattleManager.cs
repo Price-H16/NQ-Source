@@ -77,6 +77,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
             ServerManager.Instance.RainbowBattleMembers.Remove(rbb);
             ServerManager.Instance.RainbowBattleMembers.Remove(rbb.SecondTeam);
+            //ServerManager.Instance.RainbowBattleMembers = null;
         }
 
         public static void GenerateScore(RainbowBattleTeam RainbowBattle)
@@ -104,18 +105,21 @@ namespace OpenNos.GameObject.RainbowBattle
                 GenerateScore(rbb);
             }
         }
-
         public static void ReceiveFbs(RainbowBattleTeam rbb)
         {
+            var output = (rbb.TeamEntity == RainbowTeamBattleType.Red ? rbb.SecondTeam : rbb);
+
             if (rbb == null) return;
 
-            var output = (rbb.TeamEntity == RainbowTeamBattleType.Red ? rbb.SecondTeam : rbb);
 
             foreach (var bb in rbb.Session)
             {
-                if (bb == null && AreNotInMap(bb)) continue;
+                if (AreNotInMap(bb))
+                {
+                    continue;
+                }
 
-                bb?.SendPacket(
+                bb.SendPacket(
                     $"fbs " +
                     $"{(byte)rbb.TeamEntity} " +
                     $"{rbb.Session.Count()} " +
@@ -126,7 +130,53 @@ namespace OpenNos.GameObject.RainbowBattle
                     $"{GetFlag(rbb, RainbowNpcType.Large)} " +
                     $"{rbb.TeamEntity}");
             }
+
+            if (rbb.SecondTeam == null)
+            {
+                return;
+            }
+
+            foreach (var bb in rbb.SecondTeam.Session)
+            {
+                if (AreNotInMap(bb))
+                {
+                    continue;
+                }
+
+                bb.SendPacket(
+                    $"fbs " +
+                    $"{(byte)rbb.SecondTeam.TeamEntity} " +
+                    $"{rbb.SecondTeam.Session.Count()} " +
+                    $"{output.SecondTeam.Score} " +
+                    $"{output.Score} " +
+                    $"{GetFlag(rbb.SecondTeam, RainbowNpcType.Small)} " +
+                    $"{GetFlag(rbb.SecondTeam, RainbowNpcType.Second)} " +
+                    $"{GetFlag(rbb.SecondTeam, RainbowNpcType.Large)} " +
+                    $"{rbb.SecondTeam.TeamEntity}");
+            }
         }
+        //public static void ReceiveFbs(RainbowBattleTeam rbb)
+        //{
+        //    if (rbb == null) return;
+
+        //    var output = (rbb.TeamEntity == RainbowTeamBattleType.Red ? rbb.SecondTeam : rbb);
+
+        //    foreach (var bb in rbb.Session)
+        //    {
+        //        if (bb == null && AreNotInMap(bb)) continue;
+
+        //        bb?.SendPacket(
+        //            $"fbs " +
+        //            $"{(byte)rbb.TeamEntity} " +
+        //            $"{rbb.Session.Count()} " +
+        //            $"{output.SecondTeam.Score} " +
+        //            $"{output.Score} " +
+        //            $"{GetFlag(rbb, RainbowNpcType.Small)} " +
+        //            $"{GetFlag(rbb, RainbowNpcType.Second)} " +
+        //            $"{GetFlag(rbb, RainbowNpcType.Large)} " +
+        //            $"{rbb.TeamEntity}");
+        //    }
+        //}
 
         public static void RemoveFlag(RainbowBattleTeam RainbowBattle, RainbowNpcType type, int NpcId)
         {
@@ -137,6 +187,7 @@ namespace OpenNos.GameObject.RainbowBattle
 
         public static void SendFbs(MapInstance map)
         {
+
             if (map == null) return;
 
             foreach (var ses in map.Sessions)

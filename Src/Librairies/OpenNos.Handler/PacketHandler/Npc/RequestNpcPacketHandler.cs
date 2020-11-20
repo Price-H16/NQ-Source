@@ -59,7 +59,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
                 if (Session.CurrentMapInstance.Map.MapId == 2010)
                 {
-                    var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+                    var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.First(s => s.Session.Contains(Session));
 
                     if (RainbowTeam == null)
                     {

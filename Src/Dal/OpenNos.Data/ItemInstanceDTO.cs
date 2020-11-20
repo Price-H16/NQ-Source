@@ -7,7 +7,7 @@ namespace OpenNos.Data
     public class ItemInstanceDTO : SynchronizableBaseDTO
     {
         #region Properties
-
+        public ItemDTO Item { get; set; }
         public byte Ammo { get; set; }
 
         public short Amount { get; set; }

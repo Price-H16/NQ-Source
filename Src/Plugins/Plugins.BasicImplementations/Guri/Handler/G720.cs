@@ -44,7 +44,7 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     return;
                 }
 
-                var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(Session));
+                var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.First(s => s.Session.Contains(Session));
 
                 if (RainbowTeam == null || RainbowBattleManager.AlreadyHaveFlag(RainbowTeam, (RainbowNpcType)e.Argument, (int)e.User)) return;
 

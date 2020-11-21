@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class RollGeneratedItemDTO
+    public class RollGeneratedItemDTO : MappingBaseDTO
     {
         #region Properties
 

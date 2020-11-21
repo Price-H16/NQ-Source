@@ -4,7 +4,7 @@ using OpenNos.Domain;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class TeleporterDTO
+    public class TeleporterDTO : MappingBaseDTO
     {
         #region Properties
 

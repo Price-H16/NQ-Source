@@ -4,7 +4,7 @@ using System;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class FamilySkillMissionDTO
+    public class FamilySkillMissionDTO : MappingBaseDTO
     {
         public long FamilyId { get; set; }
 

@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class RecipeListDTO
+    public class RecipeListDTO : MappingBaseDTO
     {
         #region Properties
 

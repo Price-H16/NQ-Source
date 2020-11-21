@@ -4,7 +4,7 @@ using OpenNos.Domain;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class StaticBonusDTO
+    public class StaticBonusDTO : MappingBaseDTO
     {
         #region Properties
 

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ChickenApi\ChickenAPI.Core\ChickenAPI.Core.csproj" />
+    <ProjectReference Include="..\..\ChickenApi\ChickenApi.Plugins\ChickenApi.Plugins.csproj" />
+    <ProjectReference Include="..\..\Dal\OpenNos.DAL.DAO\OpenNos.DAL.DAO.csproj" />
+    <ProjectReference Include="..\..\Dal\OpenNos.DAL.EF\OpenNos.DAL.EF.csproj" />
+    <ProjectReference Include="..\..\Dal\OpenNos.DAL.Interface\OpenNos.DAL.Interface.csproj" />
+    <ProjectReference Include="..\..\Dal\OpenNos.DAL\OpenNos.DAL.csproj" />
+    <ProjectReference Include="..\..\Dal\OpenNos.Data\OpenNos.Data.csproj" />
+    <ProjectReference Include="..\..\Librairies\OpenNos.Core\OpenNos.Core.csproj" />
+    <ProjectReference Include="..\..\Librairies\OpenNos.GameObject\OpenNos.GameObject.csproj" />
+  </ItemGroup>
+
+</Project>

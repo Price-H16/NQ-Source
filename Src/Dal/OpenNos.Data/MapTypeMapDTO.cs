@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class MapTypeMapDTO
+    public class MapTypeMapDTO : MappingBaseDTO
     {
         #region Properties
 

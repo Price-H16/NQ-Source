@@ -4,7 +4,7 @@ using OpenNos.Domain;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class ScriptedInstanceDTO
+    public class ScriptedInstanceDTO : MappingBaseDTO
     {
         #region Properties
 

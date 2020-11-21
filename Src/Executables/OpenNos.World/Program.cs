@@ -31,6 +31,7 @@ using OpenNos.GameObject._Guri;
 using OpenNos.GameObject._ItemUsage;
 using OpenNos.GameObject._NpcDialog;
 using OpenNos.GameObject.Battle;
+using OpenNos.GameObject.Configuration;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.Handler.PacketHandler.Command;
@@ -121,25 +122,15 @@ namespace OpenNos.World
             }
 
         }
-        private static void InitializeDatabase()
-        {
-            if (!DataAccessHelper.Initialize())
-            {
-                Console.ReadKey();
-                return;
-            }
-
-        }
         private static void InitializeMaps()
         {
-            ServerManager.Instance.Initialize();
-
+            ServerManager.Instance.Initialize(
+                DependencyContainer.Instance.GetInstance<GameScheduledEventsConfiguration>()
+            );
         }
         private static void InitializeLogger()
         {
             Logger.InitializeLogger(new SerilogLogger());
-            //Logger.InitializeLogger(LogManager.GetLogger(typeof(Program)));
-
         }
         public static void Main(string[] args)
         {
@@ -202,7 +193,11 @@ namespace OpenNos.World
             InitializeMasterCommunication();
 
             // initialize DB
-            InitializeDatabase();
+            if (!DataAccessHelper.Initialize(coreContainer.Resolve<IOpenNosContextFactory>()))
+            {
+                Console.ReadKey();
+                return;
+            }
 
             EventEntity.InitializeEventPipeline(gameContainer.Resolve<IEventPipeline>());
 

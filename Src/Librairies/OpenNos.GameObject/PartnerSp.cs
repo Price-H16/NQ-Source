@@ -70,7 +70,7 @@ namespace OpenNos.GameObject
                     Level = ServerManager.RandomNumber<byte>(1, 8)
                 };
 
-                if (DAOFactory.PartnerSkillDAO.Insert(partnerSkillDTO) is PartnerSkillDTO result)
+                if (DAOFactory.Instance.PartnerSkillDAO.Insert(partnerSkillDTO) is PartnerSkillDTO result)
                 {
                     Skills.Add(new PartnerSkill(result));
 
@@ -219,7 +219,7 @@ namespace OpenNos.GameObject
 
             if (partnerSkill == null) return false;
             return partnerSkill != null &&
-                   DAOFactory.PartnerSkillDAO.Remove(partnerSkill.PartnerSkillId) != DeleteResult.Error;
+                   DAOFactory.Instance.PartnerSkillDAO.Remove(partnerSkill.PartnerSkillId) != DeleteResult.Error;
         }
 
         public void ResetXp()
@@ -237,7 +237,7 @@ namespace OpenNos.GameObject
         private void LoadSkills()
         {
             Skills = new List<PartnerSkill>();
-            foreach (var skill in DAOFactory.PartnerSkillDAO.LoadByEquipmentSerialId(Instance.EquipmentSerialId))
+            foreach (var skill in DAOFactory.Instance.PartnerSkillDAO.LoadByEquipmentSerialId(Instance.EquipmentSerialId))
                 Skills.Add(new PartnerSkill(skill));
         }
 

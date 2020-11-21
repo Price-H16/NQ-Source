@@ -1,6 +1,6 @@
 ﻿namespace OpenNos.Data
 {
-    public class MinigameLogDTO
+    public class MinigameLogDTO : MappingBaseDTO
     {
         #region Properties
 

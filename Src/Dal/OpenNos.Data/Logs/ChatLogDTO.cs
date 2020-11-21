@@ -3,7 +3,7 @@ using OpenNos.Domain;
 
 namespace OpenNos.Data
 {
-    public class ChatLogDTO
+    public class ChatLogDTO : MappingBaseDTO
     {
         #region Properties
 

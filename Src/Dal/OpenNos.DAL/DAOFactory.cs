@@ -3,217 +3,209 @@ using OpenNos.DAL.Interface;
 
 namespace OpenNos.DAL
 {
-    public static class DAOFactory
+    public class DAOFactory
     {
-        #region Members
-
-        private static IAccountDAO _accountDAO;
-        private static IBazaarItemDAO _bazaarItemDAO;
-        private static IBCardDAO _bcardDAO;
-        private static IBoxItemDAO _boxItemDAO;
-        private static ICardDAO _cardDAO;
-        private static ICellonOptionDAO _cellonOptionDAO;
-        private static ICharacterDAO _characterDAO;
-        private static ICharacterQuestDAO _characterQuestDAO;
-        private static ICharacterRelationDAO _characterRelationDAO;
-        private static ICharacterSkillDAO _characterSkillDAO;
-        private static ICharacterTitleDAO _characterTitleDAO;
-        private static ICharacterVisitedMapsDAO _characterVisitedMapsDAO;
-        private static IChatLogDAO _chatLogDAO;
-        private static IComboDAO _comboDAO;
-        private static IDropDAO _dropDAO;
-        private static IFamilyCharacterDAO _familyCharacterDAO;
-        private static IFamilyDAO _familyDAO;
-        private static IFamilyLogDAO _familyLogDAO;
-        private static IFamilySkillMissionDAO _familySkillMissionDAO;
-        private static IGeneralLogDAO _generalLogDAO;
-        private static IItemDAO _itemDAO;
-        private static IItemInstanceDAO _itemInstanceDAO;
-        private static IMailDAO _mailDAO;
-        private static IMaintenanceLogDAO _maintenanceLogDAO;
-        private static IMapDAO _mapDAO;
-        private static IMapMonsterDAO _mapMonsterDAO;
-        private static IMapNpcDAO _mapNpcDAO;
-        private static IMapTypeDAO _mapTypeDAO;
-        private static IMapTypeMapDAO _mapTypeMapDAO;
-        private static IMateDAO _mateDAO;
-        private static IMinigameLogDAO _minigameLogDAO;
-        private static IMinilandObjectDAO _minilandObjectDAO;
-        private static INpcMonsterDAO _npcMonsterDAO;
-        private static INpcMonsterSkillDAO _npcMonsterSkillDAO;
-        private static IPartnerSkillDAO _partnerSkillDAO;
-        private static IPenaltyLogDAO _penaltyLogDAO;
-        private static IPortalDAO _portalDAO;
-        private static IQuestDAO _questDAO;
-        private static IQuestLogDAO _questLogDAO;
-        private static IQuestObjectiveDAO _questObjectiveDAO;
-        private static IQuestRewardDAO _questRewardDAO;
-        private static IQuicklistEntryDAO _quicklistEntryDAO;
-        private static IRecipeDAO _recipeDAO;
-        private static IRecipeItemDAO _recipeItemDAO;
-        private static IRecipeListDAO _recipeListDAO;
-        private static IRespawnDAO _respawnDAO;
-        private static IRespawnMapTypeDAO _respawnMapTypeDAO;
-        private static IRollGeneratedItemDAO _rollGeneratedItemDAO;
-        private static IRuneEffectDAO _runeEffectDAO;
-        private static IScriptedInstanceDAO _scriptedInstanceDAO;
-        private static IShellEffectDAO _shellEffectDAO;
-        private static IShopDAO _shopDAO;
-        private static IShopItemDAO _shopItemDAO;
-        private static IShopSkillDAO _shopSkillDAO;
-        private static ISkillDAO _skillDAO;
-        private static IStaticBonusDAO _staticBonusDAO;
-        private static IStaticBuffDAO _staticBuffDAO;
-        private static ITeleporterDAO _teleporterDAO;
-        private static ILogsCommandsDAO _logsCommandsDAO;
-        private static IFamilyQuestsDAO _familyQuestsDAO;
-        private static IBotAuthorityDAO _botAuthorityDAO;
+        public static DAOFactory Instance { get; private set; }
+
+        public static void Initialize(DAOFactory dao)
+        {
+            Instance = dao;
+        }
+
+        public DAOFactory(IAccountDAO accountDAO, IBazaarItemDAO bazaarItemDAO, ICardDAO cardDAO, IBoxItemDAO boxItemDAO, IBCardDAO bcardDAO, IRollGeneratedItemDAO rollGeneratedItemDAO,
+            ICharacterTitleDAO characterTitleDAO, ICharacterVisitedMapsDAO characterVisitedMapsDAO, ICharacterDAO characterDAO, ICharacterRelationDAO characterRelationDAO, IChatLogDAO chatLogDAO, ICharacterSkillDAO characterskillDAO,
+            ICharacterQuestDAO characterQuestDAO, IComboDAO comboDAO, IDropDAO dropDAO, IFamilyCharacterDAO familycharacterDAO, IFamilyDAO familyDAO,
+            IFamilyLogDAO familylogDAO, IGeneralLogDAO generallogDAO, IItemDAO itemDAO, IItemInstanceDAO iteminstanceDAO, IFamilyQuestsDAO familyQuestsDAO, IFamilySkillMissionDAO familySkillMissionDAO,
+            ILogsCommandsDAO logsCommandsDAO, IBotAuthorityDAO botAuthorityDAO, IMailDAO mailDAO, IMapDAO mapDAO, IMapMonsterDAO mapmonsterDAO, IMapNpcDAO mapnpcDAO, IMapTypeDAO maptypeDAO,
+            IMapTypeMapDAO maptypemapDAO, IMateDAO mateDAO, IMinilandObjectDAO minilandobjectDAO, INpcMonsterDAO npcmonsterDAO, INpcMonsterSkillDAO npcmonsterskillDAO, IPenaltyLogDAO penaltylogDAO,
+            IPortalDAO portalDAO, IQuestDAO questDAO, IQuestLogDAO questLogDAO, IQuestRewardDAO questRewardDAO, IQuestObjectiveDAO questObjectiveDAO, IQuicklistEntryDAO quicklistDAO,
+            IMinigameLogDAO minigameLogDAO, IRecipeDAO recipeDAO, IRecipeItemDAO recipeitemDAO, IRespawnDAO respawnDAO, IRespawnMapTypeDAO respawnMapTypeDAO, IScriptedInstanceDAO scriptedinstanceDAO,
+            IShopDAO shopDAO, IShopItemDAO shopitemDAO, IShopSkillDAO shopskillDAO, ISkillDAO skillDAO, IStaticBonusDAO staticBonusDAO, IStaticBuffDAO staticBuffDAO, ITeleporterDAO teleporterDAO,
+            ICellonOptionDAO cellonOptionDAO, IMaintenanceLogDAO maintenanceLogDAO, IRuneEffectDAO runeEffectDAO, IShellEffectDAO shellEffectDAO, IPartnerSkillDAO partnerSkillDAO)
+        {
+            AccountDAO = accountDAO;
+            BazaarItemDAO = bazaarItemDAO;
+            CardDAO = cardDAO;
+            BoxItemDAO = boxItemDAO;
+            BCardDAO = bcardDAO;
+            RollGeneratedItemDAO = rollGeneratedItemDAO;
+            CellonOptionDAO = cellonOptionDAO;
+            BotAuthorityDAO = botAuthorityDAO;
+            CharacterDAO = characterDAO;
+            CharacterRelationDAO = characterRelationDAO;
+            CharacterQuestDAO = characterQuestDAO;
+            CharacterSkillDAO = characterskillDAO;
+            CharacterQuestDAO = characterQuestDAO;
+            CharacterTitleDAO = characterTitleDAO;
+            CharacterVisitedMapsDAO = characterVisitedMapsDAO;
+            ComboDAO = comboDAO;
+            DropDAO = dropDAO;
+            FamilyQuestsDAO = familyQuestsDAO;
+            FamilySkillMissionDAO = familySkillMissionDAO;
+            FamilyCharacterDAO = familycharacterDAO;
+            FamilyDAO = familyDAO;
+            FamilyLogDAO = familylogDAO;
+            GeneralLogDAO = generallogDAO;
+            ItemDAO = itemDAO;
+            IteminstanceDAO = iteminstanceDAO;
+            MinigameLogDAO = minigameLogDAO;
+            LogsCommandsDAO = logsCommandsDAO;
+            MailDAO = mailDAO;
+            MapDAO = mapDAO;
+            MapMonsterDAO = mapmonsterDAO;
+            MapNpcDAO = mapnpcDAO;
+            MapTypeDAO = maptypeDAO;
+            MapTypeMapDAO = maptypemapDAO;
+            MateDAO = mateDAO;
+            MinilandObjectDAO = minilandobjectDAO;
+            NpcMonsterDAO = npcmonsterDAO;
+            NpcMonsterSkillDAO = npcmonsterskillDAO;
+            PenaltyLogDAO = penaltylogDAO;
+            PortalDAO = portalDAO;
+            QuestDAO = questDAO;
+            QuestLogDAO = questLogDAO;
+            QuestRewardDAO = questRewardDAO;
+            QuestObjectiveDAO = questObjectiveDAO;
+            QuicklistEntryDAO = quicklistDAO;
+            ChatLogDAO = chatLogDAO;
+            MaintenanceLogDAO = maintenanceLogDAO;
+            RuneEffectDAO = runeEffectDAO;
+            ShellEffectDAO = shellEffectDAO;
+            PartnerSkillDAO = partnerSkillDAO;
+            TeleporterDAO = teleporterDAO;
+            RecipeDAO = recipeDAO;
+            RecipeItemDAO = recipeitemDAO;
+            RespawnDAO = respawnDAO;
+            RespawnMapTypeDAO = respawnMapTypeDAO;
+            ScriptedInstanceDAO = scriptedinstanceDAO;
+            ShopDAO = shopDAO;
+            ShopItemDAO = shopitemDAO;
+            ShopSkillDAO = shopskillDAO;
+            SkillDAO = skillDAO;
+            StaticBonusDAO = staticBonusDAO;
+            StaticBuffDAO = staticBuffDAO;
+            TeleporterDAO = teleporterDAO;
+        }
 
-        #endregion
 
-        #region Properties
+        public IAccountDAO AccountDAO { get; }
 
-        public static ILogsCommandsDAO LogsCommandsDAO => _logsCommandsDAO ?? (_logsCommandsDAO = new LogsCommandsDAO());
+        public IBazaarItemDAO BazaarItemDAO { get; }
 
-        public static IAccountDAO AccountDAO => _accountDAO ?? (_accountDAO = new AccountDAO());
+        public ICardDAO CardDAO { get; }
 
-        public static IBazaarItemDAO BazaarItemDAO => _bazaarItemDAO ?? (_bazaarItemDAO = new BazaarItemDAO());
+        public IBoxItemDAO BoxItemDAO { get; }
 
-        public static IBCardDAO BCardDAO => _bcardDAO ?? (_bcardDAO = new BCardDAO());
+        public ICharacterDAO CharacterDAO { get; }
 
-        public static IBoxItemDAO BoxItemDAO => _boxItemDAO ?? (_boxItemDAO = new BoxItemDAO());
+        public ICellonOptionDAO CellonOptionDAO { get; }
 
-        public static ICardDAO CardDAO => _cardDAO ?? (_cardDAO = new CardDAO());
+        public ICharacterRelationDAO CharacterRelationDAO { get; }
 
-        public static ICellonOptionDAO CellonOptionDAO => _cellonOptionDAO ?? (_cellonOptionDAO = new CellonOptionDAO());
+        public ICharacterSkillDAO CharacterSkillDAO { get; }
 
-        public static IFamilySkillMissionDAO FamilySkillMissionDAO => _familySkillMissionDAO ?? (_familySkillMissionDAO = new FamilySkillMissionDAO());
+        public ICharacterQuestDAO CharacterQuestDAO { get; }
 
-        public static ICharacterDAO CharacterDAO => _characterDAO ?? (_characterDAO = new CharacterDAO());
+        public IComboDAO ComboDAO { get; }
 
-        public static ICharacterQuestDAO CharacterQuestDAO =>
-            _characterQuestDAO ?? (_characterQuestDAO = new CharacterQuestDAO());
+        public IDropDAO DropDAO { get; }
 
-        public static ICharacterRelationDAO CharacterRelationDAO =>
-            _characterRelationDAO ?? (_characterRelationDAO = new CharacterRelationDAO());
+        public IFamilyCharacterDAO FamilyCharacterDAO { get; }
 
-        public static ICharacterSkillDAO CharacterSkillDAO =>
-            _characterSkillDAO ?? (_characterSkillDAO = new CharacterSkillDAO());
+        public IFamilyDAO FamilyDAO { get; }
 
-        public static ICharacterTitleDAO CharacterTitleDAO =>
-            _characterTitleDAO ?? (_characterTitleDAO = new CharacterTitleDAO());
-        
-        public static ICharacterVisitedMapsDAO CharacterVisitedMapsDAO =>
-            _characterVisitedMapsDAO ?? (_characterVisitedMapsDAO = new CharacterVisitedMapsDAO());
+        public IFamilyLogDAO FamilyLogDAO { get; }
 
-        public static IChatLogDAO ChatLogDAO => _chatLogDAO ?? (_chatLogDAO = new ChatLogDAO());
+        public IGeneralLogDAO GeneralLogDAO { get; }
 
-        public static IComboDAO ComboDAO => _comboDAO ?? (_comboDAO = new ComboDAO());
+        public IItemDAO ItemDAO { get; }
 
-        public static IDropDAO DropDAO => _dropDAO ?? (_dropDAO = new DropDAO());
+        public IItemInstanceDAO IteminstanceDAO { get; }
 
-        public static IFamilyCharacterDAO FamilyCharacterDAO =>
-            _familyCharacterDAO ?? (_familyCharacterDAO = new FamilyCharacterDAO());
+        public IBotAuthorityDAO BotAuthorityDAO { get; }
 
-        public static IFamilyDAO FamilyDAO => _familyDAO ?? (_familyDAO = new FamilyDAO());
+        public IFamilyQuestsDAO FamilyQuestsDAO { get; }
 
-        public static IFamilyLogDAO FamilyLogDAO => _familyLogDAO ?? (_familyLogDAO = new FamilyLogDAO());
+        public ILogsCommandsDAO LogsCommandsDAO { get; }
 
-        public static IGeneralLogDAO GeneralLogDAO => _generalLogDAO ?? (_generalLogDAO = new GeneralLogDAO());
+        public IMinigameLogDAO MinigameLogDAO { get; }
 
-        public static IItemDAO ItemDAO => _itemDAO ?? (_itemDAO = new ItemDAO());
+        public IMailDAO MailDAO { get; }
 
-        public static IItemInstanceDAO ItemInstanceDAO =>
-            _itemInstanceDAO ?? (_itemInstanceDAO = new ItemInstanceDAO());
+        public ICharacterTitleDAO CharacterTitleDAO { get; }
 
-        public static IMailDAO MailDAO => _mailDAO ?? (_mailDAO = new MailDAO());
+        public ICharacterVisitedMapsDAO CharacterVisitedMapsDAO { get; }
 
-        public static IMaintenanceLogDAO MaintenanceLogDAO =>
-            _maintenanceLogDAO ?? (_maintenanceLogDAO = new MaintenanceLogDAO());
+        public IChatLogDAO ChatLogDAO { get; }
 
-        public static IMapDAO MapDAO => _mapDAO ?? (_mapDAO = new MapDAO());
+        public IFamilySkillMissionDAO FamilySkillMissionDAO { get; }
 
-        public static IMapMonsterDAO MapMonsterDAO => _mapMonsterDAO ?? (_mapMonsterDAO = new MapMonsterDAO());
+        public IMaintenanceLogDAO MaintenanceLogDAO { get; }
 
-        public static IMapNpcDAO MapNpcDAO => _mapNpcDAO ?? (_mapNpcDAO = new MapNpcDAO());
+        public IMapDAO MapDAO { get; }
 
-        public static IMapTypeDAO MapTypeDAO => _mapTypeDAO ?? (_mapTypeDAO = new MapTypeDAO());
+        public IMapMonsterDAO MapMonsterDAO { get; }
 
-        public static IMapTypeMapDAO MapTypeMapDAO => _mapTypeMapDAO ?? (_mapTypeMapDAO = new MapTypeMapDAO());
+        public IMapNpcDAO MapNpcDAO { get; }
 
-        public static IMateDAO MateDAO => _mateDAO ?? (_mateDAO = new MateDAO());
+        public IMapTypeDAO MapTypeDAO { get; }
 
-        public static IMinigameLogDAO MinigameLogDAO => _minigameLogDAO ?? (_minigameLogDAO = new MinigameLogDAO());
+        public IMapTypeMapDAO MapTypeMapDAO { get; }
 
-        public static IMinilandObjectDAO MinilandObjectDAO =>
-            _minilandObjectDAO ?? (_minilandObjectDAO = new MinilandObjectDAO());
+        public IMateDAO MateDAO { get; }
 
-        public static INpcMonsterDAO NpcMonsterDAO => _npcMonsterDAO ?? (_npcMonsterDAO = new NpcMonsterDAO());
+        public IMinilandObjectDAO MinilandObjectDAO { get; }
 
-        public static INpcMonsterSkillDAO NpcMonsterSkillDAO =>
-            _npcMonsterSkillDAO ?? (_npcMonsterSkillDAO = new NpcMonsterSkillDAO());
+        public INpcMonsterDAO NpcMonsterDAO { get; }
 
-        public static IPartnerSkillDAO PartnerSkillDAO =>
-            _partnerSkillDAO ?? (_partnerSkillDAO = new PartnerSkillDAO());
+        public INpcMonsterSkillDAO NpcMonsterSkillDAO { get; }
 
-        public static IPenaltyLogDAO PenaltyLogDAO => _penaltyLogDAO ?? (_penaltyLogDAO = new PenaltyLogDAO());
+        public IPenaltyLogDAO PenaltyLogDAO { get; }
 
-        public static IPortalDAO PortalDAO => _portalDAO ?? (_portalDAO = new PortalDAO());
+        public IPortalDAO PortalDAO { get; }
 
-        public static IQuestDAO QuestDAO => _questDAO ?? (_questDAO = new QuestDAO());
+        public IQuestDAO QuestDAO { get; }
 
-        public static IQuestLogDAO QuestLogDAO => _questLogDAO ?? (_questLogDAO = new QuestLogDAO());
+        public IQuestLogDAO QuestLogDAO { get; }
 
-        public static IQuestObjectiveDAO QuestObjectiveDAO =>
-            _questObjectiveDAO ?? (_questObjectiveDAO = new QuestObjectiveDAO());
+        public IQuestObjectiveDAO QuestObjectiveDAO { get; }
 
-        public static IQuestRewardDAO QuestRewardDAO => _questRewardDAO ?? (_questRewardDAO = new QuestRewardDAO());
+        public IQuestRewardDAO QuestRewardDAO { get; }
 
-        public static IQuicklistEntryDAO QuicklistEntryDAO =>
-            _quicklistEntryDAO ?? (_quicklistEntryDAO = new QuicklistEntryDAO());
+        public IQuicklistEntryDAO QuicklistEntryDAO { get; }
 
-        public static IRecipeDAO RecipeDAO => _recipeDAO ?? (_recipeDAO = new RecipeDAO());
+        public IRuneEffectDAO RuneEffectDAO { get; }
 
-        public static IRecipeItemDAO RecipeItemDAO => _recipeItemDAO ?? (_recipeItemDAO = new RecipeItemDAO());
+        public IRecipeDAO RecipeDAO { get; }
 
-        public static IRecipeListDAO RecipeListDAO => _recipeListDAO ?? (_recipeListDAO = new RecipeListDAO());
+        public IRecipeItemDAO RecipeItemDAO { get; }
 
-        public static IRespawnDAO RespawnDAO => _respawnDAO ?? (_respawnDAO = new RespawnDAO());
+        public IRespawnDAO RespawnDAO { get; }
 
-        public static IRespawnMapTypeDAO RespawnMapTypeDAO =>
-            _respawnMapTypeDAO ?? (_respawnMapTypeDAO = new RespawnMapTypeDAO());
+        public IRespawnMapTypeDAO RespawnMapTypeDAO { get; }
 
-        public static IRollGeneratedItemDAO RollGeneratedItemDAO =>
-            _rollGeneratedItemDAO ?? (_rollGeneratedItemDAO = new RollGeneratedItemDAO());
+        public IShopDAO ShopDAO { get; }
 
-        public static IRuneEffectDAO RuneEffectDAO =>
-            _runeEffectDAO ?? (_runeEffectDAO = new RuneEffectDAO());
+        public IShopItemDAO ShopItemDAO { get; }
 
-        public static IScriptedInstanceDAO ScriptedInstanceDAO =>
-            _scriptedInstanceDAO ?? (_scriptedInstanceDAO = new ScriptedInstanceDAO());
+        public IShopSkillDAO ShopSkillDAO { get; }
 
-        public static IShellEffectDAO ShellEffectDAO => _shellEffectDAO ?? (_shellEffectDAO = new ShellEffectDAO());
+        public ISkillDAO SkillDAO { get; }
 
-        public static IShopDAO ShopDAO => _shopDAO ?? (_shopDAO = new ShopDAO());
+        public IStaticBonusDAO StaticBonusDAO { get; }
 
-        public static IShopItemDAO ShopItemDAO => _shopItemDAO ?? (_shopItemDAO = new ShopItemDAO());
+        public IStaticBuffDAO StaticBuffDAO { get; }
 
-        public static IShopSkillDAO ShopSkillDAO => _shopSkillDAO ?? (_shopSkillDAO = new ShopSkillDAO());
+        public ITeleporterDAO TeleporterDAO { get; }
 
-        public static ISkillDAO SkillDAO => _skillDAO ?? (_skillDAO = new SkillDAO());
+        public IScriptedInstanceDAO ScriptedInstanceDAO { get; }
 
-        public static IStaticBonusDAO StaticBonusDAO => _staticBonusDAO ?? (_staticBonusDAO = new StaticBonusDAO());
+        public IBCardDAO BCardDAO { get; }
 
-        public static IStaticBuffDAO StaticBuffDAO => _staticBuffDAO ?? (_staticBuffDAO = new StaticBuffDAO());
+        public IRollGeneratedItemDAO RollGeneratedItemDAO { get; }
 
-        public static ITeleporterDAO TeleporterDAO => _teleporterDAO ?? (_teleporterDAO = new TeleporterDAO());
+        public IShellEffectDAO ShellEffectDAO { get; }
 
-        public static IFamilyQuestsDAO FamilyQuestsDAO => _familyQuestsDAO ?? (_familyQuestsDAO = new FamilyQuestsDAO());
-
-        public static IBotAuthorityDAO BotAuthorityDAO =>
-    _botAuthorityDAO ?? (_botAuthorityDAO = new BotAuthorityDAO());
-
-
-        #endregion
+        public IPartnerSkillDAO PartnerSkillDAO { get; }
     }
 }

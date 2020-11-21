@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class NpcMonsterSkillDTO
+    public class NpcMonsterSkillDTO : MappingBaseDTO
     {
         #region Properties
 

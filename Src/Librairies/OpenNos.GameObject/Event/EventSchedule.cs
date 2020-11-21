@@ -12,8 +12,12 @@ namespace OpenNos.GameObject
 
         public object Create(object parent, object configContext, XmlNode section)
         {
-            var list = new List<Schedule>();
-            foreach (XmlNode aSchedule in section.ChildNodes) list.Add(getSchedule(aSchedule));
+            List<Schedule> list = new List<Schedule>();
+            foreach (XmlNode aSchedule in section.ChildNodes)
+            {
+                list.Add(getSchedule(aSchedule));
+            }
+
             return list;
         }
 

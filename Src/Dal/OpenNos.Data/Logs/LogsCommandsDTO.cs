@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OpenNos.Data
 {
-    public class LogCommandsDTO
+    public class LogCommandsDTO : MappingBaseDTO
     {
         #region Properties
 

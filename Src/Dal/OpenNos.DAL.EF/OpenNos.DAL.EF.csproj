@@ -87,6 +87,9 @@
     <Compile Include="CharacterQuest.cs" />
     <Compile Include="CharacterTitle.cs" />
     <Compile Include="CharacterVisitedMaps.cs" />
+    <Compile Include="Configuration\DatabaseConfiguration.cs" />
+    <Compile Include="Context\DbContextFactory.cs" />
+    <Compile Include="Context\DesignTimeContextFactory.cs" />
     <Compile Include="FamilySkillMission.cs" />
     <Compile Include="FamilyQuests.cs" />
     <Compile Include="Logs\ChatLog.cs" />
@@ -392,6 +395,12 @@
     </PackageReference>
     <PackageReference Include="EntityFramework">
       <Version>6.4.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore">
+      <Version>2.2.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer">
+      <Version>2.2.4</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>

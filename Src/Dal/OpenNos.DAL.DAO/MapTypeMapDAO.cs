@@ -53,7 +53,20 @@ namespace OpenNos.DAL.DAO
                 return result;
             }
         }
-
+        public short GetMapTypeIdByMapId(short mapId)
+        {
+            using (OpenNosContext context = DataAccessHelper.CreateContext())
+            {
+                short result = -1;
+                foreach (MapTypeMap MapTypeMap in context.MapTypeMap.Where(c => c.MapId.Equals(mapId)))
+                {
+                    MapTypeMapDTO dto = new MapTypeMapDTO();
+                    Mapper.Mappers.MapTypeMapMapper.ToMapTypeMapDTO(MapTypeMap, dto);
+                    result = dto.MapTypeId;
+                }
+                return result;
+            }
+        }
         public MapTypeMapDTO LoadByMapAndMapType(short mapId, short maptypeId)
         {
             try

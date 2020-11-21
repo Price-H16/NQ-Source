@@ -17,6 +17,8 @@ namespace OpenNos.DAL.Interface
 
         IEnumerable<MapTypeMapDTO> LoadByMapTypeId(short maptypeId);
 
+        public short GetMapTypeIdByMapId(short mapId);
+
         #endregion
     }
 }

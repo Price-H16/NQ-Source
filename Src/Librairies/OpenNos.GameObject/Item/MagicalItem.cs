@@ -270,7 +270,10 @@ namespace OpenNos.GameObject
                                 break;
 
                             case 1:
-                                if (inv.ItemVNum != 2071 && inv.ItemVNum != 10011) return;
+                                if (inv.ItemVNum != 2071 && inv.ItemVNum != 10011)
+                                {
+                                    return;
+                                }
                                 if (int.TryParse(packetsplit[6], out packetType))
                                 {
                                     if (ServerManager.Instance.ChannelId == 51)
@@ -278,149 +281,142 @@ namespace OpenNos.GameObject
                                         session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CANNOT_USE"), 10));
                                         return;
                                     }
-
-                                    var respawn = session.Character.Return;
+                                    RespawnMapTypeDTO respawn = session.Character.Return;
                                     switch (packetType)
                                     {
                                         case 0:
-                                            if (respawn.DefaultX != 0 && respawn.DefaultY != 0 &&
-                                                respawn.DefaultMapId != 0)
-                                                session.SendPacket(UserInterfaceHelper.GenerateRp(respawn.DefaultMapId,
-                                                    respawn.DefaultX, respawn.DefaultY,
-                                                    $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
+                                            if (respawn.DefaultX != 0 && respawn.DefaultY != 0 && respawn.DefaultMapId != 0)
+                                            {
+                                                session.SendPacket(UserInterfaceHelper.GenerateRp(respawn.DefaultMapId, respawn.DefaultX, respawn.DefaultY, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
+                                            }
                                             break;
 
                                         case 1:
-                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                                $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2"));
+                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2"));
                                             break;
 
                                         case 2:
-                                            if (respawn.DefaultX != 0 && respawn.DefaultY != 0 &&
-                                                respawn.DefaultMapId != 0)
-                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId,
-                                                    respawn.DefaultMapId, respawn.DefaultX, respawn.DefaultY);
+                                            if (DAOFactory.MapTypeMapDAO.GetMapTypeIdByMapId(session.CurrentMapInstance.Map.MapId) != DAOFactory.MapTypeMapDAO.GetMapTypeIdByMapId(respawn.DefaultMapId))
+                                            {
+                                                session.SendPacket(UserInterfaceHelper.GenerateInfo("You are not in the same act to go. Please, go to the same act."));
+                                                return;
+                                            }
+                                            if (respawn.DefaultX != 0 && respawn.DefaultY != 0 && respawn.DefaultMapId != 0)
+                                            {
+                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawn.DefaultMapId, respawn.DefaultX, respawn.DefaultY);
+                                            }
                                             session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                             break;
                                     }
                                 }
-
                                 break;
 
                             case 2:
-                                if (inv.ItemVNum != 2072 && inv.ItemVNum != 10012) return;
+                                if (inv.ItemVNum != 2072 && inv.ItemVNum != 10012)
+                                {
+                                    return;
+                                }
                                 if (Option == 0)
                                 {
-                                    session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                        $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
+                                    session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
                                 }
                                 else
                                 {
                                     ServerManager.Instance.JoinMiniland(session, session);
                                     session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                 }
-
                                 break;
 
                             case 4:
-                                if (inv.ItemVNum != 2188 ||
-                                    session.Character.MapInstance.Map.MapTypes.Any(s =>
-                                        s.MapTypeId == (short)MapTypeEnum.Act4)) return;
+                                if (inv.ItemVNum != 2188 || session.Character.MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4))
+                                {
+                                    return;
+                                }
                                 if (Option == 0)
                                 {
-                                    session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                        $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
+                                    session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
                                 }
                                 else
                                 {
                                     ServerManager.Instance.ChangeMap(session.Character.CharacterId, 98, 28, 34);
                                     session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                 }
-
                                 break;
 
                             case 5:
-                                if (inv.ItemVNum != 2311 || ServerManager.Instance.ChannelId != 51) return;
-                                if (ServerManager.GetAllMapInstances().SelectMany(s => s.Monsters.ToList())
-                                        .LastOrDefault(s => s.MonsterVNum == (short)session.Character.Faction + 964) is
-                                    MapMonster flag)
+                                if (inv.ItemVNum != 2311 || ServerManager.Instance.ChannelId != 51)
+                                {
+                                    return;
+                                }
+                                if (ServerManager.GetAllMapInstances().SelectMany(s => s.Monsters.ToList()).LastOrDefault(s => s.MonsterVNum == (short)session.Character.Faction + 964) is MapMonster flag)
                                 {
                                     if (Option == 0)
                                     {
-                                        session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                            $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
+                                        session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1"));
                                     }
                                     else
                                     {
-                                        ServerManager.Instance.ChangeMapInstance(session.Character.CharacterId,
-                                            flag.MapInstance.MapInstanceId, flag.MapX, flag.MapY);
+                                        ServerManager.Instance.ChangeMapInstance(session.Character.CharacterId, flag.MapInstance.MapInstanceId, flag.MapX, flag.MapY);
                                         session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                     }
                                 }
-
                                 break;
 
                             case 6:
-                                if (inv.ItemVNum != 2384 || ServerManager.Instance.ChannelId == 51 ||
-                                    session.CurrentMapInstance.MapInstanceType != MapInstanceType.BaseMapInstance)
+                                if (inv.ItemVNum != 2384 || ServerManager.Instance.ChannelId == 51 || session.CurrentMapInstance.MapInstanceType != MapInstanceType.BaseMapInstance)
+                                {
                                     return;
+                                }
                                 if (Option == 0)
-                                    session.SendPacket(UserInterfaceHelper.GenerateDialog(
-                                        $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1 #u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2 {Language.Instance.GetMessageFromKey("WANT_TO_SAVE_POSITION")}"));
+                                {
+                                    session.SendPacket(UserInterfaceHelper.GenerateDialog($"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1 #u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2 {Language.Instance.GetMessageFromKey("WANT_TO_SAVE_POSITION")}"));
+                                }
                                 else if (int.TryParse(packetsplit[6], out packetType))
+                                {
                                     switch (packetType)
                                     {
                                         case 1:
-                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                                $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^3"));
+                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^3"));
                                             break;
 
                                         case 2:
-                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7,
-                                                $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^4"));
+                                            session.SendPacket(UserInterfaceHelper.GenerateDelay(5000, 7, $"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^4"));
                                             break;
 
                                         case 3:
-                                            if (session.CurrentMapInstance.Map.MapTypes.Any(s =>
-                                                s.MapTypeId == (short)MapTypeEnum.Act51 ||
-                                                s.MapTypeId == (short)MapTypeEnum.Act52))
+                                            if (session.CurrentMapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act51 || s.MapTypeId == (short)MapTypeEnum.Act52))
                                             {
-                                                session.Character.SetReturnPoint(session.Character.MapId,
-                                                    session.Character.MapX, session.Character.MapY);
-                                                var respawn = session.Character.Respawn;
-                                                if (respawn.DefaultX != 0 && respawn.DefaultY != 0 &&
-                                                    respawn.DefaultMapId != 0)
+                                                session.Character.SetReturnPoint(session.Character.MapId, session.Character.MapX, session.Character.MapY);
+                                                RespawnMapTypeDTO respawn = session.Character.Respawn;
+                                                if (respawn.DefaultX != 0 && respawn.DefaultY != 0 && respawn.DefaultMapId != 0)
                                                 {
-                                                    var mapCell = new MapCell();
-                                                    for (var i = 0; i < 5; i++)
+                                                    MapCell mapCell = new MapCell();
+                                                    for (int i = 0; i < 5; i++)
                                                     {
-                                                        mapCell.X = (short)(respawn.DefaultX +
-                                                                             ServerManager.RandomNumber(-3, 3));
-                                                        mapCell.Y = (short)(respawn.DefaultY +
-                                                                             ServerManager.RandomNumber(-3, 3));
-                                                        if (ServerManager.GetMapInstanceByMapId(respawn.DefaultMapId) is
-                                                            MapInstance GoToMap)
+                                                        mapCell.X = (short)(respawn.DefaultX + ServerManager.RandomNumber(-3, 3));
+                                                        mapCell.Y = (short)(respawn.DefaultY + ServerManager.RandomNumber(-3, 3));
+                                                        if (ServerManager.GetMapInstanceByMapId(respawn.DefaultMapId) is MapInstance GoToMap)
+                                                        {
                                                             if (!GoToMap.Map.IsBlockedZone(mapCell.X, mapCell.Y))
+                                                            {
                                                                 break;
+                                                            }
+                                                        }
                                                     }
-
-                                                    ServerManager.Instance.ChangeMap(session.Character.CharacterId,
-                                                        respawn.DefaultMapId, mapCell.X, mapCell.Y);
+                                                    ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawn.DefaultMapId, mapCell.X, mapCell.Y);
                                                 }
-
                                                 session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                             }
                                             else
                                             {
                                                 goto case 4;
                                             }
-
                                             break;
 
                                         case 4:
-                                            var mapInstanceBackup = session.CurrentMapInstance;
+                                            MapInstance mapInstanceBackup = session.CurrentMapInstance;
                                             session.CurrentMapInstance = ServerManager.GetMapInstanceByMapId(170);
-                                            var respawnObj = session.Character.Respawn;
+                                            RespawnMapTypeDTO respawnObj = session.Character.Respawn;
                                             session.CurrentMapInstance = mapInstanceBackup;
                                             if (ServerManager.Instance.ChannelId == 51)
                                             {
@@ -428,35 +424,30 @@ namespace OpenNos.GameObject
                                                 respawnObj.DefaultX = 41;
                                                 respawnObj.DefaultY = 42;
                                             }
-
-                                            if (respawnObj.DefaultX != 0 && respawnObj.DefaultY != 0 &&
-                                                respawnObj.DefaultMapId != 0)
+                                            if (respawnObj.DefaultX != 0 && respawnObj.DefaultY != 0 && respawnObj.DefaultMapId != 0)
                                             {
-                                                var mapCell = new MapCell();
-                                                for (var i = 0; i < 5; i++)
+                                                MapCell mapCell = new MapCell();
+                                                for (int i = 0; i < 5; i++)
                                                 {
-                                                    mapCell.X = (short)(respawnObj.DefaultX +
-                                                                         ServerManager.RandomNumber(-3, 3));
-                                                    mapCell.Y = (short)(respawnObj.DefaultY +
-                                                                         ServerManager.RandomNumber(-3, 3));
-                                                    if (ServerManager.GetMapInstanceByMapId(respawnObj.DefaultMapId) is
-                                                        MapInstance GoToMap)
+                                                    mapCell.X = (short)(respawnObj.DefaultX + ServerManager.RandomNumber(-3, 3));
+                                                    mapCell.Y = (short)(respawnObj.DefaultY + ServerManager.RandomNumber(-3, 3));
+                                                    if (ServerManager.GetMapInstanceByMapId(respawnObj.DefaultMapId) is MapInstance GoToMap)
+                                                    {
                                                         if (!GoToMap.Map.IsBlockedZone(mapCell.X, mapCell.Y))
+                                                        {
                                                             break;
+                                                        }
+                                                    }
                                                 }
-
-                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId,
-                                                    respawnObj.DefaultMapId, mapCell.X, mapCell.Y);
+                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawnObj.DefaultMapId, mapCell.X, mapCell.Y);
                                             }
-
                                             session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                             break;
                                     }
-
+                                }
                                 break;
                         }
                     }
-
                     break;
 
                 // dyes or waxes

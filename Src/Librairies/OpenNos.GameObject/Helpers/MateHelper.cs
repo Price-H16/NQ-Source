@@ -2,6 +2,7 @@
 using OpenNos.GameObject.Networking;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenNos.GameObject.Helpers
 {
@@ -435,13 +436,24 @@ namespace OpenNos.GameObject.Helpers
                 XpData[i] = Convert.ToInt64(XpData[i - 1] + var * (i + 2) * (i + 2));
             }
         }
-
-        public void RemovePartnerBuffs(ClientSession session)
+        public void RemovePartnerSpBuffs(ClientSession Session)
         {
-            if (session == null) return;
-
-            foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
+            if (Session.Character == null)
+            {
+                return;
+            }
+            foreach (Buff partnerSpBuff in Session.Character.BattleEntity.Buffs.Where(b => MateHelper.Instance.PartnerSpBuffs.Values.Any(v => v == b.Card.CardId)))
+            {
+                Session.Character.RemoveBuff(partnerSpBuff.Card.CardId, true);
+                Session.Character.GenerateSki();
+            }
         }
+        //public void RemovePartnerBuffs(ClientSession session)
+        //{
+        //    if (session == null) return;
+
+        //    foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
+        //}
         public void AddPartnerSkill(ClientSession session, Mate mate)
         {
             NpcMonster mateNpc = ServerManager.GetNpcMonster(mate.NpcMonsterVNum);

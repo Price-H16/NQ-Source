@@ -46,10 +46,9 @@ namespace OpenNos.Handler.PacketHandler.Mate
 
             if (partnerSkillOpenPacket.JustDoIt)
             {
-                if (mate.Sp.AddSkill(mate, partnerSkillOpenPacket.CastId))
+                if (mate.Sp.AddSkill(partnerSkillOpenPacket.CastId))
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateModal(Language.Instance.GetMessageFromKey("PSP_SKILL_LEARNED"), 1));
+                    Session.SendPacket(UserInterfaceHelper.GenerateModal(Language.Instance.GetMessageFromKey("PSP_SKILL_LEARNED"), 1));
                     mate.Sp.ResetXp();
                 }
 
@@ -57,24 +56,19 @@ namespace OpenNos.Handler.PacketHandler.Mate
             }
             else
             {
-                if (Session.Account.Authority >= AuthorityType.DEV)
+                if (Session.Account.Authority >= AuthorityType.GM)
                 {
-                    if (mate.Sp.AddSkill(mate, partnerSkillOpenPacket.CastId))
+                    if (mate.Sp.AddSkill(partnerSkillOpenPacket.CastId))
                     {
-                        Session.SendPacket(
-                            UserInterfaceHelper.GenerateModal(Language.Instance.GetMessageFromKey("PSP_SKILL_LEARNED"),
-                                1));
+                        Session.SendPacket(UserInterfaceHelper.GenerateModal(Language.Instance.GetMessageFromKey("PSP_SKILL_LEARNED"), 1));
                         mate.Sp.FullXp();
                     }
 
                     Session.SendPacket(mate.GenerateScPacket());
                     return;
                 }
-
-                Session.SendPacket(
-                    $"pdelay 3000 12 #ps_op^{partnerSkillOpenPacket.PetId}^{partnerSkillOpenPacket.CastId}^1");
-                Session.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateGuri(2, 2, mate.MateTransportId),
-                    mate.PositionX, mate.PositionY);
+                Session.SendPacket($"pdelay 3000 12 #ps_op^{partnerSkillOpenPacket.PetId}^{partnerSkillOpenPacket.CastId}^1");
+                Session.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateGuri(2, 2, mate.MateTransportId), mate.PositionX, mate.PositionY);
             }
         }
 

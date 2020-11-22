@@ -31,7 +31,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
         #region Members
 
         // Team pvp 30 max ( 30 / 2 = 15 vs 15 ) ↓ 3v3
-        private static readonly int GroupPlayer = 1;
+        private static readonly int GroupPlayer = 4;
 
         #endregion
 
@@ -71,17 +71,17 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
         public static void SendEvent()
         {
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
-            //Thread.Sleep(4 * 60 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
-            //Thread.Sleep(30 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
-            //Thread.Sleep(20 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
+            Thread.Sleep(4 * 60 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
+            Thread.Sleep(30 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
+            Thread.Sleep(20 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
             Thread.Sleep(10 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("RAINBOW_STARTED"), 1));
             ServerManager.Instance.EventInWaiting = true;

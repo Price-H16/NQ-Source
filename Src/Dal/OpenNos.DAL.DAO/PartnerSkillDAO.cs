@@ -1,36 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OpenNos.Core;
+﻿using OpenNos.Core;
 using OpenNos.DAL.EF;
 using OpenNos.DAL.EF.Helpers;
 using OpenNos.DAL.Interface;
 using OpenNos.Data;
 using OpenNos.Data.Enums;
-using OpenNos.Mapper.Mappers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenNos.DAL.DAO
 {
     public class PartnerSkillDAO : IPartnerSkillDAO
     {
-        #region Methods
-
         public PartnerSkillDTO Insert(PartnerSkillDTO partnerSkillDTO)
         {
             try
             {
-                using (var context = DataAccessHelper.CreateContext())
+                using (OpenNosContext context = DataAccessHelper.CreateContext())
                 {
-                    var partnerSkill = new PartnerSkill();
+                    PartnerSkill partnerSkill = new PartnerSkill();
 
-                    if (PartnerSkillMapper.ToPartnerSkill(partnerSkillDTO, partnerSkill))
+                    if (Mapper.Mappers.PartnerSkillMapper.ToPartnerSkill(partnerSkillDTO, partnerSkill))
                     {
                         context.PartnerSkill.Add(partnerSkill);
                         context.SaveChanges();
 
-                        var dto = new PartnerSkillDTO();
+                        PartnerSkillDTO dto = new PartnerSkillDTO();
 
-                        if (PartnerSkillMapper.ToPartnerSkillDTO(partnerSkill, dto)) return dto;
+                        if (Mapper.Mappers.PartnerSkillMapper.ToPartnerSkillDTO(partnerSkill, dto))
+                        {
+                            return dto;
+                        }
                     }
                 }
             }
@@ -44,25 +44,28 @@ namespace OpenNos.DAL.DAO
 
         public List<PartnerSkillDTO> LoadByEquipmentSerialId(Guid equipmentSerialId)
         {
-            var partnerSkillDTOs = new List<PartnerSkillDTO>();
+            List<PartnerSkillDTO> partnerSkillDTOs = new List<PartnerSkillDTO>();
 
             try
             {
-                using (var context = DataAccessHelper.CreateContext())
+                using (OpenNosContext context = DataAccessHelper.CreateContext())
                 {
                     context.PartnerSkill.Where(s => s.EquipmentSerialId == equipmentSerialId).ToList()
                         .ForEach(partnerSkill =>
                         {
-                            var partnerSkillDTO = new PartnerSkillDTO();
+                            PartnerSkillDTO partnerSkillDTO = new PartnerSkillDTO();
 
-                            if (PartnerSkillMapper.ToPartnerSkillDTO(partnerSkill, partnerSkillDTO))
+                            if (Mapper.Mappers.PartnerSkillMapper.ToPartnerSkillDTO(partnerSkill, partnerSkillDTO))
+                            {
                                 partnerSkillDTOs.Add(partnerSkillDTO);
+                            }
                         });
                 }
             }
             catch (Exception e)
             {
                 Logger.Error(e);
+
             }
 
             return partnerSkillDTOs;
@@ -72,11 +75,14 @@ namespace OpenNos.DAL.DAO
         {
             try
             {
-                using (var context = DataAccessHelper.CreateContext())
+                using (OpenNosContext context = DataAccessHelper.CreateContext())
                 {
-                    var partnerSkill = context.PartnerSkill.FirstOrDefault(s => s.PartnerSkillId == partnerSkillId);
+                    PartnerSkill partnerSkill = context.PartnerSkill.FirstOrDefault(s => s.PartnerSkillId == partnerSkillId);
 
-                    if (partnerSkill == null) return DeleteResult.NotFound;
+                    if (partnerSkill == null)
+                    {
+                        return DeleteResult.NotFound;
+                    }
 
                     context.PartnerSkill.Remove(partnerSkill);
                     context.SaveChanges();
@@ -92,6 +98,5 @@ namespace OpenNos.DAL.DAO
             return DeleteResult.Error;
         }
 
-        #endregion
     }
 }

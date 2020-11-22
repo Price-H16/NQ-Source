@@ -15,6 +15,9 @@ namespace OpenNos.Data
 
         public byte TattooLevel { get; set; }
 
+        public bool IsPartnerSkill { get; set; }
+
+
         #endregion
     }
 }

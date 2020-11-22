@@ -11,16 +11,16 @@ namespace OpenNos.GameObject.Helpers
 
         public static Skill ConvertToNormalSkill(PartnerSkill partnerSkill)
         {
-            var skill = new Skill(partnerSkill.Skill)
+            Skill skill = new Skill(partnerSkill.Skill)
             {
                 PartnerSkill = partnerSkill
             };
 
-            var multiplier = GetMultiplierBySkillLevel(partnerSkill.Level);
+            double multiplier = GetMultiplierBySkillLevel(partnerSkill.Level);
 
             partnerSkill.Skill.BCards.ToList().ForEach(bcard =>
             {
-                var newBCard = new BCard(bcard)
+                BCard newBCard = new BCard(bcard)
                 {
                     IsPartnerSkillBCard = true
                 };
@@ -35,9 +35,17 @@ namespace OpenNos.GameObject.Helpers
                         break;
 
                     case CardType.Buff:
-                    {
-                        if (newBCard.SecondData != 7 /* Blackout */) newBCard.SecondData += partnerSkill.Level - 1;
-                    }
+                        {
+                            if (newBCard.SecondData < 2560 && newBCard.SecondData > 1999)
+                            {
+                                newBCard.SecondData += (partnerSkill.Level - 1);
+                            }
+
+                            if (newBCard.SecondData != 7 /* Blackout */)
+                            {
+                                newBCard.SecondData += (partnerSkill.Level - 1);
+                            }
+                        }
                         break;
 
                     default:

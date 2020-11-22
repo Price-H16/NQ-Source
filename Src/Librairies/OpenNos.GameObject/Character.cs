@@ -5342,8 +5342,22 @@ namespace OpenNos.GameObject
 
         public CharacterSkill GetSkillByCastId(short castId) => GetSkills()?.FirstOrDefault(s => s.Skill?.CastId == castId);
 
-        public List<CharacterSkill> GetSkills()=> UseSp? SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200).Concat(Skills.Where(s => s.IsTattoo))).ToList() : Skills.GetAllItems();
-
+        //public List<CharacterSkill> GetSkills()=> UseSp? SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200).Concat(Skills.Where(s => s.IsTattoo))).ToList() : Skills.GetAllItems();
+        public List<CharacterSkill> GetSkills()
+        {
+            var list = new List<CharacterSkill>();
+            if (UseSp)
+            {
+                list.AddRange(SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200)).ToList());
+                list.AddRange(Skills.GetAllItems().Where(sd => sd.IsPartnerSkill).ToList());
+                list.AddRange(Skills.GetAllItems().Where(sd => sd.IsTattoo).ToList());
+            }
+            else
+            {
+                list.AddRange(Skills.GetAllItems());
+            }
+            return list;
+        }
         public string GetSqst()
         {
             List<QuestLogDTO> questLogs = DAOFactory.QuestLogDAO.LoadByCharacterId(CharacterId).ToList();

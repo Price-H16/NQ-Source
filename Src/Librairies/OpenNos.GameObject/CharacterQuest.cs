@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject.Networking;
@@ -74,7 +75,7 @@ namespace OpenNos.GameObject
             {
                 case QuestType.Capture1:
                 case QuestType.Capture2:
-                    type = "capturing";
+                    type = (Language.Instance.GetMessageFromKey("CAPTURING"));
                     objectiveName = ServerManager.GetNpcMonster((short) GetObjectiveByIndex(index).Data).Name;
                     break;
 
@@ -82,12 +83,13 @@ namespace OpenNos.GameObject
                 case QuestType.Collect2:
                 case QuestType.Collect3:
                 case QuestType.Collect4:
+                case QuestType.Collect5:
                     objectiveName = ServerManager.GetItem((short) GetObjectiveByIndex(index).Data).Name;
-                    type = "collecting";
+                    type = (Language.Instance.GetMessageFromKey("COLLECTING"));
                     break;
 
                 case QuestType.Hunt:
-                    type = "hunting";
+                    type = (Language.Instance.GetMessageFromKey("HUNTING"));
                     objectiveName = ServerManager.GetNpcMonster((short) GetObjectiveByIndex(index).Data).Name;
                     break;
             }

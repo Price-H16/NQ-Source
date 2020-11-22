@@ -66,26 +66,22 @@ namespace OpenNos.GameObject.Helpers
                     switch (type)
                     {
                         case EventType.XPRATE:
-                            ServerManager.Shout(
-                                    $"XPRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateXP}");
+                            ServerManager.Shout($"XPRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateXP}");
                             ServerManager.Instance.Configuration.RateXP = value;
                             break;
 
                         case EventType.DROPRATE:
-                            ServerManager.Shout(
-                                    $"DRORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateDrop}");
+                            ServerManager.Shout($"DRORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateDrop}");
                             ServerManager.Instance.Configuration.RateDrop = value;
                             break;
 
                         case EventType.FAIRYRATE:
-                            ServerManager.Shout(
-                                    $"FAIRYRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateFairyXP}");
+                            ServerManager.Shout($"FAIRYRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateFairyXP}");
                             ServerManager.Instance.Configuration.RateFairyXP = value;
                             break;
 
                         case EventType.HERORATE:
-                            ServerManager.Shout(
-                                    $"HERORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateHeroicXP}");
+                            ServerManager.Shout($"HERORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateHeroicXP}");
                             ServerManager.Instance.Configuration.RateHeroicXP = value;
                             break;
 
@@ -156,7 +152,7 @@ namespace OpenNos.GameObject.Helpers
                             break;
 
                         case EventType.RAINBOWBATTLE:
-                            if (ServerManager.Instance.ChannelId == 4)
+                            if (ServerManager.Instance.ChannelId == 1)
                             {
                                 Event.RAINBOWBATTLE.RainbowBattle.GenerateEvent();
                             }

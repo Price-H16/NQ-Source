@@ -16,6 +16,7 @@ namespace OpenNos.Mapper.Mappers
             output.SkillVNum = input.SkillVNum;
             output.IsTattoo = input.IsTattoo;
             output.TattooLevel = input.TattooLevel;
+            output.IsPartnerSkill = input.IsPartnerSkill;
             return true;
         }
 
@@ -28,6 +29,7 @@ namespace OpenNos.Mapper.Mappers
             output.SkillVNum = input.SkillVNum;
             output.IsTattoo = input.IsTattoo;
             output.TattooLevel = input.TattooLevel;
+            output.IsPartnerSkill = input.IsPartnerSkill;
             return true;
         }
 

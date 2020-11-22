@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OpenNos.Domain;
+using OpenNos.GameObject.Networking;
+using System;
 using System.Collections.Generic;
 
 namespace OpenNos.GameObject.Helpers
@@ -27,7 +29,7 @@ namespace OpenNos.GameObject.Helpers
             LoadTrainerUpgradeHits();
             LoadTrainerUpRate();
             LoadTrainerDownRate();
-            LoadPartnerSkills();
+            //LoadPartnerSkills();
         }
 
         #endregion
@@ -43,6 +45,9 @@ namespace OpenNos.GameObject.Helpers
         public int[,] MagicDefenseData { get; private set; }
 
         // Vnum - CardId
+
+        public Dictionary<int, int> PartnerSpBuffs { get; set; }
+
         public Dictionary<int, int> MateBuffs { get; set; }
 
         public int[,] MaxDamageData { get; private set; }
@@ -55,7 +60,7 @@ namespace OpenNos.GameObject.Helpers
 
         public int[,] MpData { get; private set; }
 
-        public List<short> PartnerSpBuffs { get; set; }
+        //public List<short> PartnerSpBuffs { get; set; }
 
         public Dictionary<int, int> PartoBuffs { get; set; }
 
@@ -348,8 +353,10 @@ namespace OpenNos.GameObject.Helpers
                 1515, // Amiral (le chat chelou)
                 1516, // roi des pirates pussifer
                 1524, // Miaou fou
-                1575, 
-                1576
+                1575, // Marié Bouhmiaou
+                1576, // Marie Bouhmiaou
+                1601, // Mechamiaou
+                1627, // Boris the polar bear
             };
         }
 
@@ -435,14 +442,115 @@ namespace OpenNos.GameObject.Helpers
 
             foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
         }
+        public void AddPartnerSkill(ClientSession session, Mate mate)
+        {
+            NpcMonster mateNpc = ServerManager.GetNpcMonster(mate.NpcMonsterVNum);
 
+            if (session == null || mate == null)
+            {
+                return;
+            }
+
+            if (mate.MateType != MateType.Partner)
+            {
+                return;
+            }
+
+            if (mateNpc.Skills != null)
+            {
+                foreach (NpcMonsterSkill skill in mateNpc.Skills)
+                {
+                    if (mate.Level >= skill.Skill.LevelMinimum)
+                    {
+                        CharacterSkill characterSkillMate = new CharacterSkill
+                        {
+                            SkillVNum = skill.SkillVNum,
+                            IsPartnerSkill = true,
+                            CharacterId = session.Character.CharacterId
+                        };
+                        session.Character.Skills[skill.SkillVNum] = new CharacterSkill(characterSkillMate);
+                    }
+                }
+            }
+
+
+            session.SendPacket(session.Character.GenerateSki());
+            session.SendPackets(session.Character.GenerateQuicklist());
+            session.SendPacket(session.Character.GenerateStat());
+            session.SendPackets(session.Character.GenerateStatChar());
+            session.CurrentMapInstance?.Broadcast(session.Character.GenerateEq());
+        }
+
+        #region PartnerSPSkills
+
+        public short GetUpgradeType(short morph)
+        {
+            switch (morph)
+            {
+                case 2043:
+                    return 1;
+                case 2044:
+                    return 2;
+                case 2045:
+                    return 3;
+                case 2046:
+                    return 4;
+                case 2047:
+                    return 5;
+                case 2048:
+                    return 6;
+                case 2310:
+                    return 7;
+                case 2317:
+                    return 8;
+                case 2323:
+                    return 9;
+                case 2325:
+                    return 10;
+                case 2333:
+                    return 11;
+                case 2334:
+                    return 12;
+                case 2343:
+                    return 13;
+                case 2355:
+                    return 14;
+                case 2356:
+                    return 15;
+                case 2367:
+                    return 16;
+                case 2368:
+                    return 17;
+                case 2371:
+                    return 18;
+                case 2372:
+                    return 19;
+                case 2373:
+                    return 20;
+                case 2374:
+                    return 21;
+                case 2376:
+                    return 22;
+                case 2377:
+                    return 23;
+                case 2378:
+                    return 24;
+                case 2537:
+                    return 25;
+                case 2538:
+                    return 26;
+            }
+            return -1;
+        }
+
+        #endregion
         private void LoadMateBuffs()
         {
             MateBuffs = new Dictionary<int, int>
             {
-                //{501, 4066}, // Justin
-                //{500, 4067}, // Kupei
-                //{503, 4068}, // Felix
+                {501, 4066}, // Justin
+                {500, 4067}, // Kupei
+                {503, 4068}, // Felix
                 {501, 4066}, // Seina
                 {500, 4067}, // Daisy
                 {503, 4068}, // Whitney
@@ -475,57 +583,71 @@ namespace OpenNos.GameObject.Helpers
                 {2709, 711}, // SUPER FORTUNE BUSHTAIL
                 {2710, 783} // MR TRIKLES
             };
+
+            PartnerSpBuffs = new Dictionary<int, int>
+            {
+                { 4825, 3000 },
+                { 8247, 3000 }, //VENUS 
+                { 4326, 3007 },
+                { 8300, 3007 }, //BONE WARRIOR
+                { 4405, 3014 },
+                { 8367, 3014 }, // YUNA
+                { 4413, 3021 },
+                { 8375, 3021 }, // AMORA
+                { 4446, 3028 },
+                { 8398, 3028 } // PERTI
+            };
         }
 
-        private void LoadPartnerSkills()
-        {
-            PartoBuffs = new Dictionary<int, int>
-            {
-                {4825, 3000}, // Vénus
-                {4326, 3007}, // Guerrier Squelettique Ragnar
-                {4405, 3014}, // Yuna
-                {4413, 3021}, // Cupidia
-                {4446, 3028} // Perti
-            };
-            PartnerSpBuffs = new List<short>
-            {
-                3000,
-                3001,
-                3002,
-                3003,
-                3004,
-                3005,
-                3006,
-                3007,
-                3008,
-                3009,
-                3010,
-                3011,
-                3012,
-                3013,
-                3014,
-                3015,
-                3016,
-                3017,
-                3018,
-                3019,
-                3020,
-                3021,
-                3022,
-                3023,
-                3024,
-                3025,
-                3026,
-                3027,
-                3028,
-                3029,
-                3030,
-                3031,
-                3032,
-                3033,
-                3034
-            };
-        }
+        //private void LoadPartnerSkills()
+        //{
+        //    PartoBuffs = new Dictionary<int, int>
+        //    {
+        //        {4825, 3000}, // Vénus
+        //        {4326, 3007}, // Guerrier Squelettique Ragnar
+        //        {4405, 3014}, // Yuna
+        //        {4413, 3021}, // Cupidia
+        //        {4446, 3028} // Perti
+        //    };
+        //    PartnerSpBuffs = new List<short>
+        //    {
+        //        3000,
+        //        3001,
+        //        3002,
+        //        3003,
+        //        3004,
+        //        3005,
+        //        3006,
+        //        3007,
+        //        3008,
+        //        3009,
+        //        3010,
+        //        3011,
+        //        3012,
+        //        3013,
+        //        3014,
+        //        3015,
+        //        3016,
+        //        3017,
+        //        3018,
+        //        3019,
+        //        3020,
+        //        3021,
+        //        3022,
+        //        3023,
+        //        3024,
+        //        3025,
+        //        3026,
+        //        3027,
+        //        3028,
+        //        3029,
+        //        3030,
+        //        3031,
+        //        3032,
+        //        3033,
+        //        3034
+        //    };
+        //}
 
         #endregion
     }

@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class QuestDTO : MappingBaseDTO
+    public class QuestDTO
     {
         #region Properties
 

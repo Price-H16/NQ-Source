@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class BazaarItemDTO : MappingBaseDTO
+    public class BazaarItemDTO
     {
         #region Properties
 

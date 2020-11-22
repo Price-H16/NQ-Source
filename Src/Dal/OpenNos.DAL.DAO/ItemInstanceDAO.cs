@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using OpenNos.Core;
 using OpenNos.DAL.EF;
-using OpenNos.DAL.EF.DAO.Base;
 using OpenNos.DAL.EF.Helpers;
 using OpenNos.DAL.Interface;
 using OpenNos.Data;
@@ -14,15 +12,10 @@ using OpenNos.Mapper.Mappers;
 
 namespace OpenNos.DAL.DAO
 {
-    public class ItemInstanceDAO : SynchronizableBaseDAO<ItemInstance, ItemInstanceDTO>, IItemInstanceDAO
+    public class ItemInstanceDAO : IItemInstanceDAO
     {
         #region Methods
 
-        private readonly IItemInstanceMappingTypes _mappingTypes;
-        public ItemInstanceDAO(IMapper mapper, IItemInstanceMappingTypes mappingTypes) : base(mapper)
-        {
-            _mappingTypes = mappingTypes;
-        }
         public virtual DeleteResult Delete(Guid id)
         {
             using (var context = DataAccessHelper.CreateContext())
@@ -53,10 +46,7 @@ namespace OpenNos.DAL.DAO
                 return DeleteResult.Error;
             }
         }
-        public interface IItemInstanceMappingTypes
-        {
-            List<(Type, Type)> Types { get; }
-        }
+
         public DeleteResult DeleteGuidList(IEnumerable<Guid> guids)
         {
             using (var context = DataAccessHelper.CreateContext())

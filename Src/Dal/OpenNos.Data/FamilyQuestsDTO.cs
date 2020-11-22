@@ -2,7 +2,7 @@
 
 namespace OpenNos.Data
 {
-    public class FamilyQuestsDTO : MappingBaseDTO
+    public class FamilyQuestsDTO
     {
         [Key]
         public long FamilyQuestsId { get; set; }

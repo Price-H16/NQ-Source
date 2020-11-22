@@ -2,7 +2,6 @@
 using OpenNos.DAL;
 using OpenNos.Data;
 using OpenNos.Domain;
-using OpenNos.GameObject.Configuration;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ACT6;
 using OpenNos.GameObject.Extensions;
@@ -40,8 +39,6 @@ namespace OpenNos.GameObject.Networking
         public bool InShutdown;
         public bool ShutdownStop;
         public ThreadSafeSortedList<long, Group> ThreadSafeGroupList;
-
-        public GameScheduledEventsConfiguration GameScheduledEventsConfiguration;
 
         public static List<Card> Cards { get; set; }
 
@@ -1800,14 +1797,13 @@ namespace OpenNos.GameObject.Networking
             }
         }
 
-        public void Initialize(GameScheduledEventsConfiguration gameScheduledConf)
+        public void Initialize()
         {
-            Schedules = GameScheduledEventsConfiguration.ScheduledEvents;
-            GameScheduledEventsConfiguration = gameScheduledConf;
             InitAllProperty();
             LoadBossEntities();
+
             // Load Configuration
-            //LoadEvent();
+            LoadEvent();
             LoadItem();
             LoadBoxItem();
             LoadDropMonster();
@@ -2233,11 +2229,11 @@ namespace OpenNos.GameObject.Networking
                 _monsterDrops.Sum(i => i.Value.Count)));
         }
 
-        //public void LoadEvent()
-        //{
-        //    Schedules = ConfigurationManager.GetSection("eventScheduler") as List<Schedule>;
-        //    StartedEvents = new List<EventType>();
-        //}
+        public void LoadEvent()
+        {
+            Schedules = ConfigurationManager.GetSection("eventScheduler") as List<Schedule>;
+            StartedEvents = new List<EventType>();
+        }
 
         public void LoadItem()
         {
@@ -3134,11 +3130,9 @@ namespace OpenNos.GameObject.Networking
 
         private void LaunchEvents()
         {
-            StartedEvents = new List<EventType>();
             ThreadSafeGroupList = new ThreadSafeSortedList<long, Group>();
 
             Observable.Interval(TimeSpan.FromMinutes(5)).Subscribe(x => SaveAllProcess());
-            Observable.Interval(TimeSpan.FromMinutes(5)).Subscribe(x => { DAOFactory.BazaarItemDAO.RemoveOutDated(); });
             Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(x => Act4Process());
             Observable.Interval(TimeSpan.FromSeconds(2)).Subscribe(x => GroupProcess());
             Observable.Interval(TimeSpan.FromMinutes(1)).Subscribe(x => Act4FlowerProcess());
@@ -3151,7 +3145,7 @@ namespace OpenNos.GameObject.Networking
             EventHelper.Instance.RunEvent(new EventContainer(
                 GetMapInstance(GetBaseMapInstanceIdByMapId(98)), EventActionType.NPCSEFFECTCHANGESTATE,
                 true));
-            foreach (Schedule schedule in Schedules)
+            foreach (var schedule in Schedules)
             {
                 Observable.Timer(
                         TimeSpan.FromSeconds(EventHelper.GetMilisecondsBeforeTime(schedule.Time).TotalSeconds),

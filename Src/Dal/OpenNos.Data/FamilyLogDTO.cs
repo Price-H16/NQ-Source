@@ -4,7 +4,7 @@ using OpenNos.Domain;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class FamilyLogDTO : MappingBaseDTO
+    public class FamilyLogDTO
     {
         #region Properties
 

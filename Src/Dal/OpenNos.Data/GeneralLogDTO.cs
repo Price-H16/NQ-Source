@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class GeneralLogDTO : MappingBaseDTO
+    public class GeneralLogDTO
     {
         #region Properties
 

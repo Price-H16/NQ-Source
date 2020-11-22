@@ -4,7 +4,7 @@ using OpenNos.Domain;
 namespace OpenNos.Data
 {
     [Serializable]
-    public class NpcMonsterDTO : MappingBaseDTO
+    public class NpcMonsterDTO
     {
         #region Properties
 

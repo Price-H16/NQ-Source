@@ -60,10 +60,6 @@ namespace OpenNos.Master.Library.Client
 
         public event EventHandler CharacterDisconnectedEvent;
 
-        public event EventHandler MailSent;
-
-        public event EventHandler AuthorityChange;
-
         public event EventHandler FamilyRefresh;
 
         public event EventHandler GlobalEvent;

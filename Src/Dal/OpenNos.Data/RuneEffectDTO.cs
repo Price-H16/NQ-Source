@@ -7,7 +7,7 @@ using static OpenNos.Domain.BCardType;
 
 namespace OpenNos.Data
 {
-    public class RuneEffectDTO : MappingBaseDTO
+    public class RuneEffectDTO
     {
         public int RuneEffectId { get; set; }
 

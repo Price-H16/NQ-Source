@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class MinilandObjectDTO : MappingBaseDTO
+    public class MinilandObjectDTO
     {
         #region Properties
 

@@ -1,15 +1,10 @@
-﻿// WingsEmu
-// 
-// Developed by NosWings Team
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
 using OpenNos.DAL.Interface;
 using OpenNos.Data;
 
-
-namespace OpenNos.DAL.EF.DAO.Base
+namespace OpenNos.DAL.DAO.Base
 {
     public abstract class MappingBaseDao<TEntity, TDto> : IMappingBaseDAO
     where TDto : MappingBaseDTO

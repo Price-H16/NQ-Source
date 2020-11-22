@@ -81,7 +81,6 @@
     <Compile Include="Buff\Buff.cs" />
     <Compile Include="Buff\Card.cs" />
     <Compile Include="CharacterQuest.cs" />
-    <Compile Include="Configuration\GameScheduledEventsConfiguration.cs" />
     <Compile Include="Event\ACT4\Act4Raid.cs" />
     <Compile Include="Event\ACT4\Act4Ship.cs" />
     <Compile Include="Event\ACT4\CaligorRaid.cs" />
@@ -148,8 +147,8 @@
     <Compile Include="Event\MINILANDREFRESH\MinilandRefresh.cs" />
     <Compile Include="Helpers\TitleHelper.cs" />
     <Compile Include="Helpers\UserInterfaceHelper.cs" />
-    <Compile Include="Items\Instance\FusionItemExt.cs" />
-    <Compile Include="Items\TitleItem.cs" />
+    <Compile Include="Item\Instance\FusionItemExt.cs" />
+    <Compile Include="Item\TitleItem.cs" />
     <Compile Include="Networking\BasicSpamProtector.cs" />
     <Compile Include="Networking\ISpamProtector.cs" />
     <Compile Include="PartnerSp.cs" />
@@ -175,17 +174,17 @@
     <Compile Include="ExchangeInfo.cs" />
     <Compile Include="FamilyCharacter.cs" />
     <Compile Include="Helpers\MappingHelper.cs" />
-    <Compile Include="Items\FoodItem.cs" />
-    <Compile Include="Items\MagicalItem.cs" />
-    <Compile Include="Items\ProduceItem.cs" />
-    <Compile Include="Items\SnackItem.cs" />
-    <Compile Include="Items\PotionItem.cs" />
-    <Compile Include="Items\SpecialItem.cs" />
-    <Compile Include="Items\BoxItem.cs" />
-    <Compile Include="Items\TeacherItem.cs" />
-    <Compile Include="Items\UpgradeItem.cs" />
-    <Compile Include="Items\NoFunctionItem.cs" />
-    <Compile Include="Items\WearableItem.cs" />
+    <Compile Include="Item\FoodItem.cs" />
+    <Compile Include="Item\MagicalItem.cs" />
+    <Compile Include="Item\ProduceItem.cs" />
+    <Compile Include="Item\SnackItem.cs" />
+    <Compile Include="Item\PotionItem.cs" />
+    <Compile Include="Item\SpecialItem.cs" />
+    <Compile Include="Item\BoxItem.cs" />
+    <Compile Include="Item\TeacherItem.cs" />
+    <Compile Include="Item\UpgradeItem.cs" />
+    <Compile Include="Item\NoFunctionItem.cs" />
+    <Compile Include="Item\WearableItem.cs" />
     <Compile Include="Map\CharacterMapItem.cs" />
     <Compile Include="Map\Map.cs" />
     <Compile Include="Group.cs" />
@@ -204,12 +203,12 @@
     <Compile Include="Recipe.cs" />
     <Compile Include="MinilandObject.cs" />
     <Compile Include="Shop.cs" />
-    <Compile Include="Items\Item.cs" />
+    <Compile Include="Item\Item.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="PersonalShopItem.cs" />
     <Compile Include="Map\MapShop.cs" />
     <Compile Include="Map\MapItem.cs" />
-    <Compile Include="Items\Instance\ItemInstance.cs" />
+    <Compile Include="Item\Instance\ItemInstance.cs" />
     <Compile Include="Networking\ClientSession.cs" />
     <Compile Include="Networking\ServerManager.cs" />
     <Compile Include="Networking\BroadcastPacket.cs" />
@@ -304,9 +303,6 @@
     </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>4.4.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Runtime.Serialization.Primitives">
-      <Version>4.3.0</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

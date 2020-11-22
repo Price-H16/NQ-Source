@@ -1,17 +1,424 @@
+using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 using OpenNos.DAL.EF.Entities;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace OpenNos.DAL.EF
 {
     public class OpenNosContext : DbContext
     {
         #region Instantiation
-        public OpenNosContext(DbContextOptions<OpenNosContext> options) : base(options)
+
+        public OpenNosContext() : base("OpenNosContext")
         {
+            Configuration.LazyLoadingEnabled = true;
+
+            // --DO NOT DISABLE, otherwise the mapping will fail only one time access to database so
+            // no proxy generation needed, its just slowing down in our case
+            Configuration.ProxyCreationEnabled = false;
         }
 
         #endregion
+
+        #region Methods
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            // remove automatic pluralization
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+
+            modelBuilder.Entity<Account>()
+                .Property(e => e.Password)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Account>()
+                .HasMany(e => e.Character)
+                .WithRequired(e => e.Account)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Account>()
+                .HasMany(e => e.PenaltyLog)
+                .WithRequired(e => e.Account)
+                .HasForeignKey(e => e.AccountId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .Property(e => e.Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.Inventory)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.Mate)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.CharacterSkill)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.CharacterTitle)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.StaticBonus)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.CharacterRelation1)
+                .WithRequired(e => e.Character1)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.CharacterRelation2)
+                .WithRequired(e => e.Character2)
+                .HasForeignKey(e => e.RelatedCharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.StaticBuff)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.MinigameLog)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Card>()
+                .HasMany(e => e.StaticBuff)
+                .WithRequired(e => e.Card)
+                .HasForeignKey(e => e.CardId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.QuicklistEntry)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.Respawn)
+                .WithRequired(e => e.Character)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.Mail)
+                .WithRequired(e => e.Sender)
+                .HasForeignKey(e => e.SenderId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.MinilandObject)
+                .WithRequired(e => e.Character)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Character>()
+                .HasMany(e => e.Mail1)
+                .WithRequired(e => e.Receiver)
+                .HasForeignKey(e => e.ReceiverId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Family>()
+                .HasMany(e => e.FamilyLogs)
+                .WithRequired(e => e.Family)
+                .HasForeignKey(e => e.FamilyId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<FamilyCharacter>()
+                .HasRequired(e => e.Character)
+                .WithMany(e => e.FamilyCharacter)
+                .HasForeignKey(e => e.CharacterId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BazaarItem>()
+                .HasRequired(e => e.Character)
+                .WithMany(e => e.BazaarItem)
+                .HasForeignKey(e => e.SellerId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BazaarItem>()
+                .HasRequired(e => e.ItemInstance)
+                .WithMany(e => e.BazaarItem)
+                .HasForeignKey(e => e.ItemInstanceId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MinilandObject>()
+                .HasOptional(e => e.ItemInstance)
+                .WithMany(e => e.MinilandObject)
+                .HasForeignKey(e => e.ItemInstanceId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<FamilyCharacter>()
+                .HasRequired(e => e.Family)
+                .WithMany(e => e.FamilyCharacters)
+                .HasForeignKey(e => e.FamilyId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Item>()
+                .HasMany(e => e.Drop)
+                .WithRequired(e => e.Item)
+                .HasForeignKey(e => e.ItemVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Item>()
+                .HasMany(e => e.Recipe)
+                .WithRequired(e => e.Item)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Item>()
+                .HasMany(e => e.RecipeItem)
+                .WithRequired(e => e.Item)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Item>()
+                .HasMany(e => e.ItemInstances)
+                .WithRequired(e => e.Item)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Item>()
+                .HasMany(e => e.ShopItem)
+                .WithRequired(e => e.Item)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Mail>()
+                .HasOptional(e => e.Item)
+                .WithMany(e => e.Mail)
+                .HasForeignKey(e => e.AttachmentVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RollGeneratedItem>()
+                .HasRequired(e => e.OriginalItem)
+                .WithMany(e => e.RollGeneratedItem)
+                .HasForeignKey(e => e.OriginalItemVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RollGeneratedItem>()
+                .HasRequired(e => e.ItemGenerated)
+                .WithMany(e => e.RollGeneratedItem2)
+                .HasForeignKey(e => e.ItemGeneratedVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.Character)
+                .WithRequired(e => e.Map)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.MapMonster)
+                .WithRequired(e => e.Map)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Respawn>()
+                .HasRequired(e => e.Map)
+                .WithMany(e => e.Respawn)
+                .HasForeignKey(e => e.MapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Respawn>()
+                .HasRequired(e => e.RespawnMapType)
+                .WithMany(e => e.Respawn)
+                .HasForeignKey(e => e.RespawnMapTypeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RespawnMapType>()
+                .HasRequired(e => e.Map)
+                .WithMany(e => e.RespawnMapType)
+                .HasForeignKey(e => e.DefaultMapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapType>()
+                .HasOptional(e => e.RespawnMapType)
+                .WithMany(e => e.MapTypes)
+                .HasForeignKey(e => e.RespawnMapTypeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapType>()
+                .HasOptional(e => e.ReturnMapType)
+                .WithMany(e => e.MapTypes1)
+                .HasForeignKey(e => e.ReturnMapTypeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.MapNpc)
+                .WithRequired(e => e.Map)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.Portal)
+                .WithRequired(e => e.Map)
+                .HasForeignKey(e => e.DestinationMapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.Portal1)
+                .WithRequired(e => e.Map1)
+                .HasForeignKey(e => e.SourceMapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.ScriptedInstance)
+                .WithRequired(e => e.Map)
+                .HasForeignKey(e => e.MapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Map>()
+                .HasMany(e => e.Teleporter)
+                .WithRequired(e => e.Map)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BCard>()
+                .HasOptional(e => e.Skill)
+                .WithMany(e => e.BCards)
+                .HasForeignKey(e => e.SkillVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BCard>()
+                .HasOptional(e => e.NpcMonster)
+                .WithMany(e => e.BCards)
+                .HasForeignKey(e => e.NpcMonsterVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BCard>()
+                .HasOptional(e => e.Card)
+                .WithMany(e => e.BCards)
+                .HasForeignKey(e => e.CardId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<BCard>()
+                .HasOptional(e => e.Item)
+                .WithMany(e => e.BCards)
+                .HasForeignKey(e => e.ItemVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapTypeMap>()
+                .HasRequired(e => e.Map)
+                .WithMany(e => e.MapTypeMap)
+                .HasForeignKey(e => e.MapId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapTypeMap>()
+                .HasRequired(e => e.MapType)
+                .WithMany(e => e.MapTypeMap)
+                .HasForeignKey(e => e.MapTypeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapType>()
+                .HasMany(e => e.Drops)
+                .WithOptional(e => e.MapType)
+                .HasForeignKey(e => e.MapTypeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapNpc>()
+                .HasMany(e => e.Shop)
+                .WithRequired(e => e.MapNpc)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<MapNpc>()
+                .HasMany(e => e.Teleporter)
+                .WithRequired(e => e.MapNpc)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RecipeList>()
+                .HasOptional(e => e.Item)
+                .WithMany(e => e.RecipeList)
+                .HasForeignKey(e => e.ItemVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RecipeList>()
+                .HasOptional(e => e.MapNpc)
+                .WithMany(e => e.RecipeList)
+                .HasForeignKey(e => e.MapNpcId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<RecipeList>()
+                .HasRequired(e => e.Recipe)
+                .WithMany(e => e.RecipeList)
+                .HasForeignKey(e => e.RecipeId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<NpcMonster>()
+                .HasMany(e => e.Drop)
+                .WithOptional(e => e.NpcMonster)
+                .HasForeignKey(e => e.MonsterVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<NpcMonster>()
+                .HasMany(e => e.Mate)
+                .WithRequired(e => e.NpcMonster)
+                .HasForeignKey(e => e.NpcMonsterVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<NpcMonster>()
+                .HasMany(e => e.MapMonster)
+                .WithRequired(e => e.NpcMonster)
+                .HasForeignKey(e => e.MonsterVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<NpcMonster>()
+                .HasMany(e => e.MapNpc)
+                .WithRequired(e => e.NpcMonster)
+                .HasForeignKey(e => e.NpcVNum)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<NpcMonster>()
+                .HasMany(e => e.NpcMonsterSkill)
+                .WithRequired(e => e.NpcMonster)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Recipe>()
+                .HasMany(e => e.RecipeItem)
+                .WithRequired(e => e.Recipe)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Shop>()
+                .HasMany(e => e.ShopItem)
+                .WithRequired(e => e.Shop)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Shop>()
+                .HasMany(e => e.ShopSkill)
+                .WithRequired(e => e.Shop)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Skill>()
+                .HasMany(e => e.CharacterSkill)
+                .WithRequired(e => e.Skill)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Skill>()
+                .HasMany(e => e.Combo)
+                .WithRequired(e => e.Skill)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Skill>()
+                .HasMany(e => e.NpcMonsterSkill)
+                .WithRequired(e => e.Skill)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Skill>()
+                .HasMany(e => e.ShopSkill)
+                .WithRequired(e => e.Skill)
+                .WillCascadeOnDelete(false);
+        }
+
+        #endregion
+
         #region Properties
 
         public virtual DbSet<Account> Account { get; set; }
@@ -35,7 +442,7 @@ namespace OpenNos.DAL.EF
         public virtual DbSet<CharacterSkill> CharacterSkill { get; set; }
 
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
-
+        
         public virtual DbSet<CharacterVisitedMaps> CharacterVisitedMaps { get; set; }
 
         public virtual DbSet<ChatLog> ChatLogs { get; set; }
@@ -136,404 +543,6 @@ namespace OpenNos.DAL.EF
 
         public virtual DbSet<BotAuthority> BotAuthority { get; set; }
 
-
-        #endregion
-        #region Methods
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // remove automatic pluralization
-
-            modelBuilder.Entity<Account>()
-                .Property(e => e.Password)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Account>()
-                .HasMany(e => e.Character)
-                .WithOne(e => e.Account)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Account>()
-                .HasMany(e => e.PenaltyLog)
-                .WithOne(e => e.Account)
-                .HasForeignKey(e => e.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .Property(e => e.Name)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.Inventory)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.Mate)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.CharacterSkill)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.CharacterTitle)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.StaticBonus)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.CharacterRelation1)
-                .WithOne(e => e.Character1)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.CharacterRelation2)
-                .WithOne(e => e.Character2)
-                .HasForeignKey(e => e.RelatedCharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.StaticBuff)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.MinigameLog)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Card>()
-                .HasMany(e => e.StaticBuff)
-                .WithOne(e => e.Card)
-                .HasForeignKey(e => e.CardId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.QuicklistEntry)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.Respawn)
-                .WithOne(e => e.Character)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.Mail)
-                .WithOne(e => e.Sender)
-                .HasForeignKey(e => e.SenderId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.MinilandObject)
-                .WithOne(e => e.Character)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Character>()
-                .HasMany(e => e.Mail1)
-                .WithOne(e => e.Receiver)
-                .HasForeignKey(e => e.ReceiverId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Family>()
-                .HasMany(e => e.FamilyLogs)
-                .WithOne(e => e.Family)
-                .HasForeignKey(e => e.FamilyId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<FamilyCharacter>()
-                .HasOne(e => e.Character)
-                .WithMany(e => e.FamilyCharacter)
-                .HasForeignKey(e => e.CharacterId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BazaarItem>()
-                .HasOne(e => e.Character)
-                .WithMany(e => e.BazaarItem)
-                .HasForeignKey(e => e.SellerId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BazaarItem>()
-                .HasOne(e => e.ItemInstance)
-                .WithMany(e => e.BazaarItem)
-                .HasForeignKey(e => e.ItemInstanceId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MinilandObject>()
-                .HasOne(e => e.ItemInstance)
-                .WithMany(e => e.MinilandObject)
-                .HasForeignKey(e => e.ItemInstanceId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<FamilyCharacter>()
-                .HasOne(e => e.Family)
-                .WithMany(e => e.FamilyCharacters)
-                .HasForeignKey(e => e.FamilyId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Item>()
-                .HasMany(e => e.Drop)
-                .WithOne(e => e.Item)
-                .HasForeignKey(e => e.ItemVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Item>()
-                .HasMany(e => e.Recipe)
-                .WithOne(e => e.Item)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Item>()
-                .HasMany(e => e.RecipeItem)
-                .WithOne(e => e.Item)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Item>()
-                .HasMany(e => e.ItemInstances)
-                .WithOne(e => e.Item)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Item>()
-                .HasMany(e => e.ShopItem)
-                .WithOne(e => e.Item)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Mail>()
-                .HasOne(e => e.Item)
-                .WithMany(e => e.Mail)
-                .HasForeignKey(e => e.AttachmentVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RollGeneratedItem>()
-                .HasOne(e => e.OriginalItem)
-                .WithMany(e => e.RollGeneratedItem)
-                .HasForeignKey(e => e.OriginalItemVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RollGeneratedItem>()
-                .HasOne(e => e.ItemGenerated)
-                .WithMany(e => e.RollGeneratedItem2)
-                .HasForeignKey(e => e.ItemGeneratedVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.Character)
-                .WithOne(e => e.Map)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.MapMonster)
-                .WithOne(e => e.Map)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Respawn>()
-                .HasOne(e => e.Map)
-                .WithMany(e => e.Respawn)
-                .HasForeignKey(e => e.MapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Respawn>()
-                .HasOne(e => e.RespawnMapType)
-                .WithMany(e => e.Respawn)
-                .HasForeignKey(e => e.RespawnMapTypeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RespawnMapType>()
-                .HasOne(e => e.Map)
-                .WithMany(e => e.RespawnMapType)
-                .HasForeignKey(e => e.DefaultMapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapType>()
-                .HasOne(e => e.RespawnMapType)
-                .WithMany(e => e.MapTypes)
-                .HasForeignKey(e => e.RespawnMapTypeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapType>()
-                .HasOne(e => e.ReturnMapType)
-                .WithMany(e => e.MapTypes1)
-                .HasForeignKey(e => e.ReturnMapTypeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.MapNpc)
-                .WithOne(e => e.Map)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.Portal)
-                .WithOne(e => e.Map)
-                .HasForeignKey(e => e.DestinationMapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.Portal1)
-                .WithOne(e => e.Map1)
-                .HasForeignKey(e => e.SourceMapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.ScriptedInstance)
-                .WithOne(e => e.Map)
-                .HasForeignKey(e => e.MapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Map>()
-                .HasMany(e => e.Teleporter)
-                .WithOne(e => e.Map)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BCard>()
-                .HasOne(e => e.Skill)
-                .WithMany(e => e.BCards)
-                .HasForeignKey(e => e.SkillVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BCard>()
-                .HasOne(e => e.NpcMonster)
-                .WithMany(e => e.BCards)
-                .HasForeignKey(e => e.NpcMonsterVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BCard>()
-                .HasOne(e => e.Card)
-                .WithMany(e => e.BCards)
-                .HasForeignKey(e => e.CardId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BCard>()
-                .HasOne(e => e.Item)
-                .WithMany(e => e.BCards)
-                .HasForeignKey(e => e.ItemVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapTypeMap>()
-                .HasOne(e => e.Map)
-                .WithMany(e => e.MapTypeMap)
-                .HasForeignKey(e => e.MapId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapTypeMap>()
-                .HasOne(e => e.MapType)
-                .WithMany(e => e.MapTypeMap)
-                .HasForeignKey(e => e.MapTypeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapType>()
-                .HasMany(e => e.Drops)
-                .WithOne(e => e.MapType)
-                .HasForeignKey(e => e.MapTypeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapNpc>()
-                .HasMany(e => e.Shop)
-                .WithOne(e => e.MapNpc)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<MapNpc>()
-                .HasMany(e => e.Teleporter)
-                .WithOne(e => e.MapNpc)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RecipeList>()
-                .HasOne(e => e.Item)
-                .WithMany(e => e.RecipeList)
-                .HasForeignKey(e => e.ItemVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RecipeList>()
-                .HasOne(e => e.MapNpc)
-                .WithMany(e => e.RecipeList)
-                .HasForeignKey(e => e.MapNpcId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<RecipeList>()
-                .HasOne(e => e.Recipe)
-                .WithMany(e => e.RecipeList)
-                .HasForeignKey(e => e.RecipeId)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NpcMonster>()
-                .HasMany(e => e.Drop)
-                .WithOne(e => e.NpcMonster)
-                .HasForeignKey(e => e.MonsterVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NpcMonster>()
-                .HasMany(e => e.Mate)
-                .WithOne(e => e.NpcMonster)
-                .HasForeignKey(e => e.NpcMonsterVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NpcMonster>()
-                .HasMany(e => e.MapMonster)
-                .WithOne(e => e.NpcMonster)
-                .HasForeignKey(e => e.MonsterVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NpcMonster>()
-                .HasMany(e => e.MapNpc)
-                .WithOne(e => e.NpcMonster)
-                .HasForeignKey(e => e.NpcVNum)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NpcMonster>()
-                .HasMany(e => e.NpcMonsterSkill)
-                .WithOne(e => e.NpcMonster)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Recipe>()
-                .HasMany(e => e.RecipeItem)
-                .WithOne(e => e.Recipe)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Shop>()
-                .HasMany(e => e.ShopItem)
-                .WithOne(e => e.Shop)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Shop>()
-                .HasMany(e => e.ShopSkill)
-                .WithOne(e => e.Shop)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(e => e.CharacterSkill)
-                .WithOne(e => e.Skill)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(e => e.Combo)
-                .WithOne(e => e.Skill)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(e => e.NpcMonsterSkill)
-                .WithOne(e => e.Skill)
-                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Skill>()
-                .HasMany(e => e.ShopSkill)
-                .WithOne(e => e.Skill)
-                 .OnDelete(DeleteBehavior.Restrict);
-        }
 
         #endregion
     }

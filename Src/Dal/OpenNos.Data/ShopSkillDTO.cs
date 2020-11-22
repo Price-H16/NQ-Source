@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class ShopSkillDTO : MappingBaseDTO
+    public class ShopSkillDTO
     {
         #region Properties
 

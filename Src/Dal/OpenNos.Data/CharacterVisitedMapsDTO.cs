@@ -1,6 +1,6 @@
 ﻿namespace OpenNos.Data
 {
-    public class CharacterVisitedMapDTO : MappingBaseDTO
+    public class CharacterVisitedMapDTO
     {
         public long CharacterVisitedMapId { get; set; }
         

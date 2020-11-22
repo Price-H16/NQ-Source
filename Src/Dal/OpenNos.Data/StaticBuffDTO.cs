@@ -3,7 +3,7 @@
 namespace OpenNos.Data
 {
     [Serializable]
-    public class StaticBuffDTO : MappingBaseDTO
+    public class StaticBuffDTO
     {
         #region Properties
 

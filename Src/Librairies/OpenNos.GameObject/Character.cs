@@ -5523,6 +5523,7 @@ namespace OpenNos.GameObject
                         if (newItem.Item.ItemType == ItemType.Shell)
                         {
                             newItem.Upgrade = (byte) ServerManager.RandomNumber(50, 81);
+                            Session.Character.SaveEq();
                         }
 
                         if (newItem.Item.EquipmentSlot == EquipmentType.Gloves || newItem.Item.EquipmentSlot == EquipmentType.Boots)
@@ -5537,6 +5538,13 @@ namespace OpenNos.GameObject
                         List<ItemInstance> newInv = Inventory.AddToInventory(newItem);
                         if (newInv.Count > 0)
                         {
+                            if (newItem.Item.IsHeroic && newItem.Item.ItemType == ItemType.Armor || newItem.Item.ItemType == ItemType.Weapon && newItem.Rare > 0)
+                            {
+                                newItem.GenerateHeroicShell(RarifyProtection.RandomHeroicAmulet);
+                                newItem.SetRarityPoint();
+                                Session.Character.SaveEq();
+
+                            }
                             Session.SendPacket(GenerateSay($"{Language.Instance.GetMessageFromKey("ITEM_ACQUIRED")}: {newItem.Item.Name} x {amount}",10));
                         }
                         else if (MailList.Count(s => s.Value.AttachmentVNum != null) < 40)
@@ -5965,12 +5973,12 @@ namespace OpenNos.GameObject
             {
                 inventory.CharacterId = CharacterId;
                 Inventory[inventory.Id] = new ItemInstance(inventory);
-                /*ItemInstance iteminstance = inventory as ItemInstance;
+                ItemInstance iteminstance = inventory as ItemInstance;
                 iteminstance?.ShellEffects.Clear();
-                iteminstance?.ShellEffects.AddRange(DAOFactory.ShellEffectDAO.LoadByEquipmentSerialId(iteminstance.EquipmentSerialId));*/
+                iteminstance?.ShellEffects.AddRange(DAOFactory.ShellEffectDAO.LoadByEquipmentSerialId(iteminstance.EquipmentSerialId));
             }
 
-            /*ItemInstance ring = Inventory.LoadBySlotAndType((byte)EquipmentType.Ring, InventoryType.Wear);
+            ItemInstance ring = Inventory.LoadBySlotAndType((byte)EquipmentType.Ring, InventoryType.Wear);
             ItemInstance bracelet = Inventory.LoadBySlotAndType((byte)EquipmentType.Bracelet, InventoryType.Wear);
             ItemInstance necklace = Inventory.LoadBySlotAndType((byte)EquipmentType.Necklace, InventoryType.Wear);
             CellonOptions.Clear();
@@ -5985,7 +5993,7 @@ namespace OpenNos.GameObject
             if (necklace != null)
             {
                 CellonOptions.AddRange(necklace.CellonOptions);
-            }*/
+            }
         }
 
         public void LoadMail()
@@ -6659,7 +6667,72 @@ namespace OpenNos.GameObject
             DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(it.ShellEffects, it.EquipmentSerialId);
             DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(it.CellonOptions, it.EquipmentSerialId);
         }
+        public void SaveEq()
+        {
+            try
+            {
+                AccountDTO account = Session.Account;
+                DAOFactory.AccountDAO.InsertOrUpdate(ref account);
 
+                CharacterDTO character = DeepCopy();
+                DAOFactory.CharacterDAO.InsertOrUpdate(ref character);
+
+
+                List<ItemInstance> inventories = Inventory.GetAllItems();
+
+                List<ItemInstance> saveInventory = inventories.Where(s => s.Type != InventoryType.Bazaar && s.Type != InventoryType.FamilyWareHouse).ToList();
+
+                if (Inventory != null)
+                {
+                    lock (Inventory)
+
+
+
+
+                        foreach (ItemInstance itemInstance in saveInventory)
+                        {
+                            if (!(itemInstance is ItemInstance instance))
+                            {
+                                continue;
+                            }
+                            if (!instance.ShellEffects.Any())
+                            {
+                                continue;
+                            }
+                            if (itemInstance.EquipmentSerialId != null)
+                            {
+                                DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(itemInstance.EquipmentSerialId);
+                                DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(itemInstance.ShellEffects, itemInstance.EquipmentSerialId);
+                                instance.ShellEffects.ForEach(s =>
+                                {
+                                    s.EquipmentSerialId = instance.EquipmentSerialId;
+                                    DAOFactory.ShellEffectDAO.InsertOrUpdate(s);
+                                });
+                            }
+                        }
+                }
+            }
+
+            catch (Exception e)
+            {
+                Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", e);
+            }
+        }
+        public void Savemates()
+        {
+            IEnumerable<long> currentlySavedMates = DAOFactory.MateDAO.LoadByCharacterId(CharacterId).Select(s => s.MateId);
+
+            foreach (long matesToDeleteId in currentlySavedMates.Except(Mates.Select(s => s.MateId)))
+            {
+                DAOFactory.MateDAO.Delete(matesToDeleteId);
+            }
+
+            foreach (Mate mate in Mates)
+            {
+                MateDTO matesave = mate;
+                DAOFactory.MateDAO.InsertOrUpdate(ref matesave);
+            }
+        }
         public void Save()
         {
             Logger.LogUserEvent("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "START");
@@ -6922,6 +6995,7 @@ namespace OpenNos.GameObject
                     SenderMorphId = Morph == 0 ? (short) -1 : (short) (Morph > short.MaxValue ? 0 : Morph)
                 };
                 MailServiceClient.Instance.SendMail(mail);
+                Session.Character.SaveEq();
             }
         }
 

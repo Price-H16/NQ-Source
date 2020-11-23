@@ -255,7 +255,7 @@ namespace OpenNos.World
                 MailServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);
                 ConfigurationServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);
                 ServerManager.Instance.Configuration = ConfigurationServiceClient.Instance.GetConfigurationObject();
-
+                //ServerManager.Instance.MallApi = new MallAPIHelper(ServerManager.Instance.Configuration.MallBaseURL);
                 ServerManager.Instance.SynchronizeSheduling();
             }
             else

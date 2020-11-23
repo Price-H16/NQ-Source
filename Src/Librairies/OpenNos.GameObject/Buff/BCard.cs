@@ -9,6 +9,7 @@ using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject._BCards.Event;
 using OpenNos.GameObject.Battle;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.PathFinder;
@@ -17,6 +18,8 @@ namespace OpenNos.GameObject
 {
     public class BCard : BCardDTO
     {
+        public Card BuffCard => ServerManager.GetCard((short)SecondData);
+
         #region Instantiation
 
         public BCard()

@@ -7,6 +7,7 @@ using OpenNos.Core.Extensions;
 using OpenNos.DAL;
 using OpenNos.Data;
 using OpenNos.Domain;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Extension.Inventory;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;

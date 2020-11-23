@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OpenNos.Domain;
+using OpenNos.GameObject.Networking;
+using System;
 using System.Collections.Generic;
 
 namespace OpenNos.GameObject.Helpers
@@ -27,7 +29,6 @@ namespace OpenNos.GameObject.Helpers
             LoadTrainerUpgradeHits();
             LoadTrainerUpRate();
             LoadTrainerDownRate();
-            LoadPartnerSkills();
         }
 
         #endregion
@@ -36,90 +37,132 @@ namespace OpenNos.GameObject.Helpers
 
         public static MateHelper Instance => _instance ?? (_instance = new MateHelper());
 
-        public int[,] Concentrate { get; private set; }
 
-        public int[,] HpData { get; private set; }
+        #region Properties
 
-        public int[,] MagicDefenseData { get; private set; }
+        public short[,] MeleeDefenseData { get; private set; }
+
+        public short[,] RangeDefenseData { get; private set; }
+
+        public short[,] MagicDefenseData { get; private set; }
+
+        public short[,] MeleeDefenseDodgeData { get; private set; }
+
+        public short[,] RangeDefenseDodgeData { get; private set; }
+
+        public short[] TrainerUpgradeHits { get; private set; }
+
+        public short[] TrainerUpRate { get; private set; }
+
+        public short[] TrainerDownRate { get; private set; }
+
+        public short[,] Concentrate { get; private set; }
+
+        public short[,] HpData { get; private set; }
+
+        public short[,] MpData { get; private set; }
+
+        public short[,] MinDamageData { get; private set; }
+
+        public short[,] MaxDamageData { get; private set; }
+
+        public double[] XpData { get; private set; }
 
         // Vnum - CardId
         public Dictionary<int, int> MateBuffs { get; set; }
 
-        public int[,] MaxDamageData { get; private set; }
-
-        public int[,] MeleeDefenseData { get; private set; }
-
-        public int[,] MeleeDefenseDodgeData { get; private set; }
-
-        public int[,] MinDamageData { get; private set; }
-
-        public int[,] MpData { get; private set; }
-
-        public List<short> PartnerSpBuffs { get; set; }
-
-        public Dictionary<int, int> PartoBuffs { get; set; }
+        public Dictionary<int, int> PartnerSpBuffs { get; set; }
 
         public List<int> PetSkills { get; set; }
 
-        public int[,] RangeDefenseData { get; private set; }
-
-        public int[,] RangeDefenseDodgeData { get; private set; }
-
-        public int[] TrainerDownRate { get; private set; }
-
-        public int[] TrainerUpgradeHits { get; private set; }
-
-        public int[] TrainerUpRate { get; private set; }
-
-        public double[] XpData { get; private set; }
-
         #endregion
 
-        #region Methods
-
-        public void AddPartnerBuffs(ClientSession session, Mate mate)
+        #endregion
+        public void AddPartnerSkill(ClientSession session, Mate mate)
         {
-            if (PartoBuffs.TryGetValue(mate.Sp.Instance.ItemVNum, out var cardId) &&
-                session.Character.Buff.All(b => b.Card.CardId != cardId))
+            if (session == null || mate == null)
             {
-                var sum = mate.Sp.GetLevelForAllSkill() / 3;
-                if (sum < 1) sum = 1;
-                session.Character.AddBuff(new Buff((short) (cardId + (sum - 1)), mate.Level, true), mate.BattleEntity);
+                return;
             }
+
+            if (mate.MateType != MateType.Partner)
+            {
+                return;
+            }
+
+            NpcMonster mateNpc = ServerManager.GetNpcMonster(mate.NpcMonsterVNum);
+            if (mateNpc.Skills != null)
+            {
+                foreach (NpcMonsterSkill skill in mateNpc.Skills)
+                {
+                    if (mate.Level >= skill.Skill.LevelMinimum)
+                    {
+                        CharacterSkill characterSkillMate = new CharacterSkill
+                        {
+                            SkillVNum = skill.SkillVNum,
+                            CharacterId = session.Character.CharacterId
+                        };
+                        session.Character.Skills[skill.SkillVNum] = new CharacterSkill(characterSkillMate);
+                    }
+                }
+            }
+
+            session.SendPacket(session.Character.GenerateSki());
+            session.SendPackets(session.Character.GenerateQuicklist());
+            session.SendPacket(session.Character.GenerateStat());
+            session.SendPackets(session.Character.GenerateStatChar());
+            session.CurrentMapInstance?.Broadcast(session.Character.GenerateEq());
         }
+        //public void AddPartnerBuffs(ClientSession session, Mate mate)
+        //{
+        //    if (PartoBuffs.TryGetValue(mate.Sp.Instance.ItemVNum, out var cardId) &&
+        //        session.Character.Buff.All(b => b.Card.CardId != cardId))
+        //    {
+        //        var sum = mate.Sp.GetLevelForAllSkill() / 3;
+        //        if (sum < 1) sum = 1;
+        //        session.Character.AddBuff(new Buff((short) (cardId + (sum - 1)), mate.Level, true), mate.BattleEntity);
+        //    }
+        //}
+
+        #region Concentrate
 
         public void LoadConcentrate()
         {
-            Concentrate = new int[3, 151];
+            Concentrate = new short[3, 100];
 
-            var baseValue = 0;
+            int baseValue = 0;
 
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
                         baseValue = 424;
                         break;
-
                     case 1:
                         baseValue = 702;
                         break;
-
                     case 2:
                         baseValue = 702;
                         break;
                 }
 
-                for (var j = 0; j < Concentrate.GetLength(1); j++) Concentrate[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    Concentrate[i, j] = (short)(baseValue * j / 100);
+                }
             }
         }
 
+        #endregion
+
+        #region Defences
+
         public void LoadDefences()
         {
-            MeleeDefenseData = new int[3, 151];
-            var baseValue = 0;
-            for (var i = 0; i < 3; i++)
+            MeleeDefenseData = new short[3, 151];
+            int baseValue = 0;
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
@@ -136,107 +179,116 @@ namespace OpenNos.GameObject.Helpers
                         break;
                 }
 
-                for (var j = 0; j < MeleeDefenseData.GetLength(1); j++) MeleeDefenseData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    MeleeDefenseData[i, j] = (short)(baseValue * j / 100);
+                }
             }
 
-            RangeDefenseData = new int[3, 151];
+            RangeDefenseData = new short[3, 100];
             baseValue = 0;
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
                         baseValue = 612;
                         break;
-
                     case 1:
                         baseValue = 510;
                         break;
-
                     case 2:
                         baseValue = 425;
                         break;
                 }
 
-                for (var j = 0; j < RangeDefenseData.GetLength(1); j++) RangeDefenseData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    RangeDefenseData[i, j] = (short)(baseValue * j / 100);
+                }
             }
 
-            MagicDefenseData = new int[3, 151];
+            MagicDefenseData = new short[3, 100];
             baseValue = 0;
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
                         baseValue = 510;
                         break;
-
                     case 1:
                         baseValue = 425;
                         break;
-
                     case 2:
                         baseValue = 680;
                         break;
                 }
 
-                for (var j = 0; j < MagicDefenseData.GetLength(1); j++) MagicDefenseData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    MagicDefenseData[i, j] = (short)(baseValue * j / 100);
+                }
             }
 
-            MeleeDefenseDodgeData = new int[3, 151];
+            MeleeDefenseDodgeData = new short[3, 100];
             baseValue = 0;
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        baseValue = 600;
+                        baseValue = 540;
                         break;
-
                     case 1:
-                        baseValue = 799;
+                        baseValue = 945;
                         break;
-
                     case 2:
-                        baseValue = 575;
+                        baseValue = 475;
                         break;
                 }
 
-                for (var j = 0; j < MeleeDefenseDodgeData.GetLength(1); j++)
-                    MeleeDefenseDodgeData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    MeleeDefenseDodgeData[i, j] = (short)(baseValue * j / 100);
+                }
             }
 
-            RangeDefenseDodgeData = new int[3, 151];
+            RangeDefenseDodgeData = new short[3, 100];
             baseValue = 0;
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        baseValue = 640;
+                        baseValue = 540;
                         break;
-
                     case 1:
-                        baseValue = 745;
+                        baseValue = 945;
                         break;
-
                     case 2:
-                        baseValue = 575;
+                        baseValue = 475;
                         break;
                 }
 
-                for (var j = 0; j < RangeDefenseDodgeData.GetLength(1); j++)
-                    RangeDefenseDodgeData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    RangeDefenseDodgeData[i, j] = (short)(baseValue * j / 100);
+                }
             }
         }
 
+        #endregion
+
+        #region HP
+
         public void LoadHpData()
         {
-            HpData = new int[3, 151];
+            HpData = new short[3, 100];
 
-            var baseValue = 0;
+            int baseValue = 0;
 
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
@@ -253,96 +305,111 @@ namespace OpenNos.GameObject.Helpers
                         break;
                 }
 
-                for (var j = 0; j < HpData.GetLength(1); j++) HpData[i, j] = baseValue * j / 100;
-            }
-        }
-
-        public void LoadMaxDamageData()
-        {
-            MaxDamageData = new int[3, 151];
-
-            var baseValue = 0;
-
-            for (var i = 0; i < 3; i++)
-            {
-                switch (i)
+                for (int j = 0; j < 100; j++)
                 {
-                    case 0:
-                        baseValue = 4000;
-                        break;
-
-                    case 1:
-                        baseValue = 3000;
-                        break;
-
-                    case 2:
-                        baseValue = 2500;
-                        break;
+                    HpData[i, j] = (short)(baseValue * j / 100);
                 }
-
-                for (var j = 0; j < MaxDamageData.GetLength(1); j++) MaxDamageData[i, j] = baseValue * j / 100;
             }
         }
+
+        #endregion
+
+        #region Damage
 
         public void LoadMinDamageData()
         {
-            MinDamageData = new int[3, 151];
+            MinDamageData = new short[3, 151];
 
-            var baseValue = 0;
+            int baseValue = 0;
 
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
                         baseValue = 2200;
                         break;
-
                     case 1:
                         baseValue = 1900;
                         break;
-
                     case 2:
                         baseValue = 1200;
                         break;
                 }
 
-                for (var j = 0; j < MinDamageData.GetLength(1); j++) MinDamageData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    MinDamageData[i, j] = (short)(baseValue * j / 100);
+                }
             }
         }
 
-        public void LoadMpData()
+        public void LoadMaxDamageData()
         {
-            MpData = new int[3, 151];
+            MaxDamageData = new short[3, 151];
 
-            var baseValue = 0;
+            int baseValue = 0;
 
-            for (var i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        baseValue = 5071;
+                        baseValue = 4000;
                         break;
-
                     case 1:
-                        baseValue = 7900;
+                        baseValue = 3000;
                         break;
-
                     case 2:
-                        baseValue = 12385;
+                        baseValue = 2500;
                         break;
                 }
 
-                for (var j = 0; j < MpData.GetLength(1); j++) MpData[i, j] = baseValue * j / 100;
+                for (int j = 0; j < 100; j++)
+                {
+                    MaxDamageData[i, j] = (short)(baseValue * j / 100);
+                }
             }
         }
+
+        #endregion
+
+        #region MP
+
+        public void LoadMpData()
+        {
+            MpData = new short[3, 100];
+
+            int baseValue = 0;
+
+            for (int i = 0; i < 3; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        baseValue = 7071;
+                        break;
+                    case 1:
+                        baseValue = 9900;
+                        break;
+                    case 2:
+                        baseValue = 18385;
+                        break;
+                }
+
+                for (int j = 0; j < 100; j++)
+                {
+                    MpData[i, j] = (short)(baseValue * j / 100);
+                }
+            }
+        }
+
+        #endregion
 
         public void LoadPetSkills()
         {
             PetSkills = new List<int>
             {
-                663, 683, // Otter Skill 1
                 1513, // Purcival
                 1514, // Baron scratch ?
                 1515, // Amiral (le chat chelou)
@@ -352,21 +419,21 @@ namespace OpenNos.GameObject.Helpers
                 1576, // Marie Bouhmiaou
                 1601, // Mechamiaou
                 1627, // Boris the polar bear
+                663, // Otter
+                740,
+                743
             };
         }
 
-        public void LoadTrainerDownRate()
-        {
-            TrainerDownRate = new[] {0, 7, 13, 16, 28, 29, 33, 36, 50, 60};
-        }
+        #region Trainers
 
         public void LoadTrainerUpgradeHits()
         {
-            TrainerUpgradeHits = new int[10];
+            TrainerUpgradeHits = new short[10];
 
-            var baseValue = 0;
+            short baseValue = 0;
 
-            for (var i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 baseValue += 50;
                 TrainerUpgradeHits[i] = baseValue;
@@ -375,20 +442,33 @@ namespace OpenNos.GameObject.Helpers
 
         public void LoadTrainerUpRate()
         {
-            TrainerUpRate = new[] {67, 67, 44, 34, 22, 15, 14, 8, 1, 0};
+            TrainerUpRate = new short[] { 67, 67, 44, 34, 22, 15, 14, 8, 1, 0 };
         }
+
+        public void LoadTrainerDownRate()
+        {
+            TrainerDownRate = new short[] { 0, 7, 13, 16, 28, 29, 33, 36, 50, 60 };
+        }
+
+        #endregion
+
+        #region XP
 
         public void LoadXpData()
         {
+            // Load XpData
             XpData = new double[256];
-            var v = new double[256];
+            double[] v = new double[256];
             double var = 1;
             v[0] = 540;
             v[1] = 960;
             XpData[0] = 300;
-            for (var i = 2; i < v.Length; i++) v[i] = v[i - 1] + 420 + 120 * (i - 1);
+            for (int i = 2; i < v.Length; i++)
+            {
+                v[i] = v[i - 1] + 420 + 120 * (i - 1);
+            }
 
-            for (var i = 1; i < XpData.Length; i++)
+            for (int i = 1; i < XpData.Length; i++)
             {
                 if (i < 79)
                 {
@@ -397,11 +477,9 @@ namespace OpenNos.GameObject.Helpers
                         case 14:
                             var = 6 / 3d;
                             break;
-
                         case 39:
                             var = 19 / 3d;
                             break;
-
                         case 59:
                             var = 70 / 3d;
                             break;
@@ -410,18 +488,19 @@ namespace OpenNos.GameObject.Helpers
                     XpData[i] = Convert.ToInt64(XpData[i - 1] + var * v[i - 1]);
                 }
 
-                if (i < 79) continue;
+                if (i < 79)
+                {
+                    continue;
+                }
 
                 switch (i)
                 {
                     case 79:
                         var = 5000;
                         break;
-
                     case 82:
                         var = 9000;
                         break;
-
                     case 84:
                         var = 13000;
                         break;
@@ -431,13 +510,7 @@ namespace OpenNos.GameObject.Helpers
             }
         }
 
-        public void RemovePartnerBuffs(ClientSession session)
-        {
-            if (session == null) return;
-
-            foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
-        }
-        #region PartnerSPSkills
+        #endregion
 
         public short GetUpgradeType(short morph)
         {
@@ -499,11 +572,10 @@ namespace OpenNos.GameObject.Helpers
             return -1;
         }
 
-        #endregion
         private void LoadMateBuffs()
         {
             MateBuffs = new Dictionary<int, int>
-            {
+            {   //Monster / Buff
                 {501, 4066}, // Justin
                 {500, 4067}, // Kupei
                 {503, 4068}, // Felix
@@ -537,60 +609,30 @@ namespace OpenNos.GameObject.Helpers
                 {2708, 708}, // MARCO
                 {2704, 710}, // FORTUNE BUSHTAIL
                 {2709, 711}, // SUPER FORTUNE BUSHTAIL
-                {2710, 783} // MR TRIKLES
+                {2710, 783}, // MR TRIKLES
+                { 830, 377 }, // RUDY ROWDY
+                { 2704, 710 }, // LUCKY BUSHTAIL
+                { 2709, 711 }, // SUPER LUCKY BUSHTAIL
+                { 709, 840 }, // GOLDEN GLOOPY CAKE
+                { 687, 842 } // GLOOPY CAKE
+            };
+
+            PartnerSpBuffs = new Dictionary<int, int>
+            {
+                { 4825, 3000 },
+                { 8247, 3000 }, //VENUS 
+                { 4326, 3007 },
+                { 8300, 3007 }, //BONE WARRIOR
+                { 4405, 3014 },
+                { 8367, 3014 }, // YUNA
+                { 4413, 3021 },
+                { 8375, 3021 }, // AMORA
+                { 4446, 3028 },
+                { 8398, 3028 }, // PERTI
+                { 4547, 3035 }  //  AKHENATON
             };
         }
 
-        private void LoadPartnerSkills()
-        {
-            PartoBuffs = new Dictionary<int, int>
-            {
-                {4825, 3000}, // Vénus
-                {4326, 3007}, // Guerrier Squelettique Ragnar
-                {4405, 3014}, // Yuna
-                {4413, 3021}, // Cupidia
-                {4446, 3028} // Perti
-            };
-            PartnerSpBuffs = new List<short>
-            {
-                3000,
-                3001,
-                3002,
-                3003,
-                3004,
-                3005,
-                3006,
-                3007,
-                3008,
-                3009,
-                3010,
-                3011,
-                3012,
-                3013,
-                3014,
-                3015,
-                3016,
-                3017,
-                3018,
-                3019,
-                3020,
-                3021,
-                3022,
-                3023,
-                3024,
-                3025,
-                3026,
-                3027,
-                3028,
-                3029,
-                3030,
-                3031,
-                3032,
-                3033,
-                3034
-            };
-        }
 
-        #endregion
     }
 }

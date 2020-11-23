@@ -11,6 +11,7 @@ using OpenNos.Domain;
 using OpenNos.GameObject._Event;
 using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.PathFinder;

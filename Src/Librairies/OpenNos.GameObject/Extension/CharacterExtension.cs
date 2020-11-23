@@ -19,26 +19,26 @@ namespace OpenNos.GameObject.Extension
             session.SendPacket("sqst 5 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
             session.SendPacket("sqst 6 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
         }
-        
-        //public static void GetBuffFromSet(this Character e)
-        //{
-        //    // (MainWeapon, SecondaryWeapon, Armor, Card) Vnum
-        //    var set = e.Class == ClassType.Archer ? new Tuple<long, long, long, short>(4966, 4963, 4954, 45) :
-        //        e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4965, 4962, 4953, 45) :
-        //        e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4964, 4961, 4952, 45) :
-        //        e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 45) :
-        //        new Tuple<long, long, long, short>(566, 3636, 1313, 1); // Adventurer is to define
 
-        //    e.GetBuffFromSet(set);
+        public static void GetBuffFromSet(this Character e)
+        {
+            // (MainWeapon, SecondaryWeapon, Armor, Card) Vnum
+            var set = e.Class == ClassType.Archer ? new Tuple<long, long, long, short>(4966, 4963, 4954, 45) :
+                e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4965, 4962, 4953, 45) :
+                e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4964, 4961, 4952, 45) :
+                e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 45) :
+                new Tuple<long, long, long, short>(566, 3636, 1313, 1); // Adventurer is to define
 
-        //    set = e.Class == ClassType.Archer ? new Tuple<long, long, long, short>(4960, 4957, 4951, 46) :
-        //        e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4959, 4956, 4950, 46) :
-        //        e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4958, 4955, 4949, 46) :
-        //        e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 46) :
-        //        new Tuple<long, long, long, short>(566, 3636, 1313, 1);
+            e.GetBuffFromSet(set);
 
-        //    e.GetBuffFromSet(set);
-        //}
+            set = e.Class == ClassType.Archer ? new Tuple<long, long, long, short>(4960, 4957, 4951, 46) :
+                e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4959, 4956, 4950, 46) :
+                e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4958, 4955, 4949, 46) :
+                e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 46) :
+                new Tuple<long, long, long, short>(566, 3636, 1313, 1);
+
+            e.GetBuffFromSet(set);
+        }
 
         public static void GetBuffFromSet(this Character e, Tuple<long, long, long, short> set)
         {

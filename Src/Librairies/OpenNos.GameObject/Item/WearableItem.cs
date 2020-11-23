@@ -5,6 +5,7 @@ using OpenNos.Core;
 using OpenNos.Core.Extensions;
 using OpenNos.Data;
 using OpenNos.Domain;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 

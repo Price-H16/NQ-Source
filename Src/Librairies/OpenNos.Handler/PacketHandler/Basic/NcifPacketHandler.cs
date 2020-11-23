@@ -2,6 +2,7 @@
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.GameObject;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Networking;
 
 namespace OpenNos.Handler.PacketHandler.Basic

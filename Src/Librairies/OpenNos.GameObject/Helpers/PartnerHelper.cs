@@ -30,33 +30,34 @@ namespace OpenNos.GameObject.Helpers
         {
             switch (itemVNum)
             {
+                case 4326: // Bone Warrior Ragnar
+                case 4343: // Mad Professor Macavity
+                case 4349: // Archdaemon Amon
+                case 4446: // Perti deplumay
                 case 4800: // Aegir the Angry
                 case 4804: // Shinobi the Silent
                 case 4807: // Foxy
-                case 4818: // Fiona
                 case 4808: // Maru
-                case 4814: // Amon
                 case 4809: // Maru in Mother's Fur
-                case 4349: // Archdaemon Amon
+                case 4814: // Amon
                 case 4815: // Lucy Lopea﻿rs
+                case 4818: // Fiona
                 case 4822: // Palina Puppet Master
                 case 4825: // Little Pri﻿ncess Venus
-                case 4326: // Bone Warrior Ragnar
-                case 4343: // Mad Professor Macavity
-                case 4446: // One Winged Perti
+                case 4547: // Owner
                 case 8398: // Perti deplumay 2
                     return AttackType.Melee;
 
-                case 4802: // Barni the Clever
-                case 4805: // Lotus the Graceful
-                case 4812: // Archangel Lucifer
                 case 4324: // Guardian Lucifer
-                case 4817: // Cowgirl Chloe
                 case 4325: // Sheriff Chloe
-                case 4821: // Daniel Ducats
-                case 4824: // Nelia Nymph
                 case 4413: // Amora
                 case 4417: // Mad March Hare
+                case 4802: // Barni the Clever
+                case 4805: // Lotus the Graceful
+                case 4812: // Lucifer
+                case 4817: // Cowgirl Chloe
+                case 4821: // Daniel Ducats
+                case 4824: // Nelia Nymph
                     return AttackType.Range;
 
                 case 4405: // Magic Student Yuna

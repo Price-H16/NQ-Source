@@ -4,6 +4,8 @@ using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Networking;
+using OpenNos.GameObject.Extension;
+
 
 namespace OpenNos.Handler.PacketHandler.Basic
 {

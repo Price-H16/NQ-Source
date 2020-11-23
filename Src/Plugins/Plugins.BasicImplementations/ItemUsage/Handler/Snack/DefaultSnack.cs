@@ -10,6 +10,8 @@ using OpenNos.GameObject._ItemUsage;
 using OpenNos.GameObject._ItemUsage.Event;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
+using OpenNos.GameObject.Extension;
+
 
 namespace Plugins.BasicImplementations.ItemUsage.Handler.Snack
 {

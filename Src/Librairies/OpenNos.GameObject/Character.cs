@@ -2700,6 +2700,12 @@ namespace OpenNos.GameObject
 
         public string GenerateFaction() => $"fs {(byte) Faction}";
 
+        public void GenerateCommandInterface()
+        {
+            string Command = "";
+            Session.SendPacket($"guri 10 1 579068 985 {Command}");
+        }
+
         public string GenerateFamilyMember()
         {
             string str = "gmbr 0";
@@ -3047,7 +3053,8 @@ namespace OpenNos.GameObject
                     $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
                     $"{Family.FamilyLevel} " +
                     $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
-                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|";
+                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
+                    $"{(Family.FamilyFaction)}";
         }     
 
         public string GenerateGInfo()
@@ -3763,24 +3770,24 @@ namespace OpenNos.GameObject
                         GenerateXp(monsterToAttack);
                     }
 
-                    GenerateDignity(monsterToAttack.Monster);
+                    //GenerateDignity(monsterToAttack.Monster);
 
 
-                    if (Session.HasCurrentMapInstance)
-                    {
-                        if (Group?.GroupType == GroupType.Group)
-                        {
-                            foreach (ClientSession targetSession in Group.Sessions.Where(s =>
-                                s.Character.MapInstanceId == MapInstanceId))
-                            {
-                                targetSession.Character.GetReputation(monsterToAttack.Monster.Level / 2);
-                            }
-                        }
-                        else
-                        {
-                            GetReputation(monsterToAttack.Monster.Level / 2);
-                        }
-                    }
+                    //if (Session.HasCurrentMapInstance)
+                    //{
+                    //    if (Group?.GroupType == GroupType.Group)
+                    //    {
+                    //        foreach (ClientSession targetSession in Group.Sessions.Where(s =>
+                    //            s.Character.MapInstanceId == MapInstanceId))
+                    //        {
+                    //            targetSession.Character.GetReputation(monsterToAttack.Monster.Level / 2);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        GetReputation(monsterToAttack.Monster.Level / 2);
+                    //    }
+                    //}
                 }
 
                 #endregion
@@ -5694,6 +5701,10 @@ namespace OpenNos.GameObject
 
         public bool IsCoupleOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && c.RelationType == CharacterRelationType.Spouse && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
 
+        public bool IsFriendlistFull() => CharacterRelations.Where(s => s.RelationType == CharacterRelationType.Friend || s.RelationType == CharacterRelationType.Spouse).ToList().Count >= 80;
+
+        public bool IsFriendOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && (c.RelationType == CharacterRelationType.Friend || c.RelationType == CharacterRelationType.Spouse) && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
+
         public bool IsFamilyTop(bool isLevel)
         {
             var family = ServerManager.Instance.GetBestFamily(isLevel);
@@ -5710,10 +5721,6 @@ namespace OpenNos.GameObject
 
             return false;
         }
-
-        public bool IsFriendlistFull() => CharacterRelations.Where(s => s.RelationType == CharacterRelationType.Friend || s.RelationType == CharacterRelationType.Spouse).ToList().Count >= 80;
-
-        public bool IsFriendOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && (c.RelationType == CharacterRelationType.Friend || c.RelationType == CharacterRelationType.Spouse) && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
 
         /// <summary>
         /// Checks if the current character is in range of the given position

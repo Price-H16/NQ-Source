@@ -16,6 +16,8 @@ using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
+using OpenNos.GameObject.Extension;
+
 
 namespace Plugins.BasicImplementations.Guri.Handler
 {

@@ -135,7 +135,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 DestinationCharacterId = null,
                 SourceCharacterId = 0,
                 SourceWorldId = ServerManager.Instance.WorldId,
-                Message = "The Rainbow Battle will start in 5 minutes on the channel 4 !",
+                Message = "The Rainbow Battle will start in 5 minutes on the channel 1 !",
                 Type = MessageType.Shout
             });
         }
@@ -210,13 +210,12 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 return RainbowBattleTeam.TotalFlag.FindAll(s => s.Item2 == type).Count();
             }
 
-            public void GenerateBattleRainbowPacket(RainbowTeamBattleType ee)
+            public void GenerateBattleRainbowPacket(ClientSession ee)
             {
                 string rndm = string.Empty;
                 string rndm2 = string.Empty;
-                //var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.First(s => s.TeamEntity == ee);
+                var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(ee));
 
-                var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.TeamEntity == ee);
 
                 if (RainbowTeam == null)
                 {
@@ -288,8 +287,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                     sess.Character.Hp = (int)sess.Character.HPLoad();
                     sess.Character.Mp = (int)sess.Character.MPLoad();
                     sess.SendPacket(sess.Character.GenerateStat());
-                    GenerateBattleRainbowPacket(RainbowTeamBattleType.Blue);
-                    GenerateBattleRainbowPacket(RainbowTeamBattleType.Red);
+                    GenerateBattleRainbowPacket(sess);
                     TeleportPlayerInSafeZone(sess);
                 }
                 SummonNpc(map);

@@ -12,6 +12,7 @@ using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ARENA;
 using OpenNos.GameObject.Event.GAMES;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;

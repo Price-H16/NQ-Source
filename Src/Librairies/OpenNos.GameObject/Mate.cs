@@ -1547,7 +1547,7 @@ namespace OpenNos.GameObject
 
             if (IsTeamMember)
             {
-                MateHelper.Instance.RemovePartnerSpBuffs(Owner.Session);
+                MateHelper.Instance.RemovePartnerBuffs(Owner.Session);
                 Owner.MapInstance.Broadcast(GenerateCMode(-1));
                 Owner.Session.SendPacket(GenerateDpski());
                 Owner.Session.SendPacket(GenerateCond());
@@ -1582,7 +1582,7 @@ namespace OpenNos.GameObject
             foreach (var mateBuff in Owner.BattleEntity.Buffs.Where(b =>
                 MateHelper.Instance.MateBuffs.Values.Any(v => v == b.Card.CardId)))
                 Owner.RemoveBuff(mateBuff.Card.CardId, true);
-            MateHelper.Instance.RemovePartnerSpBuffs(Owner.Session);
+            MateHelper.Instance.RemovePartnerBuffs(Owner.Session);
             Owner.Session.SendPacket(Owner.GeneratePetskill());
         }
 

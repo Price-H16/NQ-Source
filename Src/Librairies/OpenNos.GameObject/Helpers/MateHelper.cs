@@ -1,8 +1,5 @@
-﻿using OpenNos.Domain;
-using OpenNos.GameObject.Networking;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OpenNos.GameObject.Helpers
 {
@@ -30,7 +27,7 @@ namespace OpenNos.GameObject.Helpers
             LoadTrainerUpgradeHits();
             LoadTrainerUpRate();
             LoadTrainerDownRate();
-            //LoadPartnerSkills();
+            LoadPartnerSkills();
         }
 
         #endregion
@@ -46,9 +43,6 @@ namespace OpenNos.GameObject.Helpers
         public int[,] MagicDefenseData { get; private set; }
 
         // Vnum - CardId
-
-        public Dictionary<int, int> PartnerSpBuffs { get; set; }
-
         public Dictionary<int, int> MateBuffs { get; set; }
 
         public int[,] MaxDamageData { get; private set; }
@@ -61,7 +55,7 @@ namespace OpenNos.GameObject.Helpers
 
         public int[,] MpData { get; private set; }
 
-        //public List<short> PartnerSpBuffs { get; set; }
+        public List<short> PartnerSpBuffs { get; set; }
 
         public Dictionary<int, int> PartoBuffs { get; set; }
 
@@ -436,63 +430,13 @@ namespace OpenNos.GameObject.Helpers
                 XpData[i] = Convert.ToInt64(XpData[i - 1] + var * (i + 2) * (i + 2));
             }
         }
-        public void RemovePartnerSpBuffs(ClientSession Session)
+
+        public void RemovePartnerBuffs(ClientSession session)
         {
-            if (Session.Character == null)
-            {
-                return;
-            }
-            foreach (Buff partnerSpBuff in Session.Character.BattleEntity.Buffs.Where(b => MateHelper.Instance.PartnerSpBuffs.Values.Any(v => v == b.Card.CardId)))
-            {
-                Session.Character.RemoveBuff(partnerSpBuff.Card.CardId, true);
-                Session.Character.GenerateSki();
-            }
+            if (session == null) return;
+
+            foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
         }
-        //public void RemovePartnerBuffs(ClientSession session)
-        //{
-        //    if (session == null) return;
-
-        //    foreach (var val in PartnerSpBuffs) session.Character.RemoveBuff(val, true);
-        //}
-        public void AddPartnerSkill(ClientSession session, Mate mate)
-        {
-            NpcMonster mateNpc = ServerManager.GetNpcMonster(mate.NpcMonsterVNum);
-
-            if (session == null || mate == null)
-            {
-                return;
-            }
-
-            if (mate.MateType != MateType.Partner)
-            {
-                return;
-            }
-
-            if (mateNpc.Skills != null)
-            {
-                foreach (NpcMonsterSkill skill in mateNpc.Skills)
-                {
-                    if (mate.Level >= skill.Skill.LevelMinimum)
-                    {
-                        CharacterSkill characterSkillMate = new CharacterSkill
-                        {
-                            SkillVNum = skill.SkillVNum,
-                            IsPartnerSkill = true,
-                            CharacterId = session.Character.CharacterId
-                        };
-                        session.Character.Skills[skill.SkillVNum] = new CharacterSkill(characterSkillMate);
-                    }
-                }
-            }
-
-
-            session.SendPacket(session.Character.GenerateSki());
-            session.SendPackets(session.Character.GenerateQuicklist());
-            session.SendPacket(session.Character.GenerateStat());
-            session.SendPackets(session.Character.GenerateStatChar());
-            session.CurrentMapInstance?.Broadcast(session.Character.GenerateEq());
-        }
-
         #region PartnerSPSkills
 
         public short GetUpgradeType(short morph)
@@ -595,71 +539,57 @@ namespace OpenNos.GameObject.Helpers
                 {2709, 711}, // SUPER FORTUNE BUSHTAIL
                 {2710, 783} // MR TRIKLES
             };
-
-            PartnerSpBuffs = new Dictionary<int, int>
-            {
-                { 4825, 3000 },
-                { 8247, 3000 }, //VENUS 
-                { 4326, 3007 },
-                { 8300, 3007 }, //BONE WARRIOR
-                { 4405, 3014 },
-                { 8367, 3014 }, // YUNA
-                { 4413, 3021 },
-                { 8375, 3021 }, // AMORA
-                { 4446, 3028 },
-                { 8398, 3028 } // PERTI
-            };
         }
 
-        //private void LoadPartnerSkills()
-        //{
-        //    PartoBuffs = new Dictionary<int, int>
-        //    {
-        //        {4825, 3000}, // Vénus
-        //        {4326, 3007}, // Guerrier Squelettique Ragnar
-        //        {4405, 3014}, // Yuna
-        //        {4413, 3021}, // Cupidia
-        //        {4446, 3028} // Perti
-        //    };
-        //    PartnerSpBuffs = new List<short>
-        //    {
-        //        3000,
-        //        3001,
-        //        3002,
-        //        3003,
-        //        3004,
-        //        3005,
-        //        3006,
-        //        3007,
-        //        3008,
-        //        3009,
-        //        3010,
-        //        3011,
-        //        3012,
-        //        3013,
-        //        3014,
-        //        3015,
-        //        3016,
-        //        3017,
-        //        3018,
-        //        3019,
-        //        3020,
-        //        3021,
-        //        3022,
-        //        3023,
-        //        3024,
-        //        3025,
-        //        3026,
-        //        3027,
-        //        3028,
-        //        3029,
-        //        3030,
-        //        3031,
-        //        3032,
-        //        3033,
-        //        3034
-        //    };
-        //}
+        private void LoadPartnerSkills()
+        {
+            PartoBuffs = new Dictionary<int, int>
+            {
+                {4825, 3000}, // Vénus
+                {4326, 3007}, // Guerrier Squelettique Ragnar
+                {4405, 3014}, // Yuna
+                {4413, 3021}, // Cupidia
+                {4446, 3028} // Perti
+            };
+            PartnerSpBuffs = new List<short>
+            {
+                3000,
+                3001,
+                3002,
+                3003,
+                3004,
+                3005,
+                3006,
+                3007,
+                3008,
+                3009,
+                3010,
+                3011,
+                3012,
+                3013,
+                3014,
+                3015,
+                3016,
+                3017,
+                3018,
+                3019,
+                3020,
+                3021,
+                3022,
+                3023,
+                3024,
+                3025,
+                3026,
+                3027,
+                3028,
+                3029,
+                3030,
+                3031,
+                3032,
+                3033,
+                3034
+            };
+        }
 
         #endregion
     }

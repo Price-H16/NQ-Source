@@ -715,6 +715,25 @@ namespace OpenNos.GameObject
 
         public static string GenerateAct() => "act 6";
 
+        public static void BanMethod(ClientSession session)
+        {
+            if (session != null)
+            {
+                PenaltyLogDTO log = new PenaltyLogDTO
+                {
+                    AccountId = session.Account.AccountId,
+                    Reason = "Bug Using",
+                    Penalty = PenaltyType.Banned,
+                    DateStart = DateTime.Now,
+                    DateEnd = DateTime.Now.AddYears(20),
+                    AdminName = "BenSolo"
+                };
+                DAOFactory.PenaltyLogDAO.InsertOrUpdate(ref log);
+                CommunicationServiceClient.Instance.RefreshPenalty(log.PenaltyLogId);
+                session.Disconnect();
+            }
+        }
+
         public static string GenerateRaidBf(byte type) => $"raidbf 0 {type} 25 ";
 
         public static void InsertOrUpdatePenalty(PenaltyLogDTO log)

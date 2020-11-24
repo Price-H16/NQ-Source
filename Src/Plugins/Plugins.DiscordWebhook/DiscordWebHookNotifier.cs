@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ChickenAPI.Core.Events;
 using Discord;
 using Discord.Webhook;
-using OpenNos.GameObject._gameEvent;
+using OpenNos.Domain;
 using OpenNos.Master.Library.Data;
 
 namespace Plugins.DiscordWebhook

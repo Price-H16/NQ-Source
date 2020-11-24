@@ -1,16 +1,12 @@
-﻿using NosTale.Packets.Packets.ClientPackets;
-using OpenNos.Core;
-using OpenNos.GameObject;
-
-namespace OpenNos.GameObject._gameEvent
+﻿namespace OpenNos.Domain
 {
     public enum NotifiableEventType
     {
         INSTANT_BATTLE_STARTS_IN_5_MINUTES,
         INSTANT_BATTLE_STARTS_IN_1_MINUTE,
-
+        CHANNEL_ONLINE,
         ICEBREAKER_STARTS_IN_5_MINUTES,
-
+        CHANNEL_CRASH,
         FAMILY_X_HAS_BEEN_CREATED_BY_Y,
 
         X_IS_LOOKING_FOR_RAID_MATES,

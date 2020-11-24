@@ -106,6 +106,7 @@
     <Compile Include="MessageType.cs" />
     <Compile Include="MinilandState.cs" />
     <Compile Include="MonsterType.cs" />
+    <Compile Include="NotifiableEventType.cs" />
     <Compile Include="NpcMonsterRaceType.cs" />
     <Compile Include="PartnerSkillLevelType.cs" />
     <Compile Include="PenaltyType.cs" />

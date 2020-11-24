@@ -1,5 +1,6 @@
 ﻿using OpenNos.Core;
 using OpenNos.Domain;
+using OpenNos.GameObject._gameEvent;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using System;
@@ -8,6 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using ChickenAPI.Plugins.Exceptions;
+using Autofac;
+using ChickenAPI.Plugins;
+using Plugins.DiscordWebhook;
 
 namespace OpenNos.GameObject.Event
 {
@@ -54,6 +59,27 @@ namespace OpenNos.GameObject.Event
         #endregion
 
         #region Methods
+        private static IContainer BuildCoreContainer()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
+            var container = pluginBuilder.Build();
+
+            var coreBuilder = new ContainerBuilder();
+            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                try
+                {
+                    plugin.OnLoad(coreBuilder);
+                }
+                catch (PluginException e)
+                {
+                }
+            }
+
+
+            return coreBuilder.Build();
+        }
 
         public static void GenerateIceBreaker(int Bracket)
         {
@@ -61,21 +87,21 @@ namespace OpenNos.GameObject.Event
             {
                 return;
             }
+            var pluginBuilder = new ContainerBuilder();
+            IContainer container = pluginBuilder.Build();
+            using var coreContainer = BuildCoreContainer();
             currentBracket = Bracket;
             AlreadyFrozenPlayers = new List<ClientSession>();
             Map = ServerManager.GenerateMapInstance(2005, MapInstanceType.IceBreakerInstance, new InstanceBag());
-
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                    string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 5, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
+            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+            ss.NotifyAllAsync(NotifiableEventType.ICEBREAKER_STARTS_IN_5_MINUTES);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 5, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
             Thread.Sleep(5 * 60 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 1, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 1, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
             Thread.Sleep(1 * 60 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_SECONDS"), 30, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_SECONDS"), 30, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
             Thread.Sleep(30 * 1000);
-            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_SECONDS"), 10, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_SECONDS"), 10, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
             Thread.Sleep(10 * 1000);
 
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ICEBREAKER_STARTED"), 1));

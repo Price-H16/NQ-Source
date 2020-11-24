@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using ChickenAPI.Plugins;
+using ChickenAPI.Plugins.Exceptions;
 using NosTale.Configuration;
 using NosTale.Configuration.Utilities;
 using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.Domain;
+using OpenNos.GameObject._gameEvent;
 using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ARENA;
@@ -18,6 +22,7 @@ using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
 using OpenNos.PathFinder;
+using Plugins.DiscordWebhook;
 
 namespace OpenNos.GameObject.Helpers
 {
@@ -34,7 +39,27 @@ namespace OpenNos.GameObject.Helpers
         public static EventHelper Instance => _instance ?? (_instance = new EventHelper());
 
         #endregion
+        private static IContainer BuildCoreContainer()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
+            var container = pluginBuilder.Build();
 
+            var coreBuilder = new ContainerBuilder();
+            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                try
+                {
+                    plugin.OnLoad(coreBuilder);
+                }
+                catch (PluginException e)
+                {
+                }
+            }
+
+
+            return coreBuilder.Build();
+        }
         #region Methods
 
         public static int CalculateComboPoint(int n)
@@ -674,17 +699,18 @@ namespace OpenNos.GameObject.Helpers
                                                 if (mapMonster != null)
                                                 {
                                                     mapMonster.SetDeathStatement();
-                                                    evt.MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster,
-                                                            mapMonster.MapMonsterId));
+                                                    evt.MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, mapMonster.MapMonsterId));
                                                     evt.MapInstance.RemoveMonster(mapMonster);
                                                 }
                                             }
 
                                             Logger.LogUserEvent("RAID_SUCCESS", owner.Name, $"RaidId: {@group.GroupId}");
-
-                                            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                                                    string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),
-                                                            @group.Raid.Label, owner.Name), 0));
+                                            var pluginBuilder = new ContainerBuilder();
+                                            IContainer container = pluginBuilder.Build();
+                                            using var coreContainer = BuildCoreContainer();
+                                            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+                                            ss.NotifyAllAsync(NotifiableEventType.X_TEAM_WON_THE_RAID_Y, owner.Name, @group.Raid.Label);
+                                            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),@group.Raid.Label, owner.Name), 0));
 
                                             foreach (var s in @group.Sessions.GetAllItems())
                                             {

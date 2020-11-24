@@ -151,6 +151,7 @@ namespace OpenNos.World
             IContainer container = pluginBuilder.Build();
             using var coreContainer = BuildCoreContainer();
             var gameBuilder = new ContainerBuilder();
+            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
             Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
             gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
             gameBuilder.RegisterModule(new CoreContainerModule(coreContainer));
@@ -159,6 +160,7 @@ namespace OpenNos.World
             //gameBuilder.Register(s => new CommandHandler(new SerilogLogger(), coreContainer)).As<ICommandContainer>().SingleInstance();
             //gameBuilder.Register(s => new CommandGlobalExecutorWrapper(s.Resolve<ICommandContainer>())).As<IGlobalCommandExecutor>().SingleInstance();
             //gameBuilder.Register(s => new EssentialsPlugin(s.Resolve<ICommandContainer>(), ServerManager.Instance)).As<IGamePlugin>().SingleInstance();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
             gameBuilder.Register(s => new ItemUsagePlugin(coreContainer.Resolve<IItemUsageHandlerContainer>(), coreContainer)).As<IGamePlugin>();
             gameBuilder.Register(s => new BasicEventPipelineAsync()).As<IEventPipeline>().SingleInstance();
             gameBuilder.Register(s => new GenericEventPlugin(s.Resolve<IEventPipeline>(), coreContainer)).As<IGamePlugin>().SingleInstance();
@@ -179,6 +181,8 @@ namespace OpenNos.World
             ConfigurationHelper.CustomisationRegistration();
 
             var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
+
+            //_ = ss.NotifyAllAsync(NotifiableEventType.CHANNEL_ONLINE, O);
 
             var ignoreStartupMessages = false;
             _port = Convert.ToInt32(a.WorldPort);
@@ -217,6 +221,7 @@ namespace OpenNos.World
             try
             {
                 _exitHandler += ExitHandler;
+                //ss.NotifyAllAsync(NotifiableEventType.CHANNEL_ONLINE, "Offline");
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 NativeMethods.SetConsoleCtrlHandler(_exitHandler, true);
             }
@@ -229,7 +234,7 @@ namespace OpenNos.World
 
             var ipAddress = a.IPAddress;
 
-            portloop:
+        portloop:
             try
             {
                 networkManager = new NetworkManager<WorldCryptography>(ipAddress, _port, typeof(Act4Handler),
@@ -253,8 +258,6 @@ namespace OpenNos.World
             var newChannelId = CommunicationServiceClient.Instance.RegisterWorldServer(new SerializableWorldServer(ServerManager.Instance.WorldId, ipAddress, _port, sessionLimit, ServerManager.Instance.ServerGroup));
             if (newChannelId.HasValue)
             {
-                var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-                ss.NotifyAllAsync(NotifiableEventType.CHANNEL_ONLINE,  ServerManager.Instance.ChannelId);
                 ServerManager.Instance.ChannelId = newChannelId.Value;
                 MailServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);
                 ConfigurationServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);

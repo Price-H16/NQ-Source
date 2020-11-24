@@ -45,12 +45,12 @@ namespace OpenNos.GameObject.Event
             IContainer container = pluginBuilder.Build();
             using var coreContainer = BuildCoreContainer();
             var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, 5);
+            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "5");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 0));
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 1));
             Thread.Sleep(4 * 60 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 0));
-            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, 1);
+            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "1");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 1));
             Thread.Sleep(30 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_SECONDS"), 30), 0));

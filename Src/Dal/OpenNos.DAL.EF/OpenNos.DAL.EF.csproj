@@ -212,6 +212,10 @@
     <Compile Include="Migrations\202011052337542_FamilyMissions.designer.cs">
       <DependentUpon>202011052337542_FamilyMissions.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011241837508_Update.cs" />
+    <Compile Include="Migrations\202011241837508_Update.designer.cs">
+      <DependentUpon>202011241837508_Update.cs</DependentUpon>
+    </Compile>
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="Quest.cs" />
     <Compile Include="QuestLog.cs" />
@@ -384,6 +388,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011052337542_FamilyMissions.resx">
       <DependentUpon>202011052337542_FamilyMissions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011241837508_Update.resx">
+      <DependentUpon>202011241837508_Update.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

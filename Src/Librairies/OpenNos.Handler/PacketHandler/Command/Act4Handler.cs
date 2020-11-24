@@ -61,8 +61,7 @@ namespace OpenNos.Handler.PacketHandler.Command
                 else
                 {
                     ServerManager.Instance.ChangeMap(Session.Character.CharacterId, 145, 51, 41);
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("ACT4_OFFLINE")));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("ACT4_OFFLINE")));
                 }
             }
 

@@ -1,12 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OpenNos.GameObject.Extension
+﻿namespace OpenNos.GameObject.Battle
 {
-    class BattleExtension
+    public static class BattleExtension
     {
+        #region Methods
+
+        public static void ApplyScoreArena(this BattleEntity attacker, BattleEntity defender)
+        {
+            defender.Character.ArenaDie++;
+            defender.Character.CurrentDie++;
+            defender.Character.ArenaTc = 0;
+            defender.Character.CurrentTc = 0;
+            defender.Character.GenerateAscrPacket();
+
+            attacker.Character.ArenaKill++;
+            attacker.Character.ArenaTc++;
+            attacker.Character.CurrentKill++;
+            attacker.Character.CurrentTc++;
+            attacker.Character.GenerateAscrPacket();
+        }
+
+        #endregion
     }
 }

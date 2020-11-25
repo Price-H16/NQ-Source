@@ -152,6 +152,9 @@ namespace OpenNos.Data
 
         public long ArenaTc { get; set; }
 
+        public long LastFactionChange { get; set; }
+
+
         #endregion
     }
 }

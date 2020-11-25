@@ -143,6 +143,8 @@ namespace OpenNos.GameObject
             UnlockedHLevel = input.UnlockedHLevel;
             LockCode = input.LockCode;
             VerifiedLock = input.VerifiedLock;
+            LastFactionChange = input.LastFactionChange;
+
         }
 
         #endregion
@@ -569,7 +571,11 @@ namespace OpenNos.GameObject
         public short SaveY { get; set; }
 
         public byte ScPage { get; set; }
+        public long CurrentDie { get; set; }
 
+        public long CurrentKill { get; set; }
+
+        public long CurrentTc { get; set; }
         public IDisposable SealDisposable { get; set; }
 
         public int SecondWeaponCriticalChance { get; set; }
@@ -714,7 +720,51 @@ namespace OpenNos.GameObject
         }
 
         public static string GenerateAct() => "act 6";
+        public string GenerateAscr(AscrPacketType e)
+        {
+            if (e == AscrPacketType.Close)
+            {
+                return "ascr 0 0 0 0 0 0 0 0 -1";
+            }
+            long killGroup = 0;
+            long dieGroup = 0;
+            var topArena = "0 0 0";
+            var packet = $"{CurrentKill} {CurrentDie} {CurrentTc} {ArenaKill} {ArenaDie} {ArenaTc}";
+            if (e == AscrPacketType.Group)
+            {
+                if (Group == null)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
 
+                if (Group.GroupType != GroupType.Group)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
+
+                foreach (var character in Group.Sessions.GetAllItems())
+                {
+                    dieGroup += character.Character.ArenaDie;
+                    killGroup += character.Character.ArenaKill;
+                }
+            }
+            else if (e == AscrPacketType.Family)
+            {
+                if (Family == null)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
+
+                foreach (var charac in Family.FamilyCharacters)
+                {
+                    dieGroup += charac.Character.ArenaDie;
+                    killGroup += charac.Character.ArenaKill;
+                }
+            }
+
+            return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+        }
+        public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
         public static void BanMethod(ClientSession session)
         {
             if (session != null)
@@ -733,7 +783,20 @@ namespace OpenNos.GameObject
                 session.Disconnect();
             }
         }
-
+        public void GenerateAscrPacket()
+        {
+            if (Session.CurrentMapInstance.Map.MapId == 2006)
+            {
+                Session.SendPacket(GenerateAscr(Group == null ? AscrPacketType.Alone : AscrPacketType.Group));
+                return;
+            }
+            if (Session.CurrentMapInstance.Map.MapId == 2106)
+            {
+                Session.SendPacket(GenerateAscr(AscrPacketType.Family));
+                return;
+            }
+            Session.SendPacket(GenerateAscr(AscrPacketType.Close));
+        }
         public static string GenerateRaidBf(byte type) => $"raidbf 0 {type} 25 ";
 
         public static void InsertOrUpdatePenalty(PenaltyLogDTO log)
@@ -3098,7 +3161,7 @@ namespace OpenNos.GameObject
             return "";
         }
 
-        public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
+        //public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
 
         public string GenerateGold() => $"gold {Gold} {Session.Account.GoldBank / 1000}";
 

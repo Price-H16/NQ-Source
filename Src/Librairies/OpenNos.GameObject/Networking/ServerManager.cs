@@ -1308,6 +1308,8 @@ namespace OpenNos.GameObject.Networking
                     session.SendPacket(session.Character.GenerateScpStc());
                     Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmp()); });
                     Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmi()); });
+                    session.Character.GenerateAscrPacket();
+
 
                     if (session.CurrentMapInstance.OnSpawnEvents.Any())
                     {

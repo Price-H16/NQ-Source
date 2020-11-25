@@ -496,9 +496,9 @@ namespace NosTale.Extension.Extension.Packet
                     }
                     else
                     {
-                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(
-                            string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
-                                hitRequest.Session.Character.Name, target.Character.Name), 10));
+                        hitRequest.Session.Character.BattleEntity.ApplyScoreArena(target.Character.BattleEntity);
+                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
+                        hitRequest.Session.Character.Name, target.Character.Name), 10));
                         if (target.Character.IsVehicled)
                         {
                             target.Character.RemoveVehicle();

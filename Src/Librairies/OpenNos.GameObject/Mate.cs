@@ -1863,6 +1863,7 @@ namespace OpenNos.GameObject
                             if (target.Character != null)
                             {
                                 if (target.Character.IsVehicled) target.Character.RemoveVehicle();
+                                Owner.BattleEntity.ApplyScoreArena(target);
                                 Owner.MapInstance?.Broadcast(Owner.GenerateSay(
                                     string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
                                         Owner.Name, target.Character.Name), 10));
@@ -2041,6 +2042,7 @@ namespace OpenNos.GameObject
                             if (characterInRange.Hp <= 0)
                             {
                                 if (characterInRange.IsVehicled) characterInRange.RemoveVehicle();
+                                Owner.BattleEntity.ApplyScoreArena(characterInRange.BattleEntity);
                                 Owner.MapInstance?.Broadcast(Owner.GenerateSay(
                                     string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
                                         Owner.Name, characterInRange?.Name), 10));

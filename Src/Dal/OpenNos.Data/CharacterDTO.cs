@@ -148,6 +148,10 @@ namespace OpenNos.Data
 
         public bool VerifiedLock { get; set; }
 
+        public long ArenaDie { get; set; }
+
+        public long ArenaTc { get; set; }
+
         #endregion
     }
 }

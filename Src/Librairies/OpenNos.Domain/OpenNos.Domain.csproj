@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="ActivityType.cs" />
     <Compile Include="ArenaTeamType.cs" />
+    <Compile Include="AscrPacketType.cs" />
     <Compile Include="AttackType.cs" />
     <Compile Include="BankActionType.cs" />
     <Compile Include="BazaarListType.cs" />

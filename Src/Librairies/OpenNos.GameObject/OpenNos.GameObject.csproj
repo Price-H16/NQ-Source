@@ -97,6 +97,7 @@
     <Compile Include="Event\RTR\RoundToRound.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArena.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArenaBattle.cs" />
+    <Compile Include="Extension\BattleExtension.cs" />
     <Compile Include="Extension\CharacterExtension.cs" />
     <Compile Include="Extension\ExtraExtension.cs" />
     <Compile Include="Extension\Inventory\ConvertToPartnerEquipmentExtension.cs" />

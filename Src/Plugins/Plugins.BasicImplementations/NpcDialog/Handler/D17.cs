@@ -18,7 +18,7 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
 
         public async Task Execute(ClientSession Session, NpcDialogEvent packet)
         {
-           var npc = packet.Npc;
+            var npc = packet.Npc;
             if (Session.Character.MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance)
             {
                 return;

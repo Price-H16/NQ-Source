@@ -82,6 +82,10 @@ namespace OpenNos.Mapper.Mappers
             output.VerifiedLock = input.VerifiedLock;
             output.RBBWin = input.RBBWin;
             output.RBBLose = input.RBBLose;
+            output.ArenaDie = input.ArenaDie;
+            output.ArenaTc = input.ArenaTc;
+            output.LastFactionChange = input.LastFactionChange;
+
 
             return true;
         }
@@ -158,6 +162,11 @@ namespace OpenNos.Mapper.Mappers
             output.VerifiedLock = input.VerifiedLock;
             output.RBBWin = input.RBBWin;
             output.RBBLose = input.RBBLose;
+            output.ArenaDie = input.ArenaDie;
+            output.ArenaTc = input.ArenaTc;
+            output.ArenaKill = input.ArenaKill;
+            output.LastFactionChange = input.LastFactionChange;
+
 
             return true;
         }

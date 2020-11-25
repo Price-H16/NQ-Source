@@ -44,8 +44,13 @@ namespace Plugins.BasicImplementations.Guri.Handler
                 if (Enum.TryParse(e.Argument.ToString(), out FactionType faction)
                     && Session.Character.Inventory.CountItem(baseVnum + (byte)faction) > 0)
                 {
-                    if ((byte)faction < 3) // Single family change
+                    if ((byte)faction < 3) // Single faction change
                     {
+                        if (Session.Character.LastFactionChange > DateTime.Now.AddDays(-1).Ticks)
+                        {
+                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHANGE_NOT_PERMITTED"), 0));
+                            return;
+                        }
                         if (Session.Character.Faction == (FactionType)faction)
                         {
                             return;

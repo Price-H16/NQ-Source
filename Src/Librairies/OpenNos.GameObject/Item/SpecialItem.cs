@@ -985,26 +985,78 @@ namespace OpenNos.GameObject
 
                 // Faction Egg
                 case 570:
-                    if (session.Character.Faction == (FactionType) EffectValue)
+                    if (session.CurrentMapInstance?.MapInstanceType == MapInstanceType.Act4Instance)
                     {
+                        session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MUST_BE_IN_CLASSIC_MAP"), 0));
                         return;
                     }
 
                     if (EffectValue < 3)
                     {
+                        if (session.Character.Faction == (FactionType)EffectValue)
+                        {
+                            session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SAME_FACTION"), 0));
+                            return;
+                        }
+
                         session.SendPacket(session.Character.Family == null
-                                ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
-                                : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),
-                                        0));
+                            ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
+                            : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),
+                                0));
                     }
                     else
                     {
+                        if (session.Character.Family == null)
+                        {
+                            session.SendPacket(
+                                UserInterfaceHelper.GenerateMsg(
+                                    Language.Instance.GetMessageFromKey("NO_FAMILY"), 0));
+                            return;
+                        }
+
+                        if ((session.Character.Family.FamilyFaction / 2) == EffectValue)
+                        {
+                            session.SendPacket(
+                                UserInterfaceHelper.GenerateMsg(
+                                    Language.Instance.GetMessageFromKey("SAME_FACTION"), 0));
+                            return;
+                        }
+
                         session.SendPacket(session.Character.Family != null
-                                ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
-                                : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("NO_FAMILY"),
-                                        0));
+                            ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
+                            : UserInterfaceHelper.GenerateMsg(
+                                Language.Instance.GetMessageFromKey("NOT_IN_FAMILY"),
+                                0));
                     }
+
                     break;
+                //case 570:
+                //    if (session.Character.Faction == (FactionType) EffectValue)
+                //    {
+                //        return;
+                //    }
+                //    if (session.CurrentMapInstance?.MapInstanceType == MapInstanceType.Act4Instance)
+                //    {
+                //        session.SendPacket(
+                //            UserInterfaceHelper.GenerateMsg(
+                //                Language.Instance.GetMessageFromKey("MUST_BE_IN_CLASSIC_MAP"), 0));
+                //        return;
+                //    }
+                //    if (EffectValue < 3)
+                //    {
+                //        session.SendPacket(session.Character.Family == null
+                //                ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
+                //                : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),
+                //                        0));
+                //    }
+                //    else
+                //    {
+                //        session.SendPacket(session.Character.Family != null
+                //                ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
+                //                : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("NO_FAMILY"),
+                //                        0));
+                //    }
+                //    break;
 
                 // SP Wings
                 case 650:

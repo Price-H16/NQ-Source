@@ -213,6 +213,12 @@ namespace OpenNos.DAL.EF
 
         public bool VerifiedLock { get; set; }
 
+        public long ArenaDie { get; set; }
+
+        public long ArenaTc { get; set; }
+
+        public long LastFactionChange { get; set; }
+
         #endregion
     }
 }

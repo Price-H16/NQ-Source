@@ -6,7 +6,6 @@ using OpenNos.GameObject.RainbowBattle;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -216,7 +215,6 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 string rndm2 = string.Empty;
                 var RainbowTeam = ServerManager.Instance.RainbowBattleMembers.Find(s => s.Session.Contains(ee));
 
-
                 if (RainbowTeam == null)
                 {
                     return;
@@ -228,11 +226,8 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                     {
                         continue;
                     }
-                    //fblst Level.Reputation.Class.Morph.Name.Gender.CharacterId.HeroLevel 99.100000000030971.2.0.lakowa.1.23520.60
-
                     //fblst Level.Reputation.Class.Morph.Name.Gender.CharacterId.HeroLevel 
                     rndm += $"{bb.Character.CharacterId} ";
-
                     rndm2 +=
                         $"{bb.Character.Level}." +
                         $"{bb.Character.Reputation}." + 
@@ -247,36 +242,20 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
                 var value = RainbowTeam.TeamEntity;
 
-                var output = (RainbowTeam.TeamEntity == RainbowTeamBattleType.Red ? RainbowTeam.SecondTeam : RainbowTeam);
-
-                foreach (var bb in RainbowTeam.Session)
+                if (RainbowBattleManager.AreNotInMap(ee))
                 {
-                    if (RainbowBattleManager.AreNotInMap(bb))
-                    {
-                        continue;
-                    }
-
-                    bb.SendPacket("fbt 0 1");
-                    bb.SendPacket($"fbt 1 {rndm}");
-                    bb.SendPacket($"fblst {rndm2}");
-                    bb.SendPacket($"fbt 5 2 {(byte)value}");
-                    bb.SendPacket($"fbt 5 1 {TimeRBBSec}");
-                    bb.SendPacket($"msg 0 You are on the {value} team !");
-                    bb?.SendPacket($"fbs " +
-                        $"{(byte)RainbowTeam.TeamEntity} " +
-                        $"{RainbowTeam.Session.Count()} " +
-                        $"{output.SecondTeam.Score} " +
-                        $"{output.Score} " +
-                        $"{GetFlag(RainbowTeam, RainbowNpcType.Small)} " +
-                        $"{GetFlag(RainbowTeam, RainbowNpcType.Second)} " +
-                        $"{GetFlag(RainbowTeam, RainbowNpcType.Large)} " +
-                        $"{RainbowTeam.TeamEntity}");
-                    bb?.SendPacket(bb?.Character?.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("TEAM_RBB"), value), 10));
-
+                    return;
                 }
-                //fbs <Type> <TeamCount> <RedPts> <BluePts> <flag1> <flag2> <flag3> <TEAM>
-            }
 
+                ee.SendPacket("fbt 0 1");
+                ee.SendPacket($"fbt 1 {rndm}");
+                ee.SendPacket($"fblst {rndm2}");
+                ee.SendPacket($"fbt 5 2 {(byte)value}");
+                ee.SendPacket($"fbt 5 1 {TimeRBBSec}");
+                ee.SendPacket($"msg 0 You are on the {value} team !");
+                ee.SendPacket($"fbs {(byte)RainbowTeam.TeamEntity} {RainbowTeam.Session.Count()} {RainbowTeam.Score} {RainbowTeam.SecondTeam.Score} {GetFlag(RainbowTeam, RainbowNpcType.Small)} {GetFlag(RainbowTeam, RainbowNpcType.Second)} {GetFlag(RainbowTeam, RainbowNpcType.Large)} {RainbowTeam.TeamEntity}");
+                ee?.SendPacket(ee?.Character?.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("TEAM_RBB"), value), 10));
+            }
 
             public void RunEvent(MapInstance map)
             {

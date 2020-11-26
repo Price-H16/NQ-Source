@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
@@ -37,7 +38,14 @@ namespace OpenNos.Handler.PacketHandler.Mate
                 return;
             }
 
-            var penalty = Session.Account.PenaltyLogs.OrderByDescending(s => s.DateEnd).FirstOrDefault();
+            if (suctlPacket.TargetType != UserType.Npc
+                && !Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
+            PenaltyLogDTO penalty = Session.Account.PenaltyLogs.OrderByDescending(s => s.DateEnd).FirstOrDefault();
             if (Session.Character.IsMuted() && penalty != null)
             {
                 if (Session.Character.Gender == GenderType.Female)
@@ -60,84 +68,96 @@ namespace OpenNos.Handler.PacketHandler.Mate
                 return;
             }
 
-            var attacker = Session.Character.Mates.Find(x => x.MateTransportId == suctlPacket.MateTransportId);
+            GameObject.Mate attacker = Session.Character.Mates.Find(x => x.MateTransportId == suctlPacket.MateTransportId);
 
-            if (attacker != null &&
-                !attacker.HasBuff(CardType.SpecialAttack, (byte)AdditionalTypes.SpecialAttack.NoAttack))
+            if (attacker == null ||
+                attacker.HasBuff(CardType.SpecialAttack, (byte)AdditionalTypes.SpecialAttack.NoAttack))
             {
-                IEnumerable<NpcMonsterSkill> mateSkills = attacker.Skills;
+                return;
+            }
 
-                if (mateSkills != null)
-                {
-                    NpcMonsterSkill skill = null;
+            IEnumerable<NpcMonsterSkill> mateSkills = attacker.Skills;
 
-                    var PossibleSkills = mateSkills.Where(s =>
-                            (DateTime.Now - s.LastSkillUse).TotalMilliseconds >= 1000 * s.Skill.Cooldown)
-                        .ToList();
+            if (mateSkills == null)
+            {
+                return;
+            }
 
-                    NpcMonsterSkill testSkill = null;
+            NpcMonsterSkill skill = null;
 
-                    foreach (var ski in PossibleSkills.OrderBy(rnd => ServerManager.RandomNumber()))
+            List<NpcMonsterSkill> PossibleSkills = mateSkills.Where(s => (DateTime.Now - s.LastSkillUse).TotalMilliseconds >= 1000 * s.Skill.Cooldown || s.Rate == 0).ToList();
+
+            //foreach (NpcMonsterSkill ski in PossibleSkills.OrderBy(rnd => ServerManager.RandomNumber()))
+            //{
+            //    if (ski.Rate == 0)
+            //    {
+            //        skill = ski;
+            //    }
+            //    else if (ServerManager.RandomNumber() < ski.Rate)
+            //    {
+            //        skill = ski;
+            //        break;
+            //    }
+            //}
+
+            skill = mateSkills.FirstOrDefault(s => s?.Skill?.CastId == suctlPacket.CastId);
+
+            switch (suctlPacket.TargetType)
+            {
+                case UserType.Monster:
+                    if (attacker.Hp > 0)
                     {
-                        if (ski.Rate == 0)
+                        MapMonster target = Session.CurrentMapInstance?.GetMonsterById(suctlPacket.TargetId);
+                        if (target != null)
                         {
-                            skill = ski;
-                        }
-                        else if (ServerManager.RandomNumber() < ski.Rate)
-                        {
-                            skill = ski;
-                            break;
+                            if (attacker.BattleEntity.CanAttackEntity(target.BattleEntity))
+                            {
+                                attacker.TargetHit(target.BattleEntity, skill);
+                            }
                         }
                     }
 
-                    switch (suctlPacket.TargetType)
+                    return;
+
+                case UserType.Npc:
+                    if (attacker.Hp > 0)
                     {
-                        case UserType.Monster:
-                            if (attacker.Hp > 0)
+                        GameObject.Mate target = Session.CurrentMapInstance?.GetMate(suctlPacket.TargetId);
+                        if (target != null)
+                        {
+                            if (attacker.Owner.BattleEntity.CanAttackEntity(target.BattleEntity))
                             {
-                                var target = Session.CurrentMapInstance?.GetMonsterById(suctlPacket.TargetId);
-                                if (target != null)
-                                    if (attacker.BattleEntity.CanAttackEntity(target.BattleEntity))
-                                        attacker.TargetHit(target.BattleEntity, skill);
+                                attacker.TargetHit(target.BattleEntity, skill);
                             }
-
-                            return;
-
-                        case UserType.Npc:
-                            if (attacker.Hp > 0)
+                            else
                             {
-                                var target = Session.CurrentMapInstance?.GetMate(suctlPacket.TargetId);
-                                if (target != null)
-                                {
-                                    if (attacker.Owner.BattleEntity.CanAttackEntity(target.BattleEntity))
-                                        attacker.TargetHit(target.BattleEntity, skill);
-                                    else
-                                        Session.SendPacket(StaticPacketHelper.Cancel(2, target.CharacterId));
-                                }
+                                Session.SendPacket(StaticPacketHelper.Cancel(2, target.CharacterId));
                             }
-
-                            return;
-
-                        case UserType.Player:
-                            if (attacker.Hp > 0)
-                            {
-                                var target = Session.CurrentMapInstance?.GetSessionByCharacterId(suctlPacket.TargetId)
-                                    ?.Character;
-                                if (target != null)
-                                {
-                                    if (attacker.Owner.BattleEntity.CanAttackEntity(target.BattleEntity))
-                                        attacker.TargetHit(target.BattleEntity, skill);
-                                    else
-                                        Session.SendPacket(StaticPacketHelper.Cancel(2, target.CharacterId));
-                                }
-                            }
-
-                            return;
-
-                        case UserType.Object:
-                            return;
+                        }
                     }
-                }
+                    return;
+
+                case UserType.Player:
+                    if (attacker.Hp > 0)
+                    {
+                        Character target = Session.CurrentMapInstance?.GetSessionByCharacterId(suctlPacket.TargetId)?.Character;
+                        if (target != null)
+                        {
+                            if (attacker.Owner.BattleEntity.CanAttackEntity(target.BattleEntity))
+                            {
+                                attacker.TargetHit(target.BattleEntity, skill);
+                            }
+                            else
+                            {
+                                Session.SendPacket(StaticPacketHelper.Cancel(2, target.CharacterId));
+                            }
+                        }
+                    }
+
+                    return;
+
+                case UserType.Object:
+                    return;
             }
         }
 

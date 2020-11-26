@@ -5,6 +5,7 @@ using System.Threading;
 using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.Domain;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 

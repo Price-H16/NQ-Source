@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
+using Autofac;
+using ChickenAPI.Plugins;
+using ChickenAPI.Plugins.Exceptions;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.DAL;
@@ -10,6 +14,7 @@ using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
+using Plugins.DiscordWebhook;
 
 namespace OpenNos.Handler.PacketHandler.Family
 {
@@ -31,7 +36,27 @@ namespace OpenNos.Handler.PacketHandler.Family
         #endregion
 
         #region Methods
+        private static IContainer BuildCoreContainer()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
+            var container = pluginBuilder.Build();
 
+            var coreBuilder = new ContainerBuilder();
+            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                try
+                {
+                    plugin.OnLoad(coreBuilder);
+                }
+                catch (PluginException e)
+                {
+                }
+            }
+
+
+            return coreBuilder.Build();
+        }
         public void CreateFamily(CreateFamilyPacket createFamilyPacket)
         {
             if (Session.Character.Group?.GroupType == GroupType.Group && Session.Character.Group.SessionCount == 3)
@@ -39,17 +64,13 @@ namespace OpenNos.Handler.PacketHandler.Family
                 foreach (var session in Session.Character.Group.Sessions.GetAllItems())
                     if (session.Character.Family != null || session.Character.FamilyCharacter != null)
                     {
-                        Session.SendPacket(
-                            UserInterfaceHelper.GenerateInfo(
-                                Language.Instance.GetMessageFromKey("PARTY_MEMBER_IN_FAMILY")));
+                        Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("PARTY_MEMBER_IN_FAMILY")));
                         return;
                     }
                     else if (session.Character.LastFamilyLeave > DateTime.Now.AddDays(-1).Ticks)
                     {
-                        Session.SendPacket(
-                            UserInterfaceHelper.GenerateInfo(
-                                Language.Instance.GetMessageFromKey("PARTY_MEMBER_HAS_PENALTY")));
-                        //return;
+                        Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("PARTY_MEMBER_HAS_PENALTY")));
+                        return;
                     }
 
                 if (Session.Character.Gold < 500000)
@@ -62,9 +83,7 @@ namespace OpenNos.Handler.PacketHandler.Family
                 var name = createFamilyPacket.CharacterName;
                 if (DAOFactory.FamilyDAO.LoadByName(name) != null)
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateInfo(
-                            Language.Instance.GetMessageFromKey("FAMILY_NAME_ALREADY_USED")));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("FAMILY_NAME_ALREADY_USED")));
                     return;
                 }
 
@@ -76,19 +95,18 @@ namespace OpenNos.Handler.PacketHandler.Family
                     FamilyExperience = 0,
                     FamilyLevel = 1,
                     FamilyMessage = $"Welcome to {name}!",
-                    FamilyFaction = Session.Character.Faction != FactionType.None
-                        ? (byte) Session.Character.Faction
-                        : (byte) ServerManager.RandomNumber(1, 2), // maybe doesn't work properly
+                    FamilyFaction = Session.Character.Faction != FactionType.None ? (byte) Session.Character.Faction : (byte) ServerManager.RandomNumber(1, 2), // maybe doesn't work properly
                     MaxSize = 100,
-                    WarehouseSize = 49 //free fam warehouse bc why not
+                    WarehouseSize = 0 
                 };
                 DAOFactory.FamilyDAO.InsertOrUpdate(ref family);
-
+                var pluginBuilder = new ContainerBuilder();
+                IContainer container = pluginBuilder.Build();
+                using var coreContainer = BuildCoreContainer();
                 Logger.LogUserEvent("GUILDCREATE", Session.GenerateIdentity(), $"[FamilyCreate][{family.FamilyId}]");
-
-                ServerManager.Instance.Broadcast(
-                    UserInterfaceHelper.GenerateMsg(
-                        string.Format(Language.Instance.GetMessageFromKey("FAMILY_FOUNDED"), name), 0));
+                var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+                ss.NotifyAllAsync(NotifiableEventType.FAMILY_X_HAS_BEEN_CREATED_BY_Y, name, Session.Character.CharacterId);
+                ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("FAMILY_FOUNDED"), name), 0));
                 foreach (var session in Session.Character.Group.Sessions.GetAllItems())
                 {
                     session.Character.ChangeFaction(FactionType.None);
@@ -97,9 +115,7 @@ namespace OpenNos.Handler.PacketHandler.Family
                         CharacterId = session.Character.CharacterId,
                         DailyMessage = "",
                         Experience = 0,
-                        Authority = Session.Character.CharacterId == session.Character.CharacterId
-                            ? FamilyAuthority.Head
-                            : FamilyAuthority.Familydeputy,
+                        Authority = Session.Character.CharacterId == session.Character.CharacterId ? FamilyAuthority.Head : FamilyAuthority.Familydeputy,
                         FamilyId = family.FamilyId,
                         Rank = 0
                     };

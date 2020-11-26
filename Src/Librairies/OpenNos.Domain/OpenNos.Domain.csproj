@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="ActivityType.cs" />
     <Compile Include="ArenaTeamType.cs" />
+    <Compile Include="AscrPacketType.cs" />
     <Compile Include="AttackType.cs" />
     <Compile Include="BankActionType.cs" />
     <Compile Include="BazaarListType.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="MessageType.cs" />
     <Compile Include="MinilandState.cs" />
     <Compile Include="MonsterType.cs" />
+    <Compile Include="NotifiableEventType.cs" />
     <Compile Include="NpcMonsterRaceType.cs" />
     <Compile Include="PartnerSkillLevelType.cs" />
     <Compile Include="PenaltyType.cs" />

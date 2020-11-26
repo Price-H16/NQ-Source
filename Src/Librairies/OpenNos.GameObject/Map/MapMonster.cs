@@ -11,6 +11,7 @@ using OpenNos.Domain;
 using OpenNos.GameObject._Event;
 using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.PathFinder;
@@ -1770,11 +1771,10 @@ namespace OpenNos.GameObject
 
                             if (Owner?.Character != null)
                             {
-                                Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(
-                                    string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
-                                        Owner.Character.Name, target.Character.Name), 10));
+                                Owner.Character.BattleEntity.ApplyScoreArena(target);
+                                Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"), Owner.Character.Name, target.Character.Name), 10));
                                 Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
-                                    ServerManager.Instance.AskPvpRevive((long)target.Character?.CharacterId));
+                                ServerManager.Instance.AskPvpRevive((long)target.Character?.CharacterId));
                             }
                             else
                             {
@@ -2072,9 +2072,8 @@ namespace OpenNos.GameObject
 
                                 if (Owner?.Character != null)
                                 {
-                                    Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(
-                                            string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
-                                                    Owner.Character.Name, characterInRange?.Name), 10));
+                                    Owner.Character.BattleEntity.ApplyScoreArena(characterInRange.BattleEntity);
+                                    Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"), Owner.Character.Name, characterInRange?.Name), 10));
                                     Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
                                     {
                                         ServerManager.Instance.AskPvpRevive((long)characterInRange?.CharacterId);

@@ -70,17 +70,17 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
 
         public static void SendEvent()
         {
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
-            //Thread.Sleep(4 * 60 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
-            //Thread.Sleep(30 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
-            //Thread.Sleep(20 * 1000);
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
-            //ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
+            Thread.Sleep(4 * 60 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 1));
+            Thread.Sleep(30 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 30), 1));
+            Thread.Sleep(20 * 1000);
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 0));
+            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_SECONDS"), 10), 1));
             Thread.Sleep(10 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("RAINBOW_STARTED"), 1));
             ServerManager.Instance.EventInWaiting = true;
@@ -134,7 +134,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 DestinationCharacterId = null,
                 SourceCharacterId = 0,
                 SourceWorldId = ServerManager.Instance.WorldId,
-                Message = "The Rainbow Battle will start in 5 minutes on the channel 4 !",
+                Message = "The Rainbow Battle will start in 5 minutes on the channel 1 !",
                 Type = MessageType.Shout
             });
         }
@@ -208,6 +208,7 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
                 if (RainbowBattleTeam == null) return 0;
                 return RainbowBattleTeam.TotalFlag.FindAll(s => s.Item2 == type).Count();
             }
+
             public void GenerateBattleRainbowPacket(ClientSession ee)
             {
                 string rndm = string.Empty;

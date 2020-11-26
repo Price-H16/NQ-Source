@@ -33,6 +33,7 @@ namespace OpenNos.GameObject.Helpers
                 case 854: // Black Meteorite
                 case 945: // Bomb
                 case 946: // Fire Mine
+                case 974: // SP2AM Lotus Flower
                 case 1382: // Pumpkin Bomb
                 case 1436: // Mobile Trap
                 case 1439: // Giant Swirl
@@ -74,6 +75,16 @@ namespace OpenNos.GameObject.Helpers
 
             return false;
         }
+        public static bool DefendHisRace(short monsterVNum)
+        {
+            switch (monsterVNum)
+            {
+                case 203: // Wolf-lion
+                    return true;
+            }
+
+            return false;
+        }
 
         public static bool UseOwnerEntity(short monsterVNum)
         {
@@ -82,6 +93,7 @@ namespace OpenNos.GameObject.Helpers
                 case 416: // Mini Jajamaru
                 case 945: // SP3A Bomb
                 case 946: // SP3A Fire Mine
+                case 974: // SP2AM Lotus Flower
                 case 2112: // Summoned Dark Clone (Fire)
                 case 2113: // Summoned Dark Clone (Ice)
                 case 2114: // Summoned Dark Clone (Light)

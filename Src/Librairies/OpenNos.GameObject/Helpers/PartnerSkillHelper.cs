@@ -25,29 +25,29 @@ namespace OpenNos.GameObject.Helpers
                     IsPartnerSkillBCard = true
                 };
 
-                switch ((CardType) newBCard.Type)
+                switch ((CardType)newBCard.Type)
                 {
                     case CardType.DrainAndSteal:
-                    {
-                        if (newBCard.SubType == (byte) AdditionalTypes.DrainAndSteal.LeechEnemyHP)
-                            newBCard.SecondData = Convert.ToInt32(Math.Floor(multiplier * newBCard.SecondData));
-                    }
+                        {
+                            if (newBCard.SubType == (byte)AdditionalTypes.DrainAndSteal.LeechEnemyHP)
+                                newBCard.SecondData = Convert.ToInt32(Math.Floor(multiplier * newBCard.SecondData));
+                        }
                         break;
 
                     case CardType.Buff:
-                    {
-                        if (newBCard.SecondData != 7 /* Blackout */) newBCard.SecondData += partnerSkill.Level - 1;
-                    }
+                        {
+                            if (newBCard.SecondData != 7 /* Blackout */) newBCard.SecondData += partnerSkill.Level - 1;
+                        }
                         break;
 
                     default:
-                    {
-                        if (newBCard.FirstData != 0 && newBCard.IsLevelScaled)
                         {
-                            newBCard.FirstData = Convert.ToInt32(Math.Floor(multiplier * newBCard.FirstData));
-                            newBCard.IsLevelScaled = false;
+                            if (newBCard.FirstData != 0 && newBCard.IsLevelScaled)
+                            {
+                                newBCard.FirstData = Convert.ToInt32(Math.Floor(multiplier * newBCard.FirstData));
+                                newBCard.IsLevelScaled = false;
+                            }
                         }
-                    }
                         break;
                 }
 
@@ -59,7 +59,7 @@ namespace OpenNos.GameObject.Helpers
 
         public static double GetMultiplierBySkillLevel(byte level)
         {
-            var levelType = (PartnerSkillLevelType) level;
+            var levelType = (PartnerSkillLevelType)level;
 
             switch (levelType)
             {

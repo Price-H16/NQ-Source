@@ -48,7 +48,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin\Release\World\</OutputPath>
+    <OutputPath>bin\Release\World\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -142,6 +142,10 @@
       <Project>{C93A0A40-0551-4732-B594-171B87679AC1}</Project>
       <Name>OpenNos.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Librairies\OpenNos.Domain\OpenNos.Domain.csproj">
+      <Project>{20ADDDDD-DAD9-44F3-9BEB-026C73090660}</Project>
+      <Name>OpenNos.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Librairies\OpenNos.GameObject\OpenNos.GameObject.csproj">
       <Project>{EADD17BE-20A4-4589-830E-E41BE9314928}</Project>
       <Name>OpenNos.GameObject</Name>
@@ -161,6 +165,10 @@
     <ProjectReference Include="..\..\Plugins\Plugins.BasicImplementations\Plugins.BasicImplementations.csproj">
       <Project>{b5fe46a3-9c85-44d9-8efb-4a33e7e77c4a}</Project>
       <Name>Plugins.BasicImplementations</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Plugins.DiscordWebhook\Plugins.DiscordWebhook.csproj">
+      <Project>{3D136894-3495-4B5A-91CA-66A207D8C798}</Project>
+      <Name>Plugins.DiscordWebhook</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

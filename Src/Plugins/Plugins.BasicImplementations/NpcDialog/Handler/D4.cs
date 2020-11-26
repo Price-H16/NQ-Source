@@ -7,6 +7,8 @@ using OpenNos.GameObject._NpcDialog;
 using OpenNos.GameObject._NpcDialog.Event;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
+using OpenNos.GameObject.Extension;
+
 
 namespace Plugins.BasicImplementations.NpcDialog.Handler
 {

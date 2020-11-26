@@ -1,6 +1,4 @@
-﻿using NosTale.Packets.Packets.ClientPackets;
-using OpenNos.Core;
-using OpenNos.GameObject;
+﻿using OpenNos.Domain;
 
 namespace OpenNos.GameObject._gameEvent
 {

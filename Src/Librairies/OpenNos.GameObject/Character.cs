@@ -143,6 +143,8 @@ namespace OpenNos.GameObject
             UnlockedHLevel = input.UnlockedHLevel;
             LockCode = input.LockCode;
             VerifiedLock = input.VerifiedLock;
+            LastFactionChange = input.LastFactionChange;
+
         }
 
         #endregion
@@ -569,7 +571,11 @@ namespace OpenNos.GameObject
         public short SaveY { get; set; }
 
         public byte ScPage { get; set; }
+        public long CurrentDie { get; set; }
 
+        public long CurrentKill { get; set; }
+
+        public long CurrentTc { get; set; }
         public IDisposable SealDisposable { get; set; }
 
         public int SecondWeaponCriticalChance { get; set; }
@@ -714,7 +720,83 @@ namespace OpenNos.GameObject
         }
 
         public static string GenerateAct() => "act 6";
+        public string GenerateAscr(AscrPacketType e)
+        {
+            if (e == AscrPacketType.Close)
+            {
+                return "ascr 0 0 0 0 0 0 0 0 -1";
+            }
+            long killGroup = 0;
+            long dieGroup = 0;
+            var topArena = "0 0 0";
+            var packet = $"{CurrentKill} {CurrentDie} {CurrentTc} {ArenaKill} {ArenaDie} {ArenaTc}";
+            if (e == AscrPacketType.Group)
+            {
+                if (Group == null)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
 
+                if (Group.GroupType != GroupType.Group)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
+
+                foreach (var character in Group.Sessions.GetAllItems())
+                {
+                    dieGroup += character.Character.ArenaDie;
+                    killGroup += character.Character.ArenaKill;
+                }
+            }
+            else if (e == AscrPacketType.Family)
+            {
+                if (Family == null)
+                {
+                    return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+                }
+
+                foreach (var charac in Family.FamilyCharacters)
+                {
+                    dieGroup += charac.Character.ArenaDie;
+                    killGroup += charac.Character.ArenaKill;
+                }
+            }
+
+            return $"ascr {packet} {killGroup} {dieGroup} {(long)e}";
+        }
+        public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
+        public static void BanMethod(ClientSession session)
+        {
+            if (session != null)
+            {
+                PenaltyLogDTO log = new PenaltyLogDTO
+                {
+                    AccountId = session.Account.AccountId,
+                    Reason = "Bug Using",
+                    Penalty = PenaltyType.Banned,
+                    DateStart = DateTime.Now,
+                    DateEnd = DateTime.Now.AddYears(20),
+                    AdminName = "BenSolo"
+                };
+                DAOFactory.PenaltyLogDAO.InsertOrUpdate(ref log);
+                CommunicationServiceClient.Instance.RefreshPenalty(log.PenaltyLogId);
+                session.Disconnect();
+            }
+        }
+        public void GenerateAscrPacket()
+        {
+            if (Session.CurrentMapInstance.Map.MapId == 2006)
+            {
+                Session.SendPacket(GenerateAscr(Group == null ? AscrPacketType.Alone : AscrPacketType.Group));
+                return;
+            }
+            if (Session.CurrentMapInstance.Map.MapId == 2106)
+            {
+                Session.SendPacket(GenerateAscr(AscrPacketType.Family));
+                return;
+            }
+            Session.SendPacket(GenerateAscr(AscrPacketType.Close));
+        }
         public static string GenerateRaidBf(byte type) => $"raidbf 0 {type} 25 ";
 
         public static void InsertOrUpdatePenalty(PenaltyLogDTO log)
@@ -2700,6 +2782,12 @@ namespace OpenNos.GameObject
 
         public string GenerateFaction() => $"fs {(byte) Faction}";
 
+        public void GenerateCommandInterface()
+        {
+            string Command = "";
+            Session.SendPacket($"guri 10 1 579068 985 {Command}");
+        }
+
         public string GenerateFamilyMember()
         {
             string str = "gmbr 0";
@@ -3047,7 +3135,8 @@ namespace OpenNos.GameObject
                     $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
                     $"{Family.FamilyLevel} " +
                     $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
-                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|";
+                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
+                    $"{(Family.FamilyFaction)}";
         }     
 
         public string GenerateGInfo()
@@ -3072,7 +3161,7 @@ namespace OpenNos.GameObject
             return "";
         }
 
-        public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
+        //public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
 
         public string GenerateGold() => $"gold {Gold} {Session.Account.GoldBank / 1000}";
 
@@ -3763,24 +3852,24 @@ namespace OpenNos.GameObject
                         GenerateXp(monsterToAttack);
                     }
 
-                    GenerateDignity(monsterToAttack.Monster);
+                    //GenerateDignity(monsterToAttack.Monster);
 
 
-                    if (Session.HasCurrentMapInstance)
-                    {
-                        if (Group?.GroupType == GroupType.Group)
-                        {
-                            foreach (ClientSession targetSession in Group.Sessions.Where(s =>
-                                s.Character.MapInstanceId == MapInstanceId))
-                            {
-                                targetSession.Character.GetReputation(monsterToAttack.Monster.Level / 2);
-                            }
-                        }
-                        else
-                        {
-                            GetReputation(monsterToAttack.Monster.Level / 2);
-                        }
-                    }
+                    //if (Session.HasCurrentMapInstance)
+                    //{
+                    //    if (Group?.GroupType == GroupType.Group)
+                    //    {
+                    //        foreach (ClientSession targetSession in Group.Sessions.Where(s =>
+                    //            s.Character.MapInstanceId == MapInstanceId))
+                    //        {
+                    //            targetSession.Character.GetReputation(monsterToAttack.Monster.Level / 2);
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        GetReputation(monsterToAttack.Monster.Level / 2);
+                    //    }
+                    //}
                 }
 
                 #endregion
@@ -5342,8 +5431,22 @@ namespace OpenNos.GameObject
 
         public CharacterSkill GetSkillByCastId(short castId) => GetSkills()?.FirstOrDefault(s => s.Skill?.CastId == castId);
 
-        public List<CharacterSkill> GetSkills()=> UseSp? SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200).Concat(Skills.Where(s => s.IsTattoo))).ToList() : Skills.GetAllItems();
-
+        //public List<CharacterSkill> GetSkills()=> UseSp? SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200).Concat(Skills.Where(s => s.IsTattoo))).ToList() : Skills.GetAllItems();
+        public List<CharacterSkill> GetSkills()
+        {
+            var list = new List<CharacterSkill>();
+            if (UseSp)
+            {
+                list.AddRange(SkillsSp.GetAllItems().Concat(Skills.Where(s => s.SkillVNum < 200)).ToList());
+                list.AddRange(Skills.GetAllItems().Where(sd => sd.IsPartnerSkill).ToList());
+                list.AddRange(Skills.GetAllItems().Where(sd => sd.IsTattoo).ToList());
+            }
+            else
+            {
+                list.AddRange(Skills.GetAllItems());
+            }
+            return list;
+        }
         public string GetSqst()
         {
             List<QuestLogDTO> questLogs = DAOFactory.QuestLogDAO.LoadByCharacterId(CharacterId).ToList();
@@ -5509,6 +5612,7 @@ namespace OpenNos.GameObject
                         if (newItem.Item.ItemType == ItemType.Shell)
                         {
                             newItem.Upgrade = (byte) ServerManager.RandomNumber(50, 81);
+                            Session.Character.SaveEq();
                         }
 
                         if (newItem.Item.EquipmentSlot == EquipmentType.Gloves || newItem.Item.EquipmentSlot == EquipmentType.Boots)
@@ -5523,6 +5627,13 @@ namespace OpenNos.GameObject
                         List<ItemInstance> newInv = Inventory.AddToInventory(newItem);
                         if (newInv.Count > 0)
                         {
+                            if (newItem.Item.IsHeroic && newItem.Item.ItemType == ItemType.Armor || newItem.Item.ItemType == ItemType.Weapon && newItem.Rare > 0)
+                            {
+                                newItem.GenerateHeroicShell(RarifyProtection.RandomHeroicAmulet);
+                                newItem.SetRarityPoint();
+                                Session.Character.SaveEq();
+
+                            }
                             Session.SendPacket(GenerateSay($"{Language.Instance.GetMessageFromKey("ITEM_ACQUIRED")}: {newItem.Item.Name} x {amount}",10));
                         }
                         else if (MailList.Count(s => s.Value.AttachmentVNum != null) < 40)
@@ -5672,6 +5783,10 @@ namespace OpenNos.GameObject
 
         public bool IsCoupleOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && c.RelationType == CharacterRelationType.Spouse && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
 
+        public bool IsFriendlistFull() => CharacterRelations.Where(s => s.RelationType == CharacterRelationType.Friend || s.RelationType == CharacterRelationType.Spouse).ToList().Count >= 80;
+
+        public bool IsFriendOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && (c.RelationType == CharacterRelationType.Friend || c.RelationType == CharacterRelationType.Spouse) && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
+
         public bool IsFamilyTop(bool isLevel)
         {
             var family = ServerManager.Instance.GetBestFamily(isLevel);
@@ -5688,10 +5803,6 @@ namespace OpenNos.GameObject
 
             return false;
         }
-
-        public bool IsFriendlistFull() => CharacterRelations.Where(s => s.RelationType == CharacterRelationType.Friend || s.RelationType == CharacterRelationType.Spouse).ToList().Count >= 80;
-
-        public bool IsFriendOfCharacter(long characterId) => CharacterRelations.Any(c => characterId != CharacterId && (c.RelationType == CharacterRelationType.Friend || c.RelationType == CharacterRelationType.Spouse) && (c.RelatedCharacterId.Equals(characterId) || c.CharacterId.Equals(characterId)));
 
         /// <summary>
         /// Checks if the current character is in range of the given position
@@ -5951,12 +6062,12 @@ namespace OpenNos.GameObject
             {
                 inventory.CharacterId = CharacterId;
                 Inventory[inventory.Id] = new ItemInstance(inventory);
-                /*ItemInstance iteminstance = inventory as ItemInstance;
+                ItemInstance iteminstance = inventory as ItemInstance;
                 iteminstance?.ShellEffects.Clear();
-                iteminstance?.ShellEffects.AddRange(DAOFactory.ShellEffectDAO.LoadByEquipmentSerialId(iteminstance.EquipmentSerialId));*/
+                iteminstance?.ShellEffects.AddRange(DAOFactory.ShellEffectDAO.LoadByEquipmentSerialId(iteminstance.EquipmentSerialId));
             }
 
-            /*ItemInstance ring = Inventory.LoadBySlotAndType((byte)EquipmentType.Ring, InventoryType.Wear);
+            ItemInstance ring = Inventory.LoadBySlotAndType((byte)EquipmentType.Ring, InventoryType.Wear);
             ItemInstance bracelet = Inventory.LoadBySlotAndType((byte)EquipmentType.Bracelet, InventoryType.Wear);
             ItemInstance necklace = Inventory.LoadBySlotAndType((byte)EquipmentType.Necklace, InventoryType.Wear);
             CellonOptions.Clear();
@@ -5971,7 +6082,7 @@ namespace OpenNos.GameObject
             if (necklace != null)
             {
                 CellonOptions.AddRange(necklace.CellonOptions);
-            }*/
+            }
         }
 
         public void LoadMail()
@@ -6645,7 +6756,72 @@ namespace OpenNos.GameObject
             DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(it.ShellEffects, it.EquipmentSerialId);
             DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(it.CellonOptions, it.EquipmentSerialId);
         }
+        public void SaveEq()
+        {
+            try
+            {
+                AccountDTO account = Session.Account;
+                DAOFactory.AccountDAO.InsertOrUpdate(ref account);
 
+                CharacterDTO character = DeepCopy();
+                DAOFactory.CharacterDAO.InsertOrUpdate(ref character);
+
+
+                List<ItemInstance> inventories = Inventory.GetAllItems();
+
+                List<ItemInstance> saveInventory = inventories.Where(s => s.Type != InventoryType.Bazaar && s.Type != InventoryType.FamilyWareHouse).ToList();
+
+                if (Inventory != null)
+                {
+                    lock (Inventory)
+
+
+
+
+                        foreach (ItemInstance itemInstance in saveInventory)
+                        {
+                            if (!(itemInstance is ItemInstance instance))
+                            {
+                                continue;
+                            }
+                            if (!instance.ShellEffects.Any())
+                            {
+                                continue;
+                            }
+                            if (itemInstance.EquipmentSerialId != null)
+                            {
+                                DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(itemInstance.EquipmentSerialId);
+                                DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(itemInstance.ShellEffects, itemInstance.EquipmentSerialId);
+                                instance.ShellEffects.ForEach(s =>
+                                {
+                                    s.EquipmentSerialId = instance.EquipmentSerialId;
+                                    DAOFactory.ShellEffectDAO.InsertOrUpdate(s);
+                                });
+                            }
+                        }
+                }
+            }
+
+            catch (Exception e)
+            {
+                Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", e);
+            }
+        }
+        public void Savemates()
+        {
+            IEnumerable<long> currentlySavedMates = DAOFactory.MateDAO.LoadByCharacterId(CharacterId).Select(s => s.MateId);
+
+            foreach (long matesToDeleteId in currentlySavedMates.Except(Mates.Select(s => s.MateId)))
+            {
+                DAOFactory.MateDAO.Delete(matesToDeleteId);
+            }
+
+            foreach (Mate mate in Mates)
+            {
+                MateDTO matesave = mate;
+                DAOFactory.MateDAO.InsertOrUpdate(ref matesave);
+            }
+        }
         public void Save()
         {
             Logger.LogUserEvent("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "START");
@@ -6908,6 +7084,7 @@ namespace OpenNos.GameObject
                     SenderMorphId = Morph == 0 ? (short) -1 : (short) (Morph > short.MaxValue ? 0 : Morph)
                 };
                 MailServiceClient.Instance.SendMail(mail);
+                Session.Character.SaveEq();
             }
         }
 

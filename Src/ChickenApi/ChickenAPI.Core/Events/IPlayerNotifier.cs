@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using OpenNos.Domain;
+using System.Threading.Tasks;
 
-namespace OpenNos.GameObject._gameEvent
+namespace ChickenAPI.Core.Events
 {
     public interface IPlayerNotifier
     {

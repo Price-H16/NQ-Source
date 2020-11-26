@@ -43,6 +43,11 @@ namespace OpenNos.Handler.PacketHandler.Command
             Session.SendPacket(Session.Character.GenerateSay($"LOD: 18:30", 12));
             Session.SendPacket(Session.Character.GenerateSay($"LOD: 21:00", 12));
             Session.SendPacket(Session.Character.GenerateSay($"LOD: 00:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 10:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 13:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 16:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 19:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 22:00", 12));
             Session.SendPacket(Session.Character.GenerateSay("INSTANT COMBAT: Every 2 hours except on autoreboot time", 12));
             Session.SendPacket(Session.Character.GenerateSay("METEORITE GAME: 15:40", 12));
             Session.SendPacket(Session.Character.GenerateSay("METEORITE GAME: 17:40", 12));

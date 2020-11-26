@@ -23,6 +23,7 @@ using NosTale.Configuration.Utilities;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.DAL.EF.Helpers;
+using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject._BCards;
 using OpenNos.GameObject._Event;
@@ -42,6 +43,7 @@ using Plugins.BasicImplementations.Event;
 using Plugins.BasicImplementations.Guri;
 using Plugins.BasicImplementations.ItemUsage;
 using Plugins.BasicImplementations.NpcDialog;
+using Plugins.DiscordWebhook;
 
 namespace OpenNos.World
 {
@@ -149,6 +151,7 @@ namespace OpenNos.World
             IContainer container = pluginBuilder.Build();
             using var coreContainer = BuildCoreContainer();
             var gameBuilder = new ContainerBuilder();
+            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
             Logger.InitializeLogger(coreContainer.Resolve<ILogger>());
             gameBuilder.RegisterInstance(coreContainer).As<IContainer>();
             gameBuilder.RegisterModule(new CoreContainerModule(coreContainer));
@@ -157,6 +160,7 @@ namespace OpenNos.World
             //gameBuilder.Register(s => new CommandHandler(new SerilogLogger(), coreContainer)).As<ICommandContainer>().SingleInstance();
             //gameBuilder.Register(s => new CommandGlobalExecutorWrapper(s.Resolve<ICommandContainer>())).As<IGlobalCommandExecutor>().SingleInstance();
             //gameBuilder.Register(s => new EssentialsPlugin(s.Resolve<ICommandContainer>(), ServerManager.Instance)).As<IGamePlugin>().SingleInstance();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
             gameBuilder.Register(s => new ItemUsagePlugin(coreContainer.Resolve<IItemUsageHandlerContainer>(), coreContainer)).As<IGamePlugin>();
             gameBuilder.Register(s => new BasicEventPipelineAsync()).As<IEventPipeline>().SingleInstance();
             gameBuilder.Register(s => new GenericEventPlugin(s.Resolve<IEventPipeline>(), coreContainer)).As<IGamePlugin>().SingleInstance();
@@ -175,8 +179,10 @@ namespace OpenNos.World
            
             PrintHeader();
             ConfigurationHelper.CustomisationRegistration();
-                             
+
             var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
+
+            //_ = ss.NotifyAllAsync(NotifiableEventType.CHANNEL_ONLINE, O);
 
             var ignoreStartupMessages = false;
             _port = Convert.ToInt32(a.WorldPort);
@@ -215,6 +221,7 @@ namespace OpenNos.World
             try
             {
                 _exitHandler += ExitHandler;
+                //ss.NotifyAllAsync(NotifiableEventType.CHANNEL_ONLINE, "Offline");
                 AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
                 NativeMethods.SetConsoleCtrlHandler(_exitHandler, true);
             }
@@ -227,7 +234,7 @@ namespace OpenNos.World
 
             var ipAddress = a.IPAddress;
 
-            portloop:
+        portloop:
             try
             {
                 networkManager = new NetworkManager<WorldCryptography>(ipAddress, _port, typeof(Act4Handler),
@@ -255,7 +262,7 @@ namespace OpenNos.World
                 MailServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);
                 ConfigurationServiceClient.Instance.Authenticate(authKey, ServerManager.Instance.WorldId);
                 ServerManager.Instance.Configuration = ConfigurationServiceClient.Instance.GetConfigurationObject();
-
+                //ServerManager.Instance.MallApi = new MallAPIHelper(ServerManager.Instance.Configuration.MallBaseURL);
                 ServerManager.Instance.SynchronizeSheduling();
             }
             else
@@ -270,6 +277,7 @@ namespace OpenNos.World
             var pluginBuilder = new ContainerBuilder();
             pluginBuilder.RegisterType<SerilogLogger>().AsImplementedInterfaces().AsSelf();
             pluginBuilder.RegisterType<LoggingPlugin>().AsImplementedInterfaces().AsSelf();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<DatabasePlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<RedisMultilanguagePlugin>().AsImplementedInterfaces().AsSelf();
             //pluginBuilder.RegisterType<GamePacketHandlersCorePlugin>().AsImplementedInterfaces().AsSelf();
@@ -297,7 +305,30 @@ namespace OpenNos.World
 
             return coreBuilder.Build();
         }
+        private static void SendMail(string message)
+        {
+            try
+            {
+                // Changed old mail to delynith's new mail.
+                var mailMessage = new MailMessage("", "", $"NosQuest CrashLog #{DateTime.Now} ChannelId: {ServerManager.Instance.ChannelId}", message);
 
+                var smtpClient = new SmtpClient
+                {
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    EnableSsl = true,
+                    Host = "",
+                    Port = 587,
+                    UseDefaultCredentials = true,
+                    Credentials = new NetworkCredential("", "")
+                };
+
+                smtpClient.Send(mailMessage);
+            }
+            catch (Exception e)
+            {
+                Logger.Debug("Cant Send Email ");
+            }
+        }
         private static bool ExitHandler(CtrlType sig)
         {
             LogHelper.Instance.InsertAllLogs();
@@ -315,6 +346,7 @@ namespace OpenNos.World
             LogHelper.Instance.InsertAllLogs();
             ServerManager.Instance.InShutdown = true;
             Logger.Error((Exception) e.ExceptionObject);
+            SendMail($"{(Exception)e.ExceptionObject}");
             Logger.Debug("Server crashed! Rebooting gracefully...");
             CommunicationServiceClient.Instance.UnregisterWorldServer(ServerManager.Instance.WorldId);
             ServerManager.Shout(string.Format(Language.Instance.GetMessageFromKey("SHUTDOWN_SEC"), 5));

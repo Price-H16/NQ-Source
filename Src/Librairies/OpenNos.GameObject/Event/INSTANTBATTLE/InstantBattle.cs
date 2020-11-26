@@ -7,19 +7,50 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using OpenNos.GameObject.Networking;
+using Plugins.DiscordWebhook;
+using Autofac;
+using ChickenAPI.Plugins.Exceptions;
+using ChickenAPI.Plugins;
 
 namespace OpenNos.GameObject.Event
 {
     public static class InstantBattle
     {
+        private static IContainer BuildCoreContainer()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
+            var container = pluginBuilder.Build();
+
+            var coreBuilder = new ContainerBuilder();
+            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                try
+                {
+                    plugin.OnLoad(coreBuilder);
+                }
+                catch (PluginException e)
+                {
+                }
+            }
+
+
+            return coreBuilder.Build();
+        }
         #region Methods
 
         public static void GenerateInstantBattle()
         {
+            var pluginBuilder = new ContainerBuilder();
+            IContainer container = pluginBuilder.Build();
+            using var coreContainer = BuildCoreContainer();
+            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "5");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 0));
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 1));
             Thread.Sleep(4 * 60 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 0));
+            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "1");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 1));
             Thread.Sleep(30 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_SECONDS"), 30), 0));

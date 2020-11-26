@@ -325,17 +325,11 @@ namespace OpenNos.GameObject.Event
             };
             if (_raidType.Equals(MapInstanceType.Act4Berios))
             {
-                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,
-                    new Tuple<int, short, byte, int, int, short>(_bossVNum, 2395, 15, 1, 2, 0)));
-                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,
-                    new Tuple<int, short, byte, int, int, short>(_bossVNum, 2396, 15, 1, 2, 0)));
-                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,
-                    new Tuple<int, short, byte, int, int, short>(_bossVNum, 2397, 15, 1, 2, 0)));
+                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,  new Tuple<int, short, byte, int, int, short>(_bossVNum, 2395, 15, 1, 2, 0)));
+                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,  new Tuple<int, short, byte, int, int, short>(_bossVNum, 2396, 15, 1, 2, 0)));
+                onDeathEvents.Add(new EventContainer(fam.Act4RaidBossMap, EventActionType.THROWITEMS,  new Tuple<int, short, byte, int, int, short>(_bossVNum, 2397, 15, 1, 2, 0)));
 
-                fam.Act4RaidBossMap.OnCharacterDiscoveringMapEvents.Add(new Tuple<EventContainer, List<long>>(
-                    new EventContainer(fam.Act4RaidBossMap, EventActionType.SPAWNMONSTER,
-                        new MonsterToSummon(621, fam.Act4RaidBossMap.Map.GetRandomPosition(), null, true,
-                            hasDelay: 30)), new List<long>()));
+                fam.Act4RaidBossMap.OnCharacterDiscoveringMapEvents.Add(new Tuple<EventContainer, List<long>>( new EventContainer(fam.Act4RaidBossMap, EventActionType.SPAWNMONSTER, new MonsterToSummon(621, fam.Act4RaidBossMap.Map.GetRandomPosition(), null, true,  hasDelay: 30)), new List<long>()));
                 fam.Act4RaidBossMap.OnCharacterDiscoveringMapEvents.Add(new Tuple<EventContainer, List<long>>(
                     new EventContainer(fam.Act4RaidBossMap, EventActionType.SPAWNMONSTER,
                         new MonsterToSummon(622, fam.Act4RaidBossMap.Map.GetRandomPosition(), null, true,
@@ -381,8 +375,7 @@ namespace OpenNos.GameObject.Event
                     fam.Act4RaidBossMap = ServerManager.GenerateMapInstance(_bossMapId, _raidType, new InstanceBag());
                 }
 
-                if (remaining <= 3000 && !fam.Act4Raid.Portals.Any(s =>
-                                                      s.DestinationMapInstanceId.Equals(fam.Act4RaidBossMap.MapInstanceId))) //opens at min 50
+                if (remaining <= 3000 && !fam.Act4Raid.Portals.Any(s =>  s.DestinationMapInstanceId.Equals(fam.Act4RaidBossMap.MapInstanceId))) //opens at min 50
                 {
                     fam.Act4Raid.CreatePortal(new Portal
                     {

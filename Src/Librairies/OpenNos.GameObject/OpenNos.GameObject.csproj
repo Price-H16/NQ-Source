@@ -97,6 +97,7 @@
     <Compile Include="Event\RTR\RoundToRound.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArena.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArenaBattle.cs" />
+    <Compile Include="Extension\BattleExtension.cs" />
     <Compile Include="Extension\CharacterExtension.cs" />
     <Compile Include="Extension\ExtraExtension.cs" />
     <Compile Include="Extension\Inventory\ConvertToPartnerEquipmentExtension.cs" />
@@ -228,9 +229,6 @@
     <Compile Include="_BCards\IBCardEffectHandlerContainer.cs" />
     <Compile Include="_Event\EventEntity.cs" />
     <Compile Include="_Event\PlayerEvent.cs" />
-    <Compile Include="_gameEvent\EventNotificationContext.cs" />
-    <Compile Include="_gameEvent\IPlayerNotifier.cs" />
-    <Compile Include="_gameEvent\NotifiableEventType.cs" />
     <Compile Include="_Guri\Event\GuriEvent.cs" />
     <Compile Include="_Guri\IGuriHandler.cs" />
     <Compile Include="_Guri\IGuriHandlerContainer.cs" />
@@ -249,6 +247,14 @@
     <ProjectReference Include="..\..\ChickenApi\ChickenApi.Events\ChickenApi.Events.csproj">
       <Project>{decb5668-600c-49f1-a5c8-cde5a12c9f5a}</Project>
       <Name>ChickenApi.Events</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ChickenApi\ChickenApi.Plugins\ChickenApi.Plugins.csproj">
+      <Project>{A8289E58-4507-4614-8A28-9FF936BEE009}</Project>
+      <Name>ChickenApi.Plugins</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Plugins.DiscordWebhook\Plugins.DiscordWebhook.csproj">
+      <Project>{3D136894-3495-4B5A-91CA-66A207D8C798}</Project>
+      <Name>Plugins.DiscordWebhook</Name>
     </ProjectReference>
     <ProjectReference Include="..\NosTale.Configuration\NosTale.Configuration.csproj">
       <Project>{011EE023-E1B8-4645-BBE9-94AC35B55390}</Project>
@@ -304,6 +310,9 @@
     <PackageReference Include="System.Reactive">
       <Version>4.4.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

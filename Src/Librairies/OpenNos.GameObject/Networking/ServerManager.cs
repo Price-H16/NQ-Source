@@ -4,6 +4,7 @@ using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ACT6;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.RainbowBattle;
@@ -273,8 +274,6 @@ namespace OpenNos.GameObject.Networking
         {
             return Skills.Find(m => m.SkillVNum.Equals(skillVNum));
         }
-
-        public static MapCell MinilandRandomPos() => new MapCell { X = (short)RandomNumber(5, 16), Y = (short)RandomNumber(3, 14) };
 
         public static int RandomNumber(int min = 0, int max = 100)
         {
@@ -1309,6 +1308,8 @@ namespace OpenNos.GameObject.Networking
                     session.SendPacket(session.Character.GenerateScpStc());
                     Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmp()); });
                     Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => { session.SendPacket(session.Character.GenerateFmi()); });
+                    session.Character.GenerateAscrPacket();
+
 
                     if (session.CurrentMapInstance.OnSpawnEvents.Any())
                     {
@@ -2056,6 +2057,7 @@ namespace OpenNos.GameObject.Networking
         {
             return _recipeLists.Any(r => r.ItemVNum == itemVNum);
         }
+        public MapCell MinilandRandomPos() => new MapCell { X = (short)RandomNumber(5, 16), Y = (short)RandomNumber(3, 14) };
 
         public void JoinMiniland(ClientSession session, ClientSession minilandOwner)
         {
@@ -2065,8 +2067,7 @@ namespace OpenNos.GameObject.Networking
                 {
                     if (session.Character.Miniland.Map.IsBlockedZone(mate.PositionX, mate.PositionY))
                     {
-                        var newPos = MinilandRandomPos();
-                        mate.MapX = newPos.X;
+                        MapCell newPos = MinilandRandomPos(); mate.MapX = newPos.X;
                         mate.MapY = newPos.Y;
                         mate.PositionX = mate.MapX;
                         mate.PositionY = mate.MapY;

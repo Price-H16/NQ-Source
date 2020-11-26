@@ -34,6 +34,8 @@ namespace OpenNos.GameObject
             SkillVNum = input.SkillVNum;
             IsTattoo = input.IsTattoo;
             TattooLevel = input.TattooLevel;
+            IsPartnerSkill = input.IsPartnerSkill;
+
         }
 
         #endregion

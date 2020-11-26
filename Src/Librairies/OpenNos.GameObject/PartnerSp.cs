@@ -58,7 +58,7 @@ namespace OpenNos.GameObject
 
             foreach (var ski in ServerManager.GetAllSkill())
                 if (ski.UpgradeType == mate.Sp.Instance.Item.MorphSp &&
-                    ski.SkillType == (byte) SkillType.PartnerSpSkill && ski.CastId == castId)
+                    ski.SkillType == (byte)SkillType.PartnerSpSkill && ski.CastId == castId)
                     skillSp = ski;
 
             if (skillSp != null)
@@ -148,7 +148,7 @@ namespace OpenNos.GameObject
                 if (remaining > maxCooldown) maxCooldown = remaining;
             }
 
-            return (int) (maxCooldown / 1000D);
+            return (int)(maxCooldown / 1000D);
         }
 
         public string GetName()
@@ -205,7 +205,7 @@ namespace OpenNos.GameObject
 
         public int GetXpPercent()
         {
-            return (int) Math.Floor(100D / XpMax * Instance.XP);
+            return (int)Math.Floor(100D / XpMax * Instance.XP);
         }
 
         public void ReloadSkills()

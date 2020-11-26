@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using ChickenAPI.Plugins;
+using ChickenAPI.Plugins.Exceptions;
 using NosTale.Configuration;
 using NosTale.Configuration.Utilities;
 using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.Domain;
+using OpenNos.GameObject._gameEvent;
 using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ARENA;
 using OpenNos.GameObject.Event.GAMES;
+using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
 using OpenNos.PathFinder;
+using Plugins.DiscordWebhook;
 
 namespace OpenNos.GameObject.Helpers
 {
@@ -33,7 +39,27 @@ namespace OpenNos.GameObject.Helpers
         public static EventHelper Instance => _instance ?? (_instance = new EventHelper());
 
         #endregion
+        private static IContainer BuildCoreContainer()
+        {
+            var pluginBuilder = new ContainerBuilder();
+            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
+            var container = pluginBuilder.Build();
 
+            var coreBuilder = new ContainerBuilder();
+            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
+            {
+                try
+                {
+                    plugin.OnLoad(coreBuilder);
+                }
+                catch (PluginException e)
+                {
+                }
+            }
+
+
+            return coreBuilder.Build();
+        }
         #region Methods
 
         public static int CalculateComboPoint(int n)
@@ -66,26 +92,22 @@ namespace OpenNos.GameObject.Helpers
                     switch (type)
                     {
                         case EventType.XPRATE:
-                            ServerManager.Shout(
-                                    $"XPRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateXP}");
+                            ServerManager.Shout($"XPRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateXP}");
                             ServerManager.Instance.Configuration.RateXP = value;
                             break;
 
                         case EventType.DROPRATE:
-                            ServerManager.Shout(
-                                    $"DRORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateDrop}");
+                            ServerManager.Shout($"DRORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateDrop}");
                             ServerManager.Instance.Configuration.RateDrop = value;
                             break;
 
                         case EventType.FAIRYRATE:
-                            ServerManager.Shout(
-                                    $"FAIRYRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateFairyXP}");
+                            ServerManager.Shout($"FAIRYRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateFairyXP}");
                             ServerManager.Instance.Configuration.RateFairyXP = value;
                             break;
 
                         case EventType.HERORATE:
-                            ServerManager.Shout(
-                                    $"HERORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateHeroicXP}");
+                            ServerManager.Shout($"HERORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateHeroicXP}");
                             ServerManager.Instance.Configuration.RateHeroicXP = value;
                             break;
 
@@ -156,7 +178,7 @@ namespace OpenNos.GameObject.Helpers
                             break;
 
                         case EventType.RAINBOWBATTLE:
-                            if (ServerManager.Instance.ChannelId == 4)
+                            if (ServerManager.Instance.ChannelId == 1)
                             {
                                 Event.RAINBOWBATTLE.RainbowBattle.GenerateEvent();
                             }
@@ -677,17 +699,18 @@ namespace OpenNos.GameObject.Helpers
                                                 if (mapMonster != null)
                                                 {
                                                     mapMonster.SetDeathStatement();
-                                                    evt.MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster,
-                                                            mapMonster.MapMonsterId));
+                                                    evt.MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, mapMonster.MapMonsterId));
                                                     evt.MapInstance.RemoveMonster(mapMonster);
                                                 }
                                             }
 
                                             Logger.LogUserEvent("RAID_SUCCESS", owner.Name, $"RaidId: {@group.GroupId}");
-
-                                            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(
-                                                    string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),
-                                                            @group.Raid.Label, owner.Name), 0));
+                                            var pluginBuilder = new ContainerBuilder();
+                                            IContainer container = pluginBuilder.Build();
+                                            using var coreContainer = BuildCoreContainer();
+                                            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+                                            ss.NotifyAllAsync(NotifiableEventType.X_TEAM_WON_THE_RAID_Y, owner.Name, @group.Raid.Label);
+                                            ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),@group.Raid.Label, owner.Name), 0));
 
                                             foreach (var s in @group.Sessions.GetAllItems())
                                             {

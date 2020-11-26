@@ -221,7 +221,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
             Session.SendPackets(Session.Character.GeneratePst());
 
             Session.SendPacket("zzim");
-            Session.SendPacket($"twk 1 {Session.Character.CharacterId} {Session.Account.Name} {Session.Character.Name} shtmxpdlfeoqkr");
+            //Session.SendPacket($"twk 1 {Session.Character.CharacterId} {Session.Account.Name} {Session.Character.Name} shtmxpdlfeoqkr");
 
 
             var familyId = DAOFactory.FamilyCharacterDAO.LoadByCharacterId(Session.Character.CharacterId)?.FamilyId;

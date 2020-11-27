@@ -50,7 +50,7 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
                         Session.Character.GiftAdd(vnums[item], counts[item]);
                         Session.Character.GiftAdd(11001, 1);
                     }
-                    //Session.SendPacket(UserInterfaceHelper.GenerateInfo(string.Format(Language.Instance.GetMessageFromKey("RECEIVED_ITEM"))));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo(string.Format(Language.Instance.GetMessageFromKey("RECEIVED_ITEM"))));
                 });
             }         
            

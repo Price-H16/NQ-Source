@@ -342,6 +342,9 @@ namespace OpenNos.GameObject.Helpers
         {
             PetSkills = new List<int>
             {
+                663, // Otter
+                740,
+                743,
                 1513, // Purcival
                 1514, // Baron scratch ?
                 1515, // Amiral (le chat chelou)

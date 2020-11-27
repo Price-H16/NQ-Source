@@ -237,5 +237,4 @@ namespace Plugins.BasicImplementations.Guri.Handler
                 }
             }
         }
-    }
 }

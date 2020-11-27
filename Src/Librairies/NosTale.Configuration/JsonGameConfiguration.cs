@@ -37,14 +37,14 @@ namespace NosTale.Configuration
             CylloanPercentRate = 10,
             GlacernonPercentRatePvm = 5,
             GlacernonPercentRatePvp = 1,
-            RateXP = 3,
+            RateXP = 2,
             PartnerSpXp = 2,
             QuestDropRate = 1,
             RateDrop = 35,
             RateFairyXP = 10,
             RateGold = 35,
             RateGoldDrop = 2,
-            RateHeroicXP = 10,
+            RateHeroicXP = 7,
             RateReputation = 1
         };
 

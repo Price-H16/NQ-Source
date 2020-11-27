@@ -342,18 +342,13 @@ namespace OpenNos.GameObject.Helpers
         {
             PetSkills = new List<int>
             {
-                663, 683, // Otter Skill 1
                 1513, // Purcival
                 1514, // Baron scratch ?
                 1515, // Amiral (le chat chelou)
                 1516, // roi des pirates pussifer
-                1524, // Miaou fou            
-                1575, // Marié Bouhmiaou
-                1576, // Marie Bouhmiaou
-                1601, // Mechamiaou
-                1627, // Boris the polar bear
-                740,
-                743
+                1524, // Miaou fou
+                1575,
+                1576
             };
         }
 
@@ -444,9 +439,9 @@ namespace OpenNos.GameObject.Helpers
         {
             MateBuffs = new Dictionary<int, int>
             {
-                {501, 4066}, // Justin
-                {500, 4067}, // Kupei
-                {503, 4068}, // Felix
+                //{501, 4066}, // Justin
+                //{500, 4067}, // Kupei
+                //{503, 4068}, // Felix
                 {501, 4066}, // Seina
                 {500, 4067}, // Daisy
                 {503, 4068}, // Whitney

@@ -16,8 +16,6 @@ using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
 using OpenNos.Master.Library.Client;
 using OpenNos.Master.Library.Data;
-using OpenNos.GameObject.Extension;
-
 
 namespace Plugins.BasicImplementations.Guri.Handler
 {
@@ -63,7 +61,8 @@ namespace Plugins.BasicImplementations.Guri.Handler
                                 sess.SendPacket(mate.GenerateIn(true, ServerManager.Instance.ChannelId == 51, sess.Account.Authority));
                             }
                         }
-                        Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("NEW_NAME_PET")));
+                        Session.SendPacket(
+                            UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("NEW_NAME_PET")));
                         Session.SendPacket(Session.Character.GeneratePinit());
                         Session.SendPackets(Session.Character.GeneratePst());
                         Session.SendPackets(Session.Character.GenerateScP());
@@ -74,7 +73,9 @@ namespace Plugins.BasicImplementations.Guri.Handler
                 // presentation message
                 if (e.Argument == 2)
                 {
-                    var presentationVNum = Session.Character.Inventory.CountItem(1117) > 0? 1117 : Session.Character.Inventory.CountItem(9013) > 0 ? 9013 : -1;
+                    var presentationVNum = Session.Character.Inventory.CountItem(1117) > 0
+                        ? 1117
+                        : Session.Character.Inventory.CountItem(9013) > 0 ? 9013 : -1;
                     if (presentationVNum != -1)
                     {
                         var message = "";
@@ -97,15 +98,18 @@ namespace Plugins.BasicImplementations.Guri.Handler
                         }
 
                         Session.Character.Biography = message;
-                        Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("INTRODUCTION_SET"),10));
+                        Session.SendPacket(
+                            Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("INTRODUCTION_SET"),
+                                10));
                         Session.Character.Inventory.RemoveItemAmount(presentationVNum);
                     }
                 }
+
                 // Speaker
                 if (e.Argument == 3 && (Session.Character.Inventory.CountItem(speakerVNum) > 0 || Session.Character.Inventory.CountItem(limitedSpeakerVNum) > 0))
                 {
                     string sayPacket = "";
-                    string message =$"<{Language.Instance.GetMessageFromKey("SPEAKER")} {Language.Instance.GetMessageFromKey("CH")}{ServerManager.Instance.ChannelId}> [{Session.Character.Name}]: ";
+                    string message = $"<{Language.Instance.GetMessageFromKey("SPEAKER")} {Language.Instance.GetMessageFromKey("CH")}{ServerManager.Instance.ChannelId}> [{Session.Character.Name}]: ";
                     byte sayItemInventory = 0;
                     short sayItemSlot = 0;
                     int baseLength = message.Length;
@@ -117,6 +121,12 @@ namespace Plugins.BasicImplementations.Guri.Handler
 
                     if (e.Data == 999 && (valuesplit.Length < 3 || !byte.TryParse(valuesplit[0], out sayItemInventory) || !short.TryParse(valuesplit[1], out sayItemSlot)))
                     {
+                        return;
+                    }
+
+                    if (Session.Character.LastSpeaker.AddSeconds(10) > DateTime.Now)
+                    {
+                        Session.SendPacket(UserInterfaceHelper.GenerateInfo("Speaker in cooldown, wait please."));
                         return;
                     }
 
@@ -147,21 +157,14 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     }
                     else
                     {
-                        //sayPacket = Session.Character.GenerateSay(message, 13);    
-                        CommunicationServiceClient.Instance.SendMessageToCharacter(new SCSCharacterMessage
-                        {
-                            DestinationCharacterId = null,
-                            SourceCharacterId = Session.Character.CharacterId,
-                            SourceWorldId = ServerManager.Instance.WorldId,
-                            Message = Session.Character.GenerateSay(message, 13),
-                            Type = MessageType.Broadcast
-                        });
-                        Session.Character.LastSpeaker = DateTime.Now;
+                        sayPacket = Session.Character.GenerateSay(message, 13);
                     }
 
                     if (Session.Character.IsMuted())
                     {
-                        Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("SPEAKER_CANT_BE_USED"), 10));
+                        Session.SendPacket(
+                            Session.Character.GenerateSay(
+                                Language.Instance.GetMessageFromKey("SPEAKER_CANT_BE_USED"), 10));
                         return;
                     }
 
@@ -183,14 +186,28 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     {
                         ServerManager.Instance.Broadcast(Session, sayPacket, ReceiverType.All);
                     }
-                }
 
+                    Session.Character.LastSpeaker = DateTime.Now;
+
+                    ServerManager.Instance.ChatLogs.Add(new ChatLogDTO
+                    {
+                        AccountId = (int)Session.Account.AccountId,
+                        CharacterId = (int)Session.Character.CharacterId,
+                        CharacterName = Session.Character.Name,
+                        DateTime = DateTime.Now,
+                        Message = message,
+                        Type = DialogType.Speaker
+                    });
+                }
+            }
 
                 // Bubble
 
                 if (e.Argument == 4)
                 {
-                    var bubbleVNum = Session.Character.Inventory.CountItem(2174) > 0 ? 2174 : Session.Character.Inventory.CountItem(10029) > 0 ? 10029 : -1;
+                    var bubbleVNum = Session.Character.Inventory.CountItem(2174) > 0
+                        ? 2174
+                        : Session.Character.Inventory.CountItem(10029) > 0 ? 10029 : -1;
                     if (bubbleVNum != -1)
                     {
                         var message = "";
@@ -221,4 +238,4 @@ namespace Plugins.BasicImplementations.Guri.Handler
             }
         }
     }
-} 
+}

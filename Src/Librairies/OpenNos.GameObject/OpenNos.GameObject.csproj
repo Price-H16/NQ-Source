@@ -119,6 +119,7 @@
     <Compile Include="Extension\FamilyExtensions.cs" />
     <Compile Include="Extension\ItemExtension.cs" />
     <Compile Include="Extension\LogsExtension.cs" />
+    <Compile Include="Extension\MateExtension.cs" />
     <Compile Include="Extension\NumberExtension.cs" />
     <Compile Include="FamilySkillMission.cs" />
     <Compile Include="Helpers\ChangeClassHelper.cs" />

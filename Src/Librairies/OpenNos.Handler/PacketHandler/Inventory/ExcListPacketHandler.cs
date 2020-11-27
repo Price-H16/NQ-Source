@@ -30,30 +30,34 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void ExchangeList(ExcListPacket packet)
         {
-
+            var packetsplit = packet.PacketData.Split(' ');
             Logger.LogUserEvent("EXC_LIST", Session.GenerateIdentity(),
                 $"Packet string: {packet}");
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+            if (Session.Character.ExchangeInfo == null) 
+                return;
 
-            if (Session.Character.ExchangeInfo == null) return;
+            if (Session.Character.ExchangeInfo.Gold != 0) 
+                return;
 
-            if (Session.Character.ExchangeInfo.Gold != 0) return;
+            if (Session.Character.ExchangeInfo.BankGold != 0) 
+                return;
 
-            if (Session.Character.ExchangeInfo.BankGold != 0) return;
-
-            var targetSession =
-                ServerManager.Instance.GetSessionByCharacterId(Session.Character.ExchangeInfo.TargetCharacterId);
+            var targetSession = ServerManager.Instance.GetSessionByCharacterId(Session.Character.ExchangeInfo.TargetCharacterId);
             if (Session.Character.HasShopOpened || targetSession?.Character.HasShopOpened == true)
             {
                 Session.CloseExchange(targetSession);
                 return;
             }
 
-            var packetsplit = packet.PacketData.Split(' ');
             if (packetsplit.Length < 2)
             {
                 Session.SendPacket("exc_close 0");
-                Session.CurrentMapInstance?.Broadcast(Session, "exc_close 0", ReceiverType.OnlySomeone,
-                    "", Session.Character.ExchangeInfo.TargetCharacterId);
+                Session.CurrentMapInstance?.Broadcast(Session, "exc_close 0", ReceiverType.OnlySomeone, "", Session.Character.ExchangeInfo.TargetCharacterId);
 
                 if (targetSession != null) targetSession.Character.ExchangeInfo = null;
                 Session.Character.ExchangeInfo = null;

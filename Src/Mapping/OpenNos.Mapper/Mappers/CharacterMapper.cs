@@ -85,6 +85,8 @@ namespace OpenNos.Mapper.Mappers
             output.ArenaDie = input.ArenaDie;
             output.ArenaTc = input.ArenaTc;
             output.LastFactionChange = input.LastFactionChange;
+            output.BattleTowerExp = input.BattleTowerExp;
+            output.BattleTowerStage = input.BattleTowerStage;
 
 
             return true;
@@ -166,6 +168,8 @@ namespace OpenNos.Mapper.Mappers
             output.ArenaTc = input.ArenaTc;
             output.ArenaKill = input.ArenaKill;
             output.LastFactionChange = input.LastFactionChange;
+            output.BattleTowerExp = input.BattleTowerExp;
+            output.BattleTowerStage = input.BattleTowerStage;
 
 
             return true;

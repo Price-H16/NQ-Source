@@ -27,14 +27,13 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void GetItem(GetPacket getPacket)
         {
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
 
-            if (getPacket == null || Session.Character.LastSkillUse.AddSeconds(1) > DateTime.Now
-                                  || Session.Character.IsVehicled
-                                  && Session.CurrentMapInstance?.MapInstanceType != MapInstanceType.EventGameInstance
-                                  || !Session.HasCurrentMapInstance
-                                  || Session.Character.IsSeal
-                                  || Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TimeSpaceInstance &&
-                                  Session.CurrentMapInstance.InstanceBag.EndState != 0)
+            if (getPacket == null || Session.Character.LastSkillUse.AddSeconds(1) > DateTime.Now || Session.Character.IsVehicled && Session.CurrentMapInstance?.MapInstanceType != MapInstanceType.EventGameInstance || !Session.HasCurrentMapInstance || Session.Character.IsSeal || Session.CurrentMapInstance.MapInstanceType == MapInstanceType.TimeSpaceInstance && Session.CurrentMapInstance.InstanceBag.EndState != 0)
             {
                 return;
             }
@@ -122,6 +121,13 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                         Session.Character.IncrementQuests(QuestType.Collect4, mapItem.ItemVNum);
                                     }
 
+                                    short amount = mapItem.Amount;
+
+                                    if (amount < 1) // Spam X with another player could lead to dupe
+                                    {
+                                        return;
+                                    }
+
                                     if (mapItemInstance.Item.Effect == 71)
                                     {
                                         Session.Character.SpPoint += mapItem.GetItemInstance().Item.EffectValue;
@@ -136,14 +142,14 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                         Session.SendPacket(Session.Character.GenerateSpPoint());
                                     }
 
-                                    //#region Flower Quest
+                                    #region Flower Quest
 
-                                    //if (mapItem.ItemVNum == 1086 && ServerManager.Instance.FlowerQuestId != null)
-                                    //{
-                                    //    Session.Character.AddQuest((long) ServerManager.Instance.FlowerQuestId);
-                                    //}
+                                    if (mapItem.ItemVNum == 1086 && ServerManager.Instance.FlowerQuestId != null)
+                                    {
+                                        Session.Character.AddQuest((long) ServerManager.Instance.FlowerQuestId);
+                                    }
 
-                                    //#endregion
+                                    #endregion
 
                                     Session.CurrentMapInstance.DroppedList.Remove(getPacket.TransportId);
 
@@ -167,15 +173,13 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                             characterDropperId = mapItemInstance.CharacterId;
                                         }
 
-                                        var amount = mapItem.Amount;
-
-                                        if (amount == 0) // Possible Dupe
+                                        short amount = mapItem.Amount;
+                                        if (amount == 0) // Could avoid dupe
                                         {
                                             return;
                                         }
 
-                                        var inv = Session.Character.Inventory.AddToInventory(mapItemInstance)
-                                                         .FirstOrDefault();
+                                        var inv = Session.Character.Inventory.AddToInventory(mapItemInstance).FirstOrDefault();
                                         if (inv != null)
                                         {
                                             if (mapItem is MonsterMapItem)

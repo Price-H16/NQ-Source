@@ -154,7 +154,9 @@ namespace OpenNos.Data
 
         public long LastFactionChange { get; set; }
 
+        public int BattleTowerExp { get; set; }
 
+        public byte BattleTowerStage { get; set; }
         #endregion
     }
 }

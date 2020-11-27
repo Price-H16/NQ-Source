@@ -32,7 +32,12 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
         public void SellBazaar(CRegPacket cRegPacket)
         {
-            if (Session.Character.LastBazaarInsert.AddSeconds(5) > DateTime.Now)
+            if (Session.Character.LastBazaarInsert.AddSeconds(10) > DateTime.Now)
+            {
+                return;
+            }
+
+            if (Session.Character == null)
             {
                 return;
             }
@@ -42,7 +47,20 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             {
                 return;
             }
-            if (Session.Character == null || Session.Character.InExchangeOrTrade)
+
+            if ((InventoryType)cRegPacket.Inventory == InventoryType.Bazaar)
+            {
+                //Dupe.
+                return;
+            }
+
+            if (Session.Character.IsMuted())
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg("You are sanctioned you cannot do this", 0));
+                return;
+            }
+
+            if (Session.Character == null || Session.Character.InExchangeOrTrade || Session.Character.HasShopOpened || Session.Character.MapInstance?.Map.MapId == 20001)
             {
                 return;
             }
@@ -52,8 +70,15 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
+
             if (cRegPacket.Inventory < 0 || cRegPacket.Inventory >= 9)
             {
+                Logger.Info($"{Session.Character.Name} tried to dupe via bazar");
                 ServerManager.Instance.Kick(Session.Character.Name);
                 Logger.LogUserEvent("BAZAAR_CHEAT_TRY", Session.GenerateIdentity(), $"Packet string: {cRegPacket.OriginalContent.ToString()}");
                 return;
@@ -61,7 +86,11 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
             if (cRegPacket.Inventory == 9)
             {
-                Session.SendPacket("msg 4 Action blocked");
+                Session.SendPacket("msg 4 You will be kicked now");
+                Thread.Sleep(1000);
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(("Really you dupe man ?"), 0));
+                ServerManager.Instance.Kick(Session.Character.Name);
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(("Really you dupe man ?"), 0));
                 return;
             }
 
@@ -127,12 +156,16 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (cRegPacket.Price <= 0) return;
+            if (cRegPacket.Price <= 0)
+            {
+                return;
+            }
 
-            var bazaar = Session.Character.Inventory.AddIntoBazaarInventory(
-                cRegPacket.Inventory == 4 ? 0 : (InventoryType) cRegPacket.Inventory, cRegPacket.Slot,
-                cRegPacket.Amount);
-            if (bazaar == null) return;
+            ItemInstance bazaar = Session.Character.Inventory.AddIntoBazaarInventory(cRegPacket.Inventory == 4 ? 0 : (InventoryType)cRegPacket.Inventory, cRegPacket.Slot, cRegPacket.Amount);
+            if (bazaar == null)
+            {
+                return;
+            }
 
             short duration;
             switch (cRegPacket.Durability)

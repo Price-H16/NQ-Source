@@ -178,7 +178,7 @@ namespace OpenNos.GameObject
                         switch (EffectValue)
                         {
                             case 0:
-                                if (inv.ItemVNum != 2070 && inv.ItemVNum != 2071 && inv.ItemVNum != 10010 || session.CurrentMapInstance.Map.MapTypes.Any(m => m.MapTypeId == (short)MapTypeEnum.Act51 || m.MapTypeId == (short)MapTypeEnum.Act52))
+                                if (inv.ItemVNum != 2070 && inv.ItemVNum != 10010 || (session.CurrentMapInstance.Map.MapTypes.Any(m => m.MapTypeId == (short)MapTypeEnum.Act51 || m.MapTypeId == (short)MapTypeEnum.Act52)))
                                 {
                                     return;
                                 }
@@ -188,12 +188,11 @@ namespace OpenNos.GameObject
                                     {
                                         session.SendPacket(UserInterfaceHelper.GenerateDialog($"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2 #u_i^{type}^{secondaryType}^{inventoryType}^{slot}^0 {Language.Instance.GetMessageFromKey("WANT_TO_GO_BASE")}"));
                                     }
-
                                     else
                                     {
                                         session.SendPacket(UserInterfaceHelper.GenerateDialog($"#u_i^{type}^{secondaryType}^{inventoryType}^{slot}^1 #u_i^{type}^{secondaryType}^{inventoryType}^{slot}^2 {Language.Instance.GetMessageFromKey("WANT_TO_SAVE_POSITION")}"));
                                     }
-                                }                                                                            
+                                }
                                 else if (int.TryParse(packetsplit[6], out packetType))
                                 {
                                     switch (packetType)
@@ -208,65 +207,56 @@ namespace OpenNos.GameObject
 
                                         case 3:
                                             session.Character.SetReturnPoint(session.Character.MapId, session.Character.MapX, session.Character.MapY);
-                                            var respawn = session.Character.Respawn;
+                                            RespawnMapTypeDTO respawn = session.Character.Respawn;
                                             if (respawn.DefaultX != 0 && respawn.DefaultY != 0 && respawn.DefaultMapId != 0)
                                             {
-                                                var mapCell = new MapCell();
-                                                for (var i = 0; i < 5; i++)
+                                                MapCell mapCell = new MapCell();
+                                                for (int i = 0; i < 5; i++)
                                                 {
                                                     mapCell.X = (short)(respawn.DefaultX + ServerManager.RandomNumber(-3, 3));
-
                                                     mapCell.Y = (short)(respawn.DefaultY + ServerManager.RandomNumber(-3, 3));
-
                                                     if (ServerManager.GetMapInstanceByMapId(respawn.DefaultMapId) is MapInstance GoToMap)
-
+                                                    {
                                                         if (!GoToMap.Map.IsBlockedZone(mapCell.X, mapCell.Y))
                                                         {
                                                             break;
                                                         }
-                                                            
+                                                    }
                                                 }
-
                                                 ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawn.DefaultMapId, mapCell.X, mapCell.Y);
-
                                             }
                                             session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                             break;
 
                                         case 4:
-                                            var respawnObj = session.Character.Respawn;
-                                            if (ServerManager.Instance.ChannelId == 51)
+                                            RespawnMapTypeDTO respawnObj = session.Character.Respawn;
+                                            if (ServerManager.Instance.ChannelId == 51) //9, 13, 121
                                             {
-                                                respawnObj.DefaultMapId = (short)(129 + session.Character.Faction);
-                                                respawnObj.DefaultX = 41;
-                                                respawnObj.DefaultY = 42;
+                                                respawnObj.DefaultMapId = (short)(9 + session.Character.Faction);
+                                                respawnObj.DefaultX = 13;
+                                                respawnObj.DefaultY = 121;
                                             }
-
-                                            if (respawnObj.DefaultX != 0 && respawnObj.DefaultY != 0 &&
-                                                respawnObj.DefaultMapId != 0)
+                                            if (respawnObj.DefaultX != 0 && respawnObj.DefaultY != 0 && respawnObj.DefaultMapId != 0)
                                             {
-                                                var mapCell = new MapCell();
-                                                for (var i = 0; i < 5; i++)
+                                                MapCell mapCell = new MapCell();
+                                                for (int i = 0; i < 5; i++)
                                                 {
-                                                    mapCell.X = (short)(respawnObj.DefaultX +
-                                                                         ServerManager.RandomNumber(-3, 3));
-                                                    mapCell.Y = (short)(respawnObj.DefaultY +
-                                                                         ServerManager.RandomNumber(-3, 3));
-                                                    if (ServerManager.GetMapInstanceByMapId(respawnObj.DefaultMapId) is
-                                                        MapInstance GoToMap)
+                                                    mapCell.X = (short)(respawnObj.DefaultX + ServerManager.RandomNumber(-3, 3));
+                                                    mapCell.Y = (short)(respawnObj.DefaultY + ServerManager.RandomNumber(-3, 3));
+                                                    if (ServerManager.GetMapInstanceByMapId(respawnObj.DefaultMapId) is MapInstance GoToMap)
+                                                    {
                                                         if (!GoToMap.Map.IsBlockedZone(mapCell.X, mapCell.Y))
+                                                        {
                                                             break;
+                                                        }
+                                                    }
                                                 }
-
-                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId,
-                                                    respawnObj.DefaultMapId, mapCell.X, mapCell.Y);
+                                                ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawnObj.DefaultMapId, mapCell.X, mapCell.Y);
                                             }
-
                                             session.Character.Inventory.RemoveItemFromInventory(inv.Id);
                                             break;
                                     }
                                 }
-
                                 break;
 
                             case 1:

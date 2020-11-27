@@ -157,7 +157,7 @@
     <value>Discord^Link:^https://discord.gg/8XjdyCm </value>
   </data>
   <data name="BN2" xml:space="preserve">
-    <value>Website^Link:^ </value>
+    <value>Website^Link:^ https://nosquestreborn.com</value>
   </data>
   <data name="BN3" xml:space="preserve">
     <value>You^can^support^us^through^donations^if^you^want^to!</value>
@@ -2460,5 +2460,8 @@
   </data>
   <data name="TEAM_RBB" xml:space="preserve">
     <value>{0} Join team.</value>
+  </data>
+  <data name="HUNTING" xml:space="preserve">
+    <value>Hunted</value>
   </data>
 </root>

@@ -44,6 +44,7 @@ namespace OpenNos.Mapper.Mappers
             output.IsDroppable = input.IsDroppable;
             output.IsHeroic = input.IsHeroic;
             output.IsHolder = input.IsHolder;
+            output.IsWarehouseable = input.IsWarehouseable;
             output.IsMinilandObject = input.IsMinilandObject;
             output.IsSoldable = input.IsSoldable;
             output.IsTradable = input.IsTradable;
@@ -124,6 +125,7 @@ namespace OpenNos.Mapper.Mappers
             output.IsDroppable = input.IsDroppable;
             output.IsHeroic = input.IsHeroic;
             output.IsHolder = input.IsHolder;
+            output.IsWarehouseable = input.IsWarehouseable;
             output.IsMinilandObject = input.IsMinilandObject;
             output.IsSoldable = input.IsSoldable;
             output.IsTradable = input.IsTradable;

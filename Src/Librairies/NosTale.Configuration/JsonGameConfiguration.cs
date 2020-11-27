@@ -28,7 +28,8 @@ namespace NosTale.Configuration
             LagMode = false,
             SceneOnCreate = false,
             UseOldCrypto = false,
-            WorldInformation = true
+            WorldInformation = true,
+            LockSystem = true
         };
 
         public RateConfiguration Rate { get; set; } = new RateConfiguration

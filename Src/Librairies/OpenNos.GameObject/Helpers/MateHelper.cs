@@ -342,16 +342,16 @@ namespace OpenNos.GameObject.Helpers
         {
             PetSkills = new List<int>
             {
+                663, 683, // Otter Skill 1
                 1513, // Purcival
                 1514, // Baron scratch ?
                 1515, // Amiral (le chat chelou)
                 1516, // roi des pirates pussifer
-                1524, // Miaou fou
+                1524, // Miaou fou            
                 1575, // Marié Bouhmiaou
                 1576, // Marie Bouhmiaou
                 1601, // Mechamiaou
                 1627, // Boris the polar bear
-                663, // Otter
                 740,
                 743
             };

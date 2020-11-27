@@ -231,6 +231,11 @@ namespace OpenNos.Master.Library.Client
             return _client.ServiceProxy.RetrieveRegisteredWorldServers(username, sessionId, ignoreUserName);
         }
 
+        public IEnumerable<string> RetrieveServerStatisticsPlayer()
+        {
+            return _client.ServiceProxy.RetrieveServerStatisticsPlayer();
+        }
+
         public IEnumerable<string> RetrieveServerStatistics(bool isStart)
         {
             return _client.ServiceProxy.RetrieveServerStatistics(isStart);

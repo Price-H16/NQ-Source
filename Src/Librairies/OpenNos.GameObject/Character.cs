@@ -144,6 +144,8 @@ namespace OpenNos.GameObject
             LockCode = input.LockCode;
             VerifiedLock = input.VerifiedLock;
             LastFactionChange = input.LastFactionChange;
+            BattleTowerExp = input.BattleTowerExp;
+            BattleTowerStage = input.BattleTowerStage;
 
         }
 
@@ -159,6 +161,7 @@ namespace OpenNos.GameObject
 
         public byte BeforeDirection { get; set; }
 
+        public byte gameLifes = 3;
 
         public bool isFreezed { get; set; }
 
@@ -672,6 +675,31 @@ namespace OpenNos.GameObject
 
         public byte VehicleSpeed { private get; set; }
 
+        #region OBan by NQ
+        public void Ban(DateTime dateEnd, string reason)
+        {
+            CharacterDTO characterDTO = DAOFactory.CharacterDAO.LoadByName(Name);
+            if (characterDTO != null)
+            {
+                ServerManager.Instance.Kick(Name);
+
+                PenaltyLogDTO penaltyLogDTO = new PenaltyLogDTO
+                {
+                    AccountId = characterDTO.AccountId,
+                    Reason = reason?.Trim(),
+                    Penalty = PenaltyType.Banned,
+                    DateStart = DateTime.Now,
+                    DateEnd = dateEnd,
+                    AdminName = "WorldServer"
+                };
+
+                InsertOrUpdatePenalty(penaltyLogDTO);
+                Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("DONE"), 10));
+            }
+        }
+        public DateTime LastMinimumGoldCheck { get; set; }
+
+        #endregion
 
         public IDisposable WalkDisposable { get; set; }
 
@@ -1587,7 +1615,53 @@ namespace OpenNos.GameObject
                     RemoveBuff(4035);
                 }
                 #endregion
+                #region Battle Tower Level Up
 
+                switch (BattleTowerExp)
+                {
+                    case 20:
+                        if (Session.Character.BattleTowerStage == 0)
+                        {
+                            Session.Character.BattleTowerStage += 1;
+                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 1!");
+                        }
+                        break;
+
+                    case 100:
+                        if (Session.Character.BattleTowerStage == 0)
+                        {
+                            Session.Character.BattleTowerStage += 1;
+                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 2!");
+                        }
+                        break;
+
+                    case 200:
+                        if (Session.Character.BattleTowerStage == 0)
+                        {
+                            Session.Character.BattleTowerStage += 1;
+                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 3!");
+                        }
+                        break;
+
+                    case 350:
+                        if (Session.Character.BattleTowerStage == 0)
+                        {
+                            Session.Character.BattleTowerStage += 1;
+                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 4!");
+                        }
+                        break;
+
+                    case 500:
+                        if (Session.Character.BattleTowerStage == 0)
+                        {
+                            Session.Character.BattleTowerStage += 1;
+                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 5!");
+                        }
+                        break;
+
+#warning TODO: Add Rewards
+                }
+                #endregion
                 #region Family Buffs
 
                 if (Session.Character.Family != null)
@@ -1651,6 +1725,24 @@ namespace OpenNos.GameObject
                 }
                 #endregion
 
+                #region AntiHacks-Gold
+                if (LastMinimumGoldCheck.AddSeconds(10) < DateTime.Now)
+                {
+                    LastMinimumGoldCheck = DateTime.Now;
+                    if (Gold < 0 && Session.Account.Authority < AuthorityType.Administrator)
+                    {
+                        var oBanPacket = new NosTale.Packets.Packets.CommandPackets.BanPacket();
+                        oBanPacket.CharacterName = Name;
+                        oBanPacket.Duration = 5475; // Duration in Days
+                        oBanPacket.Reason = "GoldExploit";
+                        Ban(DateTime.Now.AddDays(oBanPacket.Duration), oBanPacket.Reason);
+
+                        Session = null;
+                        return;
+                    }
+                }
+                #endregion
+
                 if (BubbleMessage != null && BubbleMessageEnd <= DateTime.Now)
                 {
                     BubbleMessage = null;
@@ -1677,7 +1769,6 @@ namespace OpenNos.GameObject
                     });
                 }
                 #endregion
-
 
                 if (CurrentMinigame != 0 && LastEffect.AddSeconds(3) <= DateTime.Now)
                 {
@@ -1895,7 +1986,7 @@ namespace OpenNos.GameObject
                         bcard.ApplyBCards(BattleEntity, BattleEntity);
                     }
 
-                    //this.GetBuffFromSet();
+                    this.GetBuffFromSet();
                 }
 
                 if (UseSp)
@@ -2191,7 +2282,18 @@ namespace OpenNos.GameObject
 
             return false;
         }
-
+        public RsfiPacket GenerateRsfi()
+        {
+            return new RsfiPacket
+            {
+                Act = 1,
+                ActPart = 1,
+                Unknown1 = 0,
+                Unknown2 = 9,
+                Ts = 0,
+                TsMax = 9
+            };
+        }
         public void Dance() => IsDancing = !IsDancing;
 
         public void DecreaseMp(int amount) => BattleEntity.DecreaseMp(amount);
@@ -3315,6 +3417,33 @@ namespace OpenNos.GameObject
             void _handleItemDrop(DropDTO drop, long? owner, short posX, short posY)
             {
                 int amount = drop.Amount;
+                if (ServerManager.Instance.Configuration.LockSystem)
+                {
+                    Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(o =>
+                    {
+                        if (Session.HasCurrentMapInstance)
+                        {
+                            if (CharacterId == owner && StaticBonusList.Any(s => s.StaticBonusType == StaticBonusType.AutoLoot))
+                            {
+                                if (!Session.Character.VerifiedLock)
+                                {
+                                    Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("CANT_DO_THIS_ACTION_CHARACTER_IS_LOCKED"), 10));
+                                    return;
+                                }
+                                GiftAdd(drop.ItemVNum, (byte)drop.Amount);
+                            }
+                            else
+                            {
+                                if (!Session.Character.VerifiedLock)
+                                {
+                                    Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("CANT_DO_THIS_ACTION_CHARACTER_IS_LOCKED"), 10));
+                                    return;
+                                }
+                                GiftAdd(drop.ItemVNum, (byte)drop.Amount);
+                            }
+                        }
+                    });
+                }
                 if (ServerManager.Instance.Configuration.EventDrop > 1)
                 {
                     amount *= ServerManager.Instance.Configuration.EventDrop;

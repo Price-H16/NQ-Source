@@ -38,7 +38,15 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             {
                 return;
             }
-
+            if (ServerManager.Instance.InShutdown)
+            {
+                return;
+            }
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
             if (cBuyPacket.Price * cBuyPacket.Amount < 501)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("MINIMUM_BUY_PRICE_IS_501")));

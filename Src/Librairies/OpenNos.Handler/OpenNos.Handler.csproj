@@ -155,6 +155,7 @@
     <Compile Include="PacketHandler\Command\ChangeHeroLevelHandler.cs" />
     <Compile Include="PacketHandler\Command\ChangeJobLevelHandler.cs" />
     <Compile Include="PacketHandler\Command\ChangeLevelHandler.cs" />
+    <Compile Include="PacketHandler\Command\ChangeLockHandler.cs" />
     <Compile Include="PacketHandler\Command\ChangeNpcMonsterNameHandler.cs" />
     <Compile Include="PacketHandler\Command\ChangeReputationHandler.cs" />
     <Compile Include="PacketHandler\Command\ChangeSexHandler.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="PacketHandler\Command\SearchItemHandler.cs" />
     <Compile Include="PacketHandler\Command\SearchMonsterHandler.cs" />
     <Compile Include="PacketHandler\Command\ServerInfoHandler.cs" />
+    <Compile Include="PacketHandler\Command\SetLockHandler.cs" />
     <Compile Include="PacketHandler\Command\SetPerfectionHandler.cs" />
     <Compile Include="PacketHandler\Command\ShoutHandler.cs" />
     <Compile Include="PacketHandler\Command\ShoutHereHandler.cs" />

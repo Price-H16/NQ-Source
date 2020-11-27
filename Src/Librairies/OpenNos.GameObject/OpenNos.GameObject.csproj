@@ -90,6 +90,7 @@
     <Compile Include="Event\EventWave.cs" />
     <Compile Include="Event\GAMES\SheepGame.cs" />
     <Compile Include="Event\GAMES\MeteoriteGame.cs" />
+    <Compile Include="Event\GAMES\TowerGame.cs" />
     <Compile Include="Event\INSTANTBATTLE\InstantBattle.cs" />
     <Compile Include="Event\ICEBREAKER\IceBreaker.cs" />
     <Compile Include="Event\PARTY TIMESPACE\PartyTimespace.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Event\RTR\RoundToRound.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArena.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArenaBattle.cs" />
+    <Compile Include="Event\WORLDBOSS\WorldBoss.cs" />
     <Compile Include="Extension\BattleExtension.cs" />
     <Compile Include="Extension\CharacterExtension.cs" />
     <Compile Include="Extension\ExtraExtension.cs" />

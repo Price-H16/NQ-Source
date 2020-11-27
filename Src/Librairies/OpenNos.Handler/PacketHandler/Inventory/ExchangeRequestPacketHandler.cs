@@ -31,7 +31,11 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
         public void ExchangeRequest(ExchangeRequestPacket exchangeRequestPacket)
         {
-
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                return;
+            }
             if (Session.Account?.Authority >= AuthorityType.GM && Session.Account?.Authority < AuthorityType.Administrator)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("GM_CANNOT_TRADE")));
@@ -54,42 +58,39 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                         case RequestExchangeType.Requested:
                             if (!Session.HasCurrentMapInstance) return;
 
-                            var targetSession =
-                                Session.CurrentMapInstance.GetSessionByCharacterId(exchangeRequestPacket.CharacterId);
+                            var targetSession = Session.CurrentMapInstance.GetSessionByCharacterId(exchangeRequestPacket.CharacterId);
+
                             if (targetSession?.Account == null) return;
 
-                            if (targetSession.CurrentMapInstance?.MapInstanceType ==
-                                MapInstanceType.TalentArenaMapInstance) return;
-
-                            if (targetSession.Character.Group != null
-                                && targetSession.Character.Group?.GroupType != GroupType.Group)
+                            if (!targetSession.Character.VerifiedLock)
                             {
-                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                    Language.Instance.GetMessageFromKey("EXCHANGE_NOT_ALLOWED_IN_RAID"), 0));
+                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                                return;
+                            }
+                            if (targetSession.CurrentMapInstance?.MapInstanceType == MapInstanceType.TalentArenaMapInstance) return;
+
+                            if (targetSession.Character.Group != null && targetSession.Character.Group?.GroupType != GroupType.Group)
+                            {
+                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("EXCHANGE_NOT_ALLOWED_IN_RAID"), 0));
                                 return;
                             }
 
-                            if (Session.Character.Group != null
-                                && Session.Character.Group?.GroupType != GroupType.Group)
+                            if (Session.Character.Group != null && Session.Character.Group?.GroupType != GroupType.Group)
                             {
-                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                    Language.Instance.GetMessageFromKey("EXCHANGE_NOT_ALLOWED_WITH_RAID_MEMBER"), 0));
+                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("EXCHANGE_NOT_ALLOWED_WITH_RAID_MEMBER"), 0));
                                 return;
                             }
 
                             if (Session.Character.IsBlockedByCharacter(exchangeRequestPacket.CharacterId))
                             {
-                                Session.SendPacket(
-                                    UserInterfaceHelper.GenerateInfo(
-                                        Language.Instance.GetMessageFromKey("BLACKLIST_BLOCKED")));
+                                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("BLACKLIST_BLOCKED")));
                                 return;
                             }
 
                             if (Session.Character.Speed == 0 || targetSession.Character.Speed == 0)
                                 Session.Character.ExchangeBlocked = true;
 
-                            if (targetSession.Character.LastSkillUse.AddSeconds(20) > DateTime.Now
-                                || targetSession.Character.LastDefence.AddSeconds(20) > DateTime.Now)
+                            if (targetSession.Character.LastSkillUse.AddSeconds(20) > DateTime.Now || targetSession.Character.LastDefence.AddSeconds(20) > DateTime.Now)
                             {
                                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(
                                     string.Format(Language.Instance.GetMessageFromKey("PLAYER_IN_BATTLE"),

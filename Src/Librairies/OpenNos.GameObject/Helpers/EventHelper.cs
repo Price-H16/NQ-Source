@@ -16,6 +16,7 @@ using OpenNos.GameObject.Battle;
 using OpenNos.GameObject.Event;
 using OpenNos.GameObject.Event.ARENA;
 using OpenNos.GameObject.Event.GAMES;
+using OpenNos.GameObject.Event.WORLDBOSS;
 using OpenNos.GameObject.Extension;
 using OpenNos.GameObject.Extensions;
 using OpenNos.GameObject.Networking;
@@ -225,6 +226,14 @@ namespace OpenNos.GameObject.Helpers
                             {
                                 ServerManager.Instance.StartedEvents?.Remove(type);
                             }
+                            break;
+
+                        case EventType.TOWERGAME:
+                            TowerGame.GenerateTowerGame();
+                            break;
+
+                        case EventType.WORLDBOSS:
+                            WorldBoss.Run();
                             break;
 
                         case EventType.AUTOREBOOT:
@@ -651,9 +660,9 @@ namespace OpenNos.GameObject.Helpers
                                             {
                                                 s.SendPacket(StaticPacketHelper.Cancel(2, s.Character.CharacterId));
 
-                                                if (@group.Sessions.CountLinq(b => b.IpAddress.GetIp().Equals(s.IpAddress.GetIp())) > 4)
+                                                if (@group.Sessions.CountLinq(b => b.IpAddress.GetIp().Equals(s.IpAddress.GetIp())) > 2)
                                                 {
-                                                    s.SendPacket(s.Character.GenerateSay("if you are doing the raid with more than 4 characters you don't receive any reward", 10));
+                                                    s.SendPacket(s.Character.GenerateSay("if you are doing the raid with more than 2 characters you don't receive any reward", 10));
                                                     continue;
                                                 }
 
@@ -708,8 +717,8 @@ namespace OpenNos.GameObject.Helpers
                                             var pluginBuilder = new ContainerBuilder();
                                             IContainer container = pluginBuilder.Build();
                                             using var coreContainer = BuildCoreContainer();
-                                            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-                                            ss.NotifyAllAsync(NotifiableEventType.X_TEAM_WON_THE_RAID_Y, owner.Name, @group.Raid.Label);
+                                            //var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
+                                            //ss.NotifyAllAsync(NotifiableEventType.X_TEAM_WON_THE_RAID_Y, owner.Name, @group.Raid.Label);
                                             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),@group.Raid.Label, owner.Name), 0));
 
                                             foreach (var s in @group.Sessions.GetAllItems())

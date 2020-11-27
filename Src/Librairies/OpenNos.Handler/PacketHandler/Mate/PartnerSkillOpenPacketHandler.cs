@@ -27,9 +27,8 @@ namespace OpenNos.Handler.PacketHandler.Mate
 
         public void PartnerSkillOpen(PartnerSkillOpenPacket partnerSkillOpenPacket)
         {
-            if (partnerSkillOpenPacket == null
-                || partnerSkillOpenPacket.CastId < 0
-                || partnerSkillOpenPacket.CastId > 2)
+            if (partnerSkillOpenPacket == null || partnerSkillOpenPacket.CastId < 0 || partnerSkillOpenPacket.CastId > 2)
+
                 return;
 
             var mate = Session?.Character?.Mates?.Find(s => s.IsTeamMember && s.MateType == MateType.Partner);

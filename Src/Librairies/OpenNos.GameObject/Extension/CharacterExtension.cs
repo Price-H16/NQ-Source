@@ -27,7 +27,8 @@ namespace OpenNos.GameObject.Extension
                 e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4965, 4962, 4953, 45) :
                 e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4964, 4961, 4952, 45) :
                 e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 45) :
-                new Tuple<long, long, long, short>(566, 3636, 1313, 1); // Adventurer is to define
+                //e.Class == ClassType.Adventurer ? new Tuple<long, long, long, short>(566, 3636, 1313, 1) :
+                new Tuple<long, long, long, short>(566, 3636, 1313, 1);
 
             e.GetBuffFromSet(set);
 
@@ -35,6 +36,7 @@ namespace OpenNos.GameObject.Extension
                 e.Class == ClassType.Magician ? new Tuple<long, long, long, short>(4959, 4956, 4950, 46) :
                 e.Class == ClassType.Swordsman ? new Tuple<long, long, long, short>(4958, 4955, 4949, 46) :
                 e.Class == ClassType.MartialArtist ? new Tuple<long, long, long, short>(4736, 4767, 4754, 46) :
+                //e.Class == ClassType.Adventurer ? new Tuple<long, long, long, short>(566, 3636, 1313, 1) :
                 new Tuple<long, long, long, short>(566, 3636, 1313, 1);
 
             e.GetBuffFromSet(set);

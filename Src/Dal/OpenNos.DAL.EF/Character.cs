@@ -219,6 +219,9 @@ namespace OpenNos.DAL.EF
 
         public long LastFactionChange { get; set; }
 
+        public int BattleTowerExp { get; set; }
+
+        public byte BattleTowerStage { get; set; }
         #endregion
     }
 }

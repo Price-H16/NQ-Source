@@ -49,35 +49,26 @@ namespace OpenNos.Handler.PacketHandler.Npc
                     return;
                 }
 
-                if ((Session.Character.HasShopOpened && typePacket != 1) || !Session.HasCurrentMapInstance
-                                                                         || Session.Character.IsExchanging ||
-                                                                         Session.Character.ExchangeInfo != null)
+                if ((Session.Character.HasShopOpened && typePacket != 1) || !Session.HasCurrentMapInstance || Session.Character.IsExchanging || Session.Character.ExchangeInfo != null)
                 {
                     return;
                 }
 
-                if (Session.CurrentMapInstance.Portals.Any(por =>
-                    Session.Character.PositionX < por.SourceX + 6 && Session.Character.PositionX > por.SourceX - 6
-                                                                  && Session.Character.PositionY < por.SourceY + 6 &&
-                                                                  Session.Character.PositionY > por.SourceY - 6))
+                if (Session.CurrentMapInstance.Portals.Any(por => Session.Character.PositionX < por.SourceX + 6 && Session.Character.PositionX > por.SourceX - 6 && Session.Character.PositionY < por.SourceY + 6 && Session.Character.PositionY > por.SourceY - 6))
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NEAR_PORTAL"), 0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NEAR_PORTAL"), 0));
                     return;
                 }
 
                 if (Session.Character.Group != null && Session.Character.Group?.GroupType != GroupType.Group)
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NOT_ALLOWED_IN_RAID"),
-                            0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NOT_ALLOWED_IN_RAID"),0));
                     return;
                 }
 
                 if (!Session.CurrentMapInstance.ShopAllowed)
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NOT_ALLOWED"), 0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_NOT_ALLOWED"), 0));
                     return;
                 }
 
@@ -88,8 +79,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
                         break;
 
                     case 0:
-                        if (Session.CurrentMapInstance.UserShops.Any(s =>
-                            s.Value.OwnerId == Session.Character.CharacterId))
+                        if (Session.CurrentMapInstance.UserShops.Any(s => s.Value.OwnerId == Session.Character.CharacterId))
                         {
                             return;
                         }
@@ -129,8 +119,7 @@ namespace OpenNos.Handler.PacketHandler.Npc
 
                                         if (!inv.Item.IsTradable || inv.IsBound)
                                         {
-                                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                                Language.Instance.GetMessageFromKey("SHOP_ONLY_TRADABLE_ITEMS"), 0));
+                                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SHOP_ONLY_TRADABLE_ITEMS"), 0));
                                             Session.SendPacket("shop_end 0");
                                             return;
                                         }
@@ -171,17 +160,13 @@ namespace OpenNos.Handler.PacketHandler.Npc
                                 shopname = shopname.Truncate(20);
                                 myShop.OwnerId = Session.Character.CharacterId;
                                 myShop.Name = shopname;
-                                Session.CurrentMapInstance.UserShops.Add(Session.CurrentMapInstance.LastUserShopId++,
-                                    myShop);
+                                Session.CurrentMapInstance.UserShops.Add(Session.CurrentMapInstance.LastUserShopId++, myShop);
 
                                 Session.Character.HasShopOpened = true;
 
-                                Session.CurrentMapInstance?.Broadcast(Session,
-                                    Session.Character.GeneratePlayerFlag(Session.CurrentMapInstance.LastUserShopId),
-                                    ReceiverType.AllExceptMe);
+                                Session.CurrentMapInstance?.Broadcast(Session, Session.Character.GeneratePlayerFlag(Session.CurrentMapInstance.LastUserShopId), ReceiverType.AllExceptMe);
                                 Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateShop(shopname));
-                                Session.SendPacket(
-                                    UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("SHOP_OPEN")));
+                                Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("SHOP_OPEN")));
 
                                 Session.Character.IsSitting = true;
                                 Session.Character.IsShopping = true;
@@ -193,16 +178,13 @@ namespace OpenNos.Handler.PacketHandler.Npc
                             else
                             {
                                 Session.SendPacket("shop_end 0");
-                                Session.SendPacket(
-                                    Session.Character.GenerateSay(
-                                        Language.Instance.GetMessageFromKey("ITEM_NOT_SOLDABLE"), 10));
+                                Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("ITEM_NOT_SOLDABLE"), 10));
                             }
                         }
                         else
                         {
                             Session.SendPacket("shop_end 0");
-                            Session.SendPacket(
-                                Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("SHOP_EMPTY"), 10));
+                            Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("SHOP_EMPTY"), 10));
                         }
 
                         break;

@@ -37,7 +37,18 @@ namespace OpenNos.Handler.PacketHandler.Inventory
             {
                 return;
             }
-            
+
+            ItemInstance previousInventory = Session.Character.Inventory.LoadBySlotAndType(withdrawPacket.Slot, withdrawPacket.PetBackpack ? InventoryType.PetWarehouse : InventoryType.Warehouse);
+            if (withdrawPacket.Amount <= 0 || previousInventory == null || withdrawPacket.Amount > previousInventory.Amount || !Session.Character.Inventory.CanAddItem(previousInventory.ItemVNum))
+            {
+                return;
+            }
+
+            if (previousInventory.Item.IsWarehouseable)
+            {
+                Session.SendPacket("msg 4 You can't do this");
+                return;
+            }
             if (Session.Character.InExchangeOrTrade)
             {
                 return;
@@ -48,7 +59,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 return;
             }
 
-            ItemInstance previousInventory = Session.Character.Inventory.LoadBySlotAndType(withdrawPacket.Slot, withdrawPacket.PetBackpack ? InventoryType.PetWarehouse : InventoryType.Warehouse);
 
             if (previousInventory == null)
             {

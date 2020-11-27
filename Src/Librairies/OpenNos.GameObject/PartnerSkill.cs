@@ -1,6 +1,6 @@
-﻿using System;
-using OpenNos.Data;
+﻿using OpenNos.Data;
 using OpenNos.GameObject.Networking;
+using System;
 
 namespace OpenNos.GameObject
 {
@@ -24,12 +24,6 @@ namespace OpenNos.GameObject
 
         #endregion
 
-        #region Methods
-
-        public bool CanBeUsed() => Skill != null && LastUse.AddMilliseconds(Skill.Cooldown * 100) < DateTime.Now;
-
-        #endregion
-
         #region Properties
 
         public long PartnerSkillId { get; set; }
@@ -43,6 +37,12 @@ namespace OpenNos.GameObject
         public Skill Skill => _skill ?? (_skill = ServerManager.GetSkill(SkillVNum));
 
         public DateTime LastUse { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        public bool CanBeUsed() => Skill != null && LastUse.AddMilliseconds(Skill.Cooldown * 100) < DateTime.Now;
 
         #endregion
     }

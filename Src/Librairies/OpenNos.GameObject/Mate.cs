@@ -2100,7 +2100,171 @@ namespace OpenNos.GameObject
                 }
             }
         }
+        public void AttackMonster(ClientSession session, Mate attacker, NpcMonsterSkill npcMonsterSkill, long targetId, short x, short y)
+        {
+            var skill = npcMonsterSkill.Skill;
+            if (skill?.MpCost > attacker.Mp)
+            {
+                return;
+            }
+            attacker.LastSkillUse = DateTime.Now;
+            attacker.Mp -= skill?.MpCost ?? 0;
+            if (skill?.TargetType == 1 && skill.HitType == 1)
+            {
+                if (!session.HasCurrentMapInstance || skill.TargetRange == 0)
+                {
+                    return;
+                }
 
+                //Probably some pvp stuff in here
+                foreach (MapMonster mon in attacker.Owner.MapInstance.GetMonsterInRangeList(attacker.PositionX, attacker.PositionY, skill.TargetRange).Where(s => s.CurrentHp > 0))
+                {
+                    mon.HitQueue.Enqueue(new HitRequest(TargetHitType.AOETargetHit, session, this, npcMonsterSkill));
+                    session.CurrentMapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Npc, attacker.MateTransportId, UserType.Npc, mon.MapMonsterId, skill.CastAnimation, skill.CastEffect, skill.SkillVNum));
+                    session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Npc, attacker.MateTransportId, 3, mon.MapMonsterId, skill.SkillVNum, skill.Cooldown, skill.CastAnimation, skill.CastEffect, mon.MapX, mon.MapY, mon.CurrentHp > 0, (int)(mon.CurrentHp / (double)mon.MaxHp * 100), 0, 0, skill.SkillType));
+                }
+            }
+            else if (skill?.TargetType == 2 && skill.HitType == 0)
+            {
+                ClientSession target = attacker.Owner.Session ?? session;
+                session.CurrentMapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Npc, attacker.MateTransportId, UserType.Npc, targetId, skill.CastAnimation, skill.CastEffect, skill.SkillVNum));
+                session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Npc, attacker.MateTransportId, 3, targetId, skill.SkillVNum, skill.Cooldown, skill.CastAnimation, skill.CastEffect, x, y, true, 100, 0, 0, skill.SkillType));
+                skill.BCards.ToList().ForEach(s =>
+                {
+                    // Apply skill bcards to owner and pet
+                    s.ApplyBCards(target.Character.BattleEntity, this.BattleEntity);
+                    s.ApplyBCards(this.BattleEntity, this.BattleEntity);
+                });
+            }
+            else if (skill?.TargetType == 1 && skill.HitType != 1)
+            {
+                session.CurrentMapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Npc, attacker.MateTransportId, UserType.Npc, targetId, skill.CastAnimation, skill.CastEffect, skill.SkillVNum));
+                session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Npc, attacker.MateTransportId, 3, targetId, skill.SkillVNum, skill.Cooldown, skill.CastAnimation, skill.CastEffect, x, y, true, 100, 0, 0, skill.SkillType));
+                switch (skill.HitType)
+                {
+                    case 2:
+                        IEnumerable<MapMonster> entityInRange = session.Character.MapInstance?.GetMonsterInRangeList(attacker.PositionX, attacker.PositionY, skill.TargetRange);
+                        foreach (BCard sb in skill.BCards)
+                        {
+                            if (sb.Type != (short)BCardType.CardType.Buff)
+                            {
+                                continue;
+                            }
+
+                            Buff bf = new Buff((short)sb.SecondData, 1);
+                            if (bf.Card.BuffType != BuffType.Good)
+                            {
+                                continue;
+                            }
+                            sb.ApplyBCards(this.BattleEntity, this.BattleEntity);
+                            sb.ApplyBCards(attacker.Owner.BattleEntity, this.BattleEntity);
+                        }
+
+                        if (entityInRange != null)
+                        {
+                            foreach (var target in entityInRange)
+                            {
+                                foreach (BCard s in skill.BCards)
+                                {
+                                    if (s.Type != (short)BCardType.CardType.Buff)
+                                    {
+                                        s.ApplyBCards(target.BattleEntity, attacker.BattleEntity);
+                                        continue;
+                                    }
+
+                                    switch (attacker.Owner.MapInstance.MapInstanceType)
+                                    {
+                                        default:
+                                            s.ApplyBCards(target.BattleEntity, BattleEntity);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    case 4:
+                    case 0:
+                        foreach (BCard bc in skill.BCards)
+                        {
+                            var bonusBuff = 0;
+
+                            Buff bf = new Buff((short)bc.SecondData, 1);
+
+                            if (bc.Type == (short)BCardType.CardType.Buff && bc?.BuffCard?.BuffType == BuffType.Good)
+                            {
+                                bc.ApplyBCards(attacker.BattleEntity, BattleEntity);
+                                bc.ApplyBCards(attacker.Owner.BattleEntity, BattleEntity);
+                            }
+                            else
+                            {
+                                bc.ApplyBCards(attacker.BattleEntity, BattleEntity);
+                            }
+                        }
+                        break;
+                }
+            }
+            else if (skill != null && skill.TargetType == 0 && session.HasCurrentMapInstance)
+            {
+                MapMonster monsterToAttack = attacker.Owner.MapInstance.GetMonsterById(targetId);
+                if (monsterToAttack == null || attacker.Mp <= skill.MpCost)
+                {
+                    return;
+                }
+
+                if (Map.GetDistance(new MapCell { X = monsterToAttack.MapX, Y = monsterToAttack.MapY }, new MapCell { X = monsterToAttack.MapX, Y = monsterToAttack.MapY }) >=
+                    skill.Range + 1 + monsterToAttack.Monster.BasicArea)
+                {
+                    return;
+                }
+
+                foreach (BCard bc in skill.BCards)
+                {
+                    var bf = new Buff((short)bc.SecondData, 1);
+                    if (bf.Card?.BuffType == BuffType.Bad || bf.Card?.BuffType == BuffType.Neutral)
+                    {
+                        bc.ApplyBCards(monsterToAttack.BattleEntity, attacker.BattleEntity);
+                    }
+                }
+
+                attacker?.Monster?.BCards.Where(s => s.Type.Equals((byte)BCardType.CardType.Buff) && s.CastType == 1).ToList()
+                    .ForEach(s => s.ApplyBCards(monsterToAttack.BattleEntity, session.Character.BattleEntity));
+
+                session.SendPacket(attacker.GenerateStatInfo());
+
+                if (skill.HitType == 3)
+                {
+                    monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, session, attacker, npcMonsterSkill));
+                }
+                else
+                {
+                    if (skill.TargetRange != 0)
+                    {
+                        IEnumerable<MapMonster> monstersInAorRange = attacker.Owner.MapInstance?.GetMonsterInRangeList(monsterToAttack.MapX, monsterToAttack.MapY, skill.TargetRange);
+
+                        monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, session, attacker, npcMonsterSkill));
+
+                        if (monstersInAorRange != null)
+                        {
+                            foreach (MapMonster mon in monstersInAorRange)
+                            {
+                                mon.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, session, attacker, npcMonsterSkill));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!monsterToAttack.IsAlive)
+                        {
+                            session.SendPacket("cancel 2 0");
+                            return;
+                        }
+
+                        monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, session, attacker, npcMonsterSkill));
+                    }
+                }
+            }
+        }
         public void UpdateBushFire()
         {
             BattleEntity.UpdateBushFire();

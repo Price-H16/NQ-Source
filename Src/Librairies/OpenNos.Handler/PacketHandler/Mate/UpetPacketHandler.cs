@@ -56,21 +56,18 @@ namespace OpenNos.Handler.PacketHandler.Mate
 
             var attacker = Session.Character.Mates.FirstOrDefault(x => x.MateTransportId == upetPacket.MateTransportId);
             if (attacker == null) return;
+
             NpcMonsterSkill mateSkill = null;
             if (attacker.Monster.Skills.Any())
             {
                 mateSkill = attacker.Monster.Skills.FirstOrDefault(sk => MateHelper.Instance.PetSkills.Contains(sk.SkillVNum));
             }
-            
-            if (attacker.Monster.Skills.Any()) mateSkill = attacker.Monster.Skills.FirstOrDefault(x => x.Rate == 0);
 
             if (mateSkill == null)
-            {
                 mateSkill = new NpcMonsterSkill
                 {
                     SkillVNum = 200
                 };
-            }
 
             if (attacker.IsSitting) return;
 
@@ -79,21 +76,27 @@ namespace OpenNos.Handler.PacketHandler.Mate
                 case UserType.Monster:
                     if (attacker.Hp > 0)
                     {
-                        var target = Session?.CurrentMapInstance?.GetMonsterById(upetPacket.TargetId);
+                        MapMonster target = Session?.CurrentMapInstance?.GetMonsterById(upetPacket.TargetId);
                         attacker.TargetHit(target.BattleEntity, mateSkill);
+                        Session.SendPacketAfter("petsr 0", mateSkill.Skill.Cooldown * 100);
                     }
 
                     return;
 
                 case UserType.Npc:
+                    {
+                        MapMonster target = Session.CurrentMapInstance?.GetMonsterById(upetPacket.TargetId);
+                        attacker.AttackMonster(attacker.Owner.Session, attacker, mateSkill, upetPacket.TargetId, target?.MapX ?? attacker.PositionX, target?.MapY ?? attacker.PositionY);
+                        Session.SendPacketAfter("petsr 0", mateSkill.Skill.Cooldown * 100);
+                    }
                     return;
 
                 case UserType.Player:
                     if (attacker.Hp > 0)
                     {
-                        var target = Session?.CurrentMapInstance?.GetSessionByCharacterId(upetPacket.TargetId)
-                            .Character;
+                        Character target = Session?.CurrentMapInstance?.GetSessionByCharacterId(upetPacket.TargetId).Character;
                         attacker.TargetHit(target.BattleEntity, mateSkill);
+                        Session.SendPacketAfter("petsr 0", mateSkill.Skill.Cooldown * 100);
                     }
 
                     return;

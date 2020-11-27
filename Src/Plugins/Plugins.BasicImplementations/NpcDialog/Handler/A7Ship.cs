@@ -24,7 +24,7 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
            }
 
             //if (!DAOFactory.QuestLogDAO.LoadByCharacterId(Session.Character.CharacterId).Any(s => s.QuestId == 6500))
-            if (Session.Character.HeroLevel < 20)
+            if (Session.Character.HeroLevel < 45)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("A7_SHIP_REQUIREMENT"), 0));
                 return;

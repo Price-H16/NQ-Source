@@ -37,8 +37,6 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
             {
                 Session.GoldLess(goldless);
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo("Testing your luck..."));
-                Session.Character.NoMove = true;
-                Session.Character.NoAttack = true;
                 Session.Character.DisposeShopAndExchange();
                 Session.SendPacket(Session.Character.GenerateCond());
                 Observable.Timer(TimeSpan.FromSeconds(4)).Subscribe(o =>
@@ -46,13 +44,11 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
                     var rnd = ServerManager.RandomNumber(0, 100);
                     if (rnd <= 100)
                     {
-                        short[] vnums = { 2282, 1030, 1428, 1244, 1013, 5018, 1286, 1296, 1012, 1363, 1364, 1218, 5369, 2037, 2041, 2049, 2045, 4129, 4130, 4131, 4132, 4262};
-                        byte[] counts = { 99, 99, 50, 50, 99, 1, 3, 3, 99, 5, 5, 10, 5, 99, 99, 99, 99, 1, 1, 1, 1, 1 };
-                        var item = ServerManager.RandomNumber(0, 22);
+                        short[] vnums = { 2282, 1030, 1428, 1244, 1013, 5018, 1286, 1296, 1012, 1363, 1364, 1218, 5369, 2037, 2041, 2049, 2045, 4129, 4130, 4131, 4132, 4262, 1, 33, 46, 1366, 1219};
+                        byte[] counts = { 99, 99, 50, 50, 99, 1, 3, 3, 99, 5, 5, 10, 5, 99, 99, 99, 99, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5 };
+                        var item = ServerManager.RandomNumber(0, 27);
                         Session.Character.GiftAdd(vnums[item], counts[item]);
                         Session.Character.GiftAdd(11001, 1);
-                        Session.Character.NoAttack = false;
-                        Session.Character.NoMove = false;
                     }
                     //Session.SendPacket(UserInterfaceHelper.GenerateInfo(string.Format(Language.Instance.GetMessageFromKey("RECEIVED_ITEM"))));
                 });

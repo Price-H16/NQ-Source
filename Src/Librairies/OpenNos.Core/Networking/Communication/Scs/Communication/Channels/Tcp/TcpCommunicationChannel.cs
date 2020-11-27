@@ -154,7 +154,14 @@ namespace OpenNos.Core.Networking.Communication.Scs.Communication.Channels.Tcp
                 _disposed = true;
             }
         }
-
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Disconnect();
+                _sendCancellationToken.Dispose();
+            }
+        }
         /// <summary>
         ///     Duplicates the client socket and closes.
         /// </summary>
@@ -192,15 +199,6 @@ namespace OpenNos.Core.Networking.Communication.Scs.Communication.Channels.Tcp
             if (!_clientSocket.Connected)
             {
                 // do nothing
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Disconnect();
-                _sendCancellationToken.Dispose();
             }
         }
 

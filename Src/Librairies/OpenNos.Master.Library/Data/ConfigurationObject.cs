@@ -19,6 +19,14 @@ namespace OpenNos.Master.Library.Data
 
         public bool HalloweenEvent { get; set; }
 
+        public bool EstivalEvent { get; set; }
+
+        public bool ValentineEvent { get; set; }
+
+        public bool LunarNewYearEvent { get; set; }
+
+        public bool EasterEvent { get; set; }
+
         public byte HeroicStartLevel { get; set; }
 
         public long MaxGold { get; set; }
@@ -61,7 +69,7 @@ namespace OpenNos.Master.Library.Data
 
         public byte CylloanPercentRate { get; set; }
 
-        public bool AccountLock { get; set; }
+        public bool LockSystem { get; set; }
 
         public int EventLvlUpEq { get; set; }
 

@@ -961,7 +961,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Website^Link:^ .
+        ///   Looks up a localized string similar to Website^Link:^ https://nosquestreborn.com.
         /// </summary>
         internal static string BN2 {
             get {
@@ -2847,6 +2847,15 @@ namespace OpenNos.World.Resource {
         internal static string HP_UNLOCKED {
             get {
                 return ResourceManager.GetString("HP_UNLOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hunted.
+        /// </summary>
+        internal static string HUNTING {
+            get {
+                return ResourceManager.GetString("HUNTING", resourceCulture);
             }
         }
         

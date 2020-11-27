@@ -319,6 +319,48 @@ namespace OpenNos.Master.Server
                     world.CommunicationServiceClient.GetClientProxy<ICommunicationClient>().Restart(time);
         }
 
+        public IEnumerable<string> RetrieveServerStatisticsPlayer()
+        {
+            if (!MSManager.Instance.AuthentificatedClients.Any(s => s.Equals(CurrentClient.ClientId)))
+            {
+                return null;
+            }
+
+            List<string> result = new List<string>();
+
+            try
+            {
+                List<string> groups = new List<string>();
+                foreach (string s in MSManager.Instance.WorldServers.Select(s => s.WorldGroup))
+                {
+                    if (!groups.Contains(s))
+                    {
+                        groups.Add(s);
+                    }
+                }
+                int totalsessions = 0;
+                foreach (string message in groups)
+                {
+                    result.Add($"==={message}===");
+                    int groupsessions = 0;
+                    foreach (WorldServer world in MSManager.Instance.WorldServers.Where(w => w.WorldGroup.Equals(message)))
+                    {
+                        int sessions = MSManager.Instance.ConnectedAccounts.CountLinq(a => a.ConnectedWorld?.Id.Equals(world.Id) == true);
+                        result.Add($"Channel {world.ChannelId}: {sessions} Players.");
+                        groupsessions += sessions;
+                    }
+                    totalsessions += groupsessions;
+                }
+                result.Add($"Players Online: {totalsessions}.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogEventError("RETRIEVE_EXCEPTION", "Error while retreiving server Statistics:", ex);
+            }
+
+            return result;
+        }
+
         public long[][] RetrieveOnlineCharacters(long characterId)
         {
             if (!MSManager.Instance.AuthentificatedClients.Any(s => s.Equals(CurrentClient.ClientId))) return null;

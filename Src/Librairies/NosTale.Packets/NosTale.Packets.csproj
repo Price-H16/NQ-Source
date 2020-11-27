@@ -131,6 +131,7 @@
     <Compile Include="Packets\ClientPackets\RlPacket.cs" />
     <Compile Include="Packets\ClientPackets\RmvobjPacket.cs" />
     <Compile Include="Packets\ClientPackets\RselPacket.cs" />
+    <Compile Include="Packets\ClientPackets\RsfiPacket.cs" />
     <Compile Include="Packets\ClientPackets\RstartPacket.cs" />
     <Compile Include="Packets\ClientPackets\SayPacket.cs" />
     <Compile Include="Packets\ClientPackets\SayPPacket.cs" />
@@ -190,6 +191,7 @@
     <Compile Include="Packets\CommandPackets\ChangeHeroLevelPacket.cs" />
     <Compile Include="Packets\CommandPackets\ChangeJobLevelPacket.cs" />
     <Compile Include="Packets\CommandPackets\ChangeLevelPacket.cs" />
+    <Compile Include="Packets\CommandPackets\ChangeLockPacket.cs" />
     <Compile Include="Packets\CommandPackets\ChangeReputationPacket.cs" />
     <Compile Include="Packets\CommandPackets\ChangeSexPacket.cs" />
     <Compile Include="Packets\CommandPackets\ChangeShopNamePacket.cs" />
@@ -268,6 +270,7 @@
     <Compile Include="Packets\CommandPackets\SearchItemPacket.cs" />
     <Compile Include="Packets\CommandPackets\SearchMonsterPacket.cs" />
     <Compile Include="Packets\CommandPackets\ServerInfoPacket.cs" />
+    <Compile Include="Packets\CommandPackets\SetLockPacket.cs" />
     <Compile Include="Packets\CommandPackets\SetPerfectionPacket.cs" />
     <Compile Include="Packets\CommandPackets\ShoutHerePacket.cs" />
     <Compile Include="Packets\CommandPackets\ShoutPacket.cs" />

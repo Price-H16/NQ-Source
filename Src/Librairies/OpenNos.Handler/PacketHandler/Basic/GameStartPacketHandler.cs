@@ -7,6 +7,7 @@ using System.Reflection;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.DAL;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Extension;
@@ -37,13 +38,11 @@ namespace OpenNos.Handler.PacketHandler.Basic
         public void StartGame(GameStartPacket gameStartPacket)
         {
             #region System Code Lock
-
-            if (ServerManager.Instance.Configuration.AccountLock)
+            if (ServerManager.Instance.Configuration.LockSystem)
             {
                 if (Session.Character.LockCode != null)
                 {
                     #region Lock Code
-
                     Session.Character.HeroChatBlocked = true;
                     Session.Character.ExchangeBlocked = true;
                     Session.Character.WhisperBlocked = true;
@@ -51,15 +50,12 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     Session.Character.NoAttack = true;
                     Session.Character.NoMove = true;
                     Session.Character.VerifiedLock = false;
-
-                    #endregion Lock Code
-
+                    #endregion
                     Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
                 }
                 else
                 {
                     #region Unlock Code
-
                     Session.Character.HeroChatBlocked = false;
                     Session.Character.ExchangeBlocked = false;
                     Session.Character.WhisperBlocked = false;
@@ -67,9 +63,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     Session.Character.NoAttack = false;
                     Session.Character.NoMove = false;
                     Session.Character.VerifiedLock = true;
-
-                    #endregion Unlock Code
-
+                    #endregion
                     Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
                 }
             }
@@ -77,8 +71,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
             {
                 Session.Character.VerifiedLock = true;
             }
-
-            #endregion System Code Lock
+            #endregion
 
             if (Session?.Character == null || Session.IsOnMap || !Session.HasSelectedCharacter)
             // character should have been selected in SelectCharacter
@@ -111,6 +104,14 @@ namespace OpenNos.Handler.PacketHandler.Basic
             //    Session.SendPacket("scene 40");
             //}
 
+            #region Count Online Players
+
+            foreach (string message in CommunicationServiceClient.Instance.RetrieveServerStatisticsPlayer())
+            {
+                Session.SendPacket(Session.Character.GenerateSay(message, 13));
+            }
+
+            #endregion
             if (ServerManager.Instance.Configuration.WorldInformation)
             {
                 var assembly = Assembly.GetEntryAssembly();
@@ -119,7 +120,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     : "1337";
 
                 Session.SendPacket(Session.Character.GenerateSay("------------------[NosQuest]------------------", 10));
-                //Session.SendPacket(Session.Character.GenerateSay("Website: https://nosquestreborn.com", 12)); //Page-Remove-after-release
+                Session.SendPacket(Session.Character.GenerateSay("Website: https://nosquestreborn.com", 12)); 
                 Session.SendPacket(Session.Character.GenerateSay("Discord: https://discord.gg/zM5JxBK", 12));
                 Session.SendPacket(Session.Character.GenerateSay("------------------[Counter]--------------------", 10));
                 Session.SendPacket(Session.Character.GenerateSay($"Mob Kill Counter: {Session.Character.MobKillCounter.ToString("###,##0")}", 10));
@@ -144,7 +145,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
             Session.SendPacket("c_info_reset");
             Session.SendPacket(Session.Character.GenerateTit());
             Session.SendPacket(Session.Character.GenerateSpPoint());
-            Session.SendPacket("rsfi 1 1 0 9 0 9");
+            Session.SendPacket(Session.Character.GenerateRsfi());
             Session.SendPacket(Session.Character.GenerateEventIcon());
 
 
@@ -178,7 +179,10 @@ namespace OpenNos.Handler.PacketHandler.Basic
 
             #region Check StaticBonusType
 
-            var medal = Session.Character.StaticBonusList.Find(s => s.StaticBonusType == StaticBonusType.BazaarMedalGold || s.StaticBonusType == StaticBonusType.BazaarMedalSilver);
+            StaticBonusDTO medal = Session.Character.StaticBonusList.Find(s => s.StaticBonusType == StaticBonusType.BazaarMedalGold || s.StaticBonusType == StaticBonusType.BazaarMedalSilver);
+
+            StaticBonusDTO buffs = Session.Character.StaticBonusList.Find(s => s.StaticBonusType == StaticBonusType.MedalOfErenia);
+
             if (medal != null)
             {
                 Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("LOGIN_MEDAL"), 12));
@@ -244,8 +248,8 @@ namespace OpenNos.Handler.PacketHandler.Basic
                 Session.SendPacket(Session.Character.GenerateFamilyMember());
                 Session.SendPacket(Session.Character.GenerateFamilyMemberMessage());
                 Session.SendPacket(Session.Character.GenerateFamilyMemberExp());
-                Session.SendPacket($"gcon {Session.Character.CharacterId}|1|0");
-                Session.SendPacket("fmi 0|9002|2|0|0 " +
+                //Session.SendPacket($"gcon {Session.Character.CharacterId}|1|0");
+                /*Session.SendPacket("fmi 0|9002|2|0|0 " +
                                    "0|9003|2|0|0 " +
                                    "0|9004|2|3|8 " +
                                    "0|9005|2|1|8 " +
@@ -285,7 +289,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                                    "0|9077|2|6|0 " +
                                    "0|9078|2|0|40 " +
                                    "0|9079|2|0|0");
-                Session.SendPacket("fmp 9747|0 9732|0 9742|0 9738|0");
+                Session.SendPacket("fmp 9747|0 9732|0 9742|0 9738|0");*/
 
                 if (!string.IsNullOrWhiteSpace(Session.Character.Family.FamilyMessage))
                 {
@@ -293,7 +297,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
 
                 }
             }
-
+            RewardsHelper.Instance.MobKillRewards(Session);
             RewardsHelper.Instance.DailyReward(Session);
             Session.SendPacket(Session.Character.GetSqst());
             Session.SendPacket("act6");
@@ -343,6 +347,87 @@ namespace OpenNos.Handler.PacketHandler.Basic
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(string.Format(Language.Instance.GetMessageFromKey("WARNING_INFO"), warning.Count())));
 
+            }
+
+            //Messagge GM
+            //if (Session.Character.Authority == AuthorityType.Administrator)
+
+            //{
+            //    CommunicationServiceClient.Instance.SendMessageToCharacter(new SCSCharacterMessage()
+            //    {
+            //        DestinationCharacterId = null,
+            //        SourceCharacterId = Session.Character.CharacterId,
+            //        SourceWorldId = ServerManager.Instance.WorldId,
+            //        Message = $"Welcome Now Game Master {Session.Character.Name} to NQ!",
+            //        Type = MessageType.Shout
+            //    });
+            //}
+
+            //Messagge GameMaster
+            if (Session.Character.Authority == AuthorityType.Administrator)
+            {
+                Session.SendPacket(Session.Character.GenerateSay("==========Owner==========", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Welcome " + Session.Character.Name, 12));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Bank Help for info about Bank.", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a BLZ Team", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Warp + Name to Move Map", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Help to see the list of additional commands available", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $CheckStat for check status Glacer and Act6", 10));
+                Session.SendPacket(Session.Character.GenerateSay("=========================", 10));
+            }
+
+            //Messagge GameMaster
+            if (Session.Character.Authority == AuthorityType.GM)
+            {
+                Session.SendPacket(Session.Character.GenerateSay("============GM===========", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Welcome " + Session.Character.Name, 12));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Bank Help for info about Bank.", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a NQ Team", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Warp + Name to Move Map", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Help to see the list of additional commands available", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $CheckStat for check status Glacer and Act6", 10));
+                Session.SendPacket(Session.Character.GenerateSay("=========================", 10));
+            }
+
+            //Messagge GameSage
+            if (Session.Character.Authority == AuthorityType.GA)
+            {
+                Session.SendPacket(Session.Character.GenerateSay("============GS===========", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Welcome " + Session.Character.Name, 12));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Bank Help for info about Bank.", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a NQ Team", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Warp + Name to Move Map", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Help to see the list of additional commands available", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $CheckStat for check status Glacer and Act6", 10));
+                Session.SendPacket(Session.Character.GenerateSay("=========================", 10));
+            }
+
+            //Messagge Users
+            if (Session.Character.Authority == AuthorityType.User)
+
+            {
+                Session.SendPacket(Session.Character.GenerateSay("===========NosQuest===========", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Welcome " + Session.Character.Name, 12));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Bank Help for info about Bank.", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a NQ Team", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Warp + Name to Move Map", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $Help to see the list of additional commands available", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $CheckStat for check status Glacer and Act6", 10));
+                Session.SendPacket(Session.Character.GenerateSay("========================", 10));
+            }
+
+            //Messagge Support
+            if (Session.Character.Authority == AuthorityType.Supporter)
+
+            {
+                CommunicationServiceClient.Instance.SendMessageToCharacter(new SCSCharacterMessage()
+                {
+                    DestinationCharacterId = null,
+                    SourceCharacterId = Session.Character.CharacterId,
+                    SourceWorldId = ServerManager.Instance.WorldId,
+                    Message = $"Welcome  Support {Session.Character.Name} To NQ!",
+                    Type = MessageType.Shout
+                });
             }
 
             Observable.Interval(TimeSpan.FromSeconds(30)).Subscribe(s =>

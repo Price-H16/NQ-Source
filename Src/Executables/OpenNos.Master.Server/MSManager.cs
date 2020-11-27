@@ -65,13 +65,32 @@ namespace OpenNos.Master.Server
                 WorldInformation = a.Server.WorldInformation,
                 Act4IP = a.Server.IPAddress,
                 Act4Port = a.Server.Act4Port,
+                LockSystem = a.Server.LockSystem,
 
                 #endregion
 
                 #region Event
 
                 HalloweenEvent = a.Event.HalloweenEvent,
-                ChristmasEvent = a.Event.ChristmasEvent
+                ChristmasEvent = a.Event.ChristmasEvent,
+                EstivalEvent = a.Event.EstivalEvent,
+                ValentineEvent = a.Event.ValentineEvent,
+                LunarNewYearEvent = a.Event.LunarNewYearEvent,
+                EasterEvent = a.Event.EasterEvent,
+                EventLvlUpEq = a.Event.EventLvlUpEq,
+                EventRareUpEq = a.Event.EventRareUpEq,
+                EventSpUp = a.Event.EventSpUp,
+                EventSpPerfection = a.Event.EventSpPerfection,
+                EventXPF = a.Event.EventXPF,
+                EventSealed = a.Event.EventSealed,
+                EventXp = a.Event.EventXp,
+                EventGold = a.Event.EventGold,
+                EventRep = a.Event.EventRep,
+                EventDrop = a.Event.EventDrop,
+                EventRuneUp = a.Event.EventRuneUp,
+                EventTattoUp = a.Event.EventTattoUp
+
+
 
                 #endregion
             };

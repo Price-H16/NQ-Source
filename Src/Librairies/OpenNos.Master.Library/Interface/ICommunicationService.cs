@@ -37,7 +37,7 @@ namespace OpenNos.Master.Library.Interface
         bool Authenticate(string authKey);
         void KickSession(long? accountId, int? sessionId);
         IEnumerable<string> RetrieveServerStatistics(bool isStart);
-
+        IEnumerable<string> RetrieveServerStatisticsPlayer();
         /*
          * Character Interaction
          */

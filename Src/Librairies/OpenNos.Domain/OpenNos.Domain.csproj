@@ -78,6 +78,7 @@
     <Compile Include="DiscordAuthorityType.cs" />
     <Compile Include="EntityType.cs" />
     <Compile Include="EventActionType.cs" />
+    <Compile Include="EventButtonType.cs" />
     <Compile Include="EventType.cs" />
     <Compile Include="FactionType.cs" />
     <Compile Include="FixedUpModeType.cs" />

@@ -62,6 +62,8 @@ namespace OpenNos.Data
 
         public bool IsBlocked { get; set; }
 
+        public bool IsWarehouseable { get; set; }
+
         public bool IsColored { get; set; }
 
         public bool IsConsumable { get; set; }

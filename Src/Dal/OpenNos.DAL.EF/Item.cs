@@ -89,6 +89,8 @@ namespace OpenNos.DAL.EF
 
         public bool IsColored { get; set; }
 
+        public bool IsWarehouseable { get; set; }
+
         public bool IsConsumable { get; set; }
 
         public bool IsDroppable { get; set; }

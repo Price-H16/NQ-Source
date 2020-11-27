@@ -3598,7 +3598,7 @@ namespace OpenNos.GameObject.Networking
                     foreach (var session in Sessions.Where(s =>
                         newFam.FamilyCharacters.Any(m => m.CharacterId == s.Character.CharacterId)))
                     {
-                        /*if (session.Character.LastFamilyLeave < DateTime.Now.AddDays(-1).Ticks)
+                        if (session.Character.LastFamilyLeave < DateTime.Now.AddDays(-1).Ticks)
                         {
                             session.Character.Family = newFam;
 
@@ -3607,7 +3607,7 @@ namespace OpenNos.GameObject.Networking
                                 session.Character.ChangeFaction((FactionType)newFam.FamilyFaction);
                             }
                             session?.CurrentMapInstance?.Broadcast(session?.Character?.GenerateGidx());
-                        }*/
+                        }
                         session.Character.Family = newFam;
 
                         if (tuple.Item2)
@@ -3627,8 +3627,7 @@ namespace OpenNos.GameObject.Networking
                         FamilyList.Remove(fam.FamilyId);
                     }
 
-                    foreach (var sess in Sessions.Where(s =>
-                        fam.FamilyCharacters.Any(f => f.CharacterId.Equals(s.Character.CharacterId))))
+                    foreach (var sess in Sessions.Where(s => fam.FamilyCharacters.Any(f => f.CharacterId.Equals(s.Character.CharacterId))))
                     {
                         sess.Character.Family = null;
                         sess.SendPacket(sess.Character.GenerateGidx());

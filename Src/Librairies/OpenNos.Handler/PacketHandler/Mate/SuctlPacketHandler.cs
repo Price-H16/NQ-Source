@@ -38,8 +38,7 @@ namespace OpenNos.Handler.PacketHandler.Mate
                 return;
             }
 
-            if (suctlPacket.TargetType != UserType.Npc
-                && !Session.Character.VerifiedLock)
+            if (suctlPacket.TargetType != UserType.Npc && !Session.Character.VerifiedLock)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
                 return;
@@ -50,19 +49,13 @@ namespace OpenNos.Handler.PacketHandler.Mate
             {
                 if (Session.Character.Gender == GenderType.Female)
                 {
-                    Session.CurrentMapInstance?.Broadcast(
-                        Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("MUTED_FEMALE"), 1));
-                    Session.SendPacket(Session.Character.GenerateSay(
-                        string.Format(Language.Instance.GetMessageFromKey("MUTE_TIME"),
-                            (penalty.DateEnd - DateTime.Now).ToString("hh\\:mm\\:ss")), 11));
+                    Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("MUTED_FEMALE"), 1));
+                    Session.SendPacket(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("MUTE_TIME"), (penalty.DateEnd - DateTime.Now).ToString("hh\\:mm\\:ss")), 11));
                 }
                 else
                 {
-                    Session.CurrentMapInstance?.Broadcast(
-                        Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("MUTED_MALE"), 1));
-                    Session.SendPacket(Session.Character.GenerateSay(
-                        string.Format(Language.Instance.GetMessageFromKey("MUTE_TIME"),
-                            (penalty.DateEnd - DateTime.Now).ToString("hh\\:mm\\:ss")), 11));
+                    Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("MUTED_MALE"), 1));
+                    Session.SendPacket(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("MUTE_TIME"), (penalty.DateEnd - DateTime.Now).ToString("hh\\:mm\\:ss")), 11));
                 }
 
                 return;

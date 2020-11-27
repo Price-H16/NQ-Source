@@ -31,8 +31,20 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
         public void ModPriceBazaar(CModPacket cModPacket)
         {
 
-            if (Session.Character.LastBazaarModeration.AddSeconds(5) > DateTime.Now)
+            if (Session.Character.LastBazaarModeration.AddMinutes(5) > DateTime.Now)
             {
+                return;
+            }
+
+            if (Session.Character.IsMuted())
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg("You are sanctioned you cannot do this", 0));
+                return;
+            }
+
+            if (!Session.Character.VerifiedLock)
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
                 return;
             }
 

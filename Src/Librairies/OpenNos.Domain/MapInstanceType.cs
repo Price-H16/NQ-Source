@@ -26,6 +26,8 @@
         RoundToRound,
         MapPvp = ArenaInstance | TalentArenaMapInstance | Act4Instance,
         Act7Ship = 32,
-        SealedVesselsMap = 33
+        SealedVesselsMap = 33,
+        TowerInstanceType,
+        WorldBossInstance
     }
 }

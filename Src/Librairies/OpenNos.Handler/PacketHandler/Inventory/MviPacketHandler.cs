@@ -35,11 +35,18 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
             if (mviPacket != null)
             {
-                if (mviPacket.InventoryType != InventoryType.Equipment
-                    && mviPacket.InventoryType != InventoryType.Main
-                    && mviPacket.InventoryType != InventoryType.Etc
-                    && mviPacket.InventoryType != InventoryType.Miniland)
+                if (mviPacket.InventoryType != InventoryType.Equipment && mviPacket.InventoryType != InventoryType.Main && mviPacket.InventoryType != InventoryType.Etc && mviPacket.InventoryType != InventoryType.Miniland)
                     return;
+
+                if (mviPacket.Slot == mviPacket.DestinationSlot)
+                {
+                    return;
+                }
+
+                if (mviPacket.InventoryType == InventoryType.Wear)
+                {
+                    return;
+                }
 
                 if (mviPacket.Amount < 1) return;
 
@@ -48,24 +55,26 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 lock (Session.Character.Inventory)
                 {
                     // check if the destination slot is out of range
-                    if (mviPacket.DestinationSlot > 48 + (Session.Character.HaveBackpack() ? 1 : 0) * 12 +
-                        (Session.Character.HaveExtension() ? 1 : 0) * 60) return;
+                    if (mviPacket.DestinationSlot > 48 + ((Session.Character.HaveBackpack() ? 1 : 0) * 12) + ((Session.Character.HaveExtension() ? 1 : 0) * 60))
+                    {
+                        return;
+                    }
 
                     // check if the character is allowed to move the item
-                    if (Session.Character.InExchangeOrTrade) return;
+                    if (Session.Character.InExchangeOrTrade)
+                    {
+                        return;
+                    }
 
                     // actually move the item from source to destination
-                    Session.Character.Inventory.MoveItem(mviPacket.InventoryType, mviPacket.InventoryType,
-                        mviPacket.Slot, mviPacket.Amount, mviPacket.DestinationSlot, out var previousInventory,
-                        out var newInventory);
-                    if (newInventory == null) return;
-
+                    Session.Character.Inventory.MoveItem(mviPacket.InventoryType, mviPacket.InventoryType, mviPacket.Slot, mviPacket.Amount, mviPacket.DestinationSlot, out var previousInventory, out var newInventory);
+                    if (newInventory == null)
+                    {
+                        return;
+                    }
                     Session.SendPacket(newInventory.GenerateInventoryAdd());
 
-                    Session.SendPacket(previousInventory != null
-                        ? previousInventory.GenerateInventoryAdd()
-                        : UserInterfaceHelper.Instance.GenerateInventoryRemove(mviPacket.InventoryType,
-                            mviPacket.Slot));
+                    Session.SendPacket(previousInventory != null ? previousInventory.GenerateInventoryAdd() : UserInterfaceHelper.Instance.GenerateInventoryRemove(mviPacket.InventoryType, mviPacket.Slot));
                 }
             }
         }

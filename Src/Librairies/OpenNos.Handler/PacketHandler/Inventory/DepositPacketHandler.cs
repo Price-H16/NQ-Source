@@ -4,6 +4,7 @@ using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
+using OpenNos.GameObject.Networking;
 
 namespace OpenNos.Handler.PacketHandler.Inventory
 {
@@ -30,10 +31,26 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 return;
             }
 
-            if (depositPacket.Inventory != InventoryType.Equipment &&
-                depositPacket.Inventory != InventoryType.Main &&
-                depositPacket.Inventory != InventoryType.Etc)
+            if (depositPacket.Inventory == InventoryType.Bazaar
+                || depositPacket.Inventory == InventoryType.FamilyWareHouse
+                || depositPacket.Inventory == InventoryType.Miniland
+                || depositPacket.Inventory == InventoryType.Wear
+                || depositPacket.Inventory == InventoryType.PetWarehouse
+                || depositPacket.Inventory == InventoryType.Warehouse
+                || depositPacket.Inventory == InventoryType.FirstPartnerInventory
+                || depositPacket.Inventory == InventoryType.SecondPartnerInventory
+                || depositPacket.Inventory == InventoryType.ThirdPartnerInventory
+                || depositPacket.Inventory == InventoryType.FourthPartnerInventory
+                || depositPacket.Inventory == InventoryType.FifthPartnerInventory
+                || depositPacket.Inventory == InventoryType.SixthPartnerInventory
+                || depositPacket.Inventory == InventoryType.SeventhPartnerInventory
+                || depositPacket.Inventory == InventoryType.EighthPartnerInventory
+                || depositPacket.Inventory == InventoryType.NinthPartnerInventory
+                || depositPacket.Inventory == InventoryType.TenthPartnerInventory
+                )
             {
+                ServerManager.Instance.Kick(Session.Character.Name);
+                Logger.LogUserEvent("WAREHOUSE_CHEAT_TRY", Session.GenerateIdentity(), $"Packet string: {depositPacket.OriginalContent.ToString()}");
                 return;
             }
 
@@ -74,6 +91,13 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 return;
             }
 
+            ItemInstance item = Session.Character.Inventory.LoadBySlotAndType(depositPacket.Slot, depositPacket.Inventory);
+            ItemInstance itemdest = Session.Character.Inventory.LoadBySlotAndType(depositPacket.NewSlot, depositPacket.PartnerBackpack ? InventoryType.PetWarehouse : InventoryType.Warehouse);
+            if (item.Item.IsWarehouseable)
+            {
+                Session.SendPacket("msg 4 You can't do this");
+                return;
+            }
             if (Session.Character.HasShopOpened)
             {
                 return;

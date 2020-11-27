@@ -166,18 +166,18 @@ namespace NosTale.Extension.Extension.Packet
                         target.Character.CharacterId, -1, 0, -1, 4211, -1, -1, true, 92, damage1 / 2, 0, 1));
                 }
 
-                //if (target.Character.GetBuff(BCardType.CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectsMaximumDamageFromNegated)[0] > 0)
-                //{
-                //    hitRequest.Session.Character.GetDamage(damage / 2, new BattleEntity(target.Character, null), true);
-                //    hitRequest.Session.SendPacket($"bf 1 {hitRequest.Session.Character.CharacterId} 0.0.0 {hitRequest.Session.Character.Level}");
-                //    hitRequest.Session.Character.LastDefence = DateTime.Now;
-                //    target.Character.LastDefence = DateTime.Now;
-                //    target.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player, target.Character.CharacterId, 1,
-                //        hitRequest.Session.Character.CharacterId, -1, 0, -1, hitRequest.Skill.Effect, -1, -1, true, 92,
-                //        damage, 0, 0));
-                //    hitRequest.Session.SendPacket(target.Character.GenerateStat());
-                //    damage = 0;
-                //}
+                if (target.Character.GetBuff(BCardType.CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectsMaximumDamageFromNegated)[0] > 0)
+                {
+                    hitRequest.Session.Character.GetDamage(damage / 2, new BattleEntity(target.Character, null), true);
+                    hitRequest.Session.SendPacket($"bf 1 {hitRequest.Session.Character.CharacterId} 0.0.0 {hitRequest.Session.Character.Level}");
+                    hitRequest.Session.Character.LastDefence = DateTime.Now;
+                    target.Character.LastDefence = DateTime.Now;
+                    target.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player, target.Character.CharacterId, 1,
+                        hitRequest.Session.Character.CharacterId, -1, 0, -1, hitRequest.Skill.Effect, -1, -1, true, 92,
+                        damage, 0, 0));
+                    hitRequest.Session.SendPacket(target.Character.GenerateStat());
+                    damage = 0;
+                }
 
                 target.Character.GetDamage(damage / 2, battleEntity);
                 target.SendPacket(target.Character.GenerateStat());

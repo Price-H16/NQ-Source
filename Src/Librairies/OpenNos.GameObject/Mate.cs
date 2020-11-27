@@ -286,8 +286,10 @@ namespace OpenNos.GameObject
                         Owner.AddBuff(new Buff((short)cardId, Level, true), BattleEntity);
                 }
             });
-            foreach (var skill in Monster.Skills.Where(sk => MateHelper.Instance.PetSkills.Contains(sk.SkillVNum)))
+            foreach (NpcMonsterSkill skill in Monster.Skills.Where(sk => MateHelper.Instance.PetSkills.Contains(sk.SkillVNum)))
+            {
                 Owner.Session.SendPacket(Owner.GeneratePetskill(skill.SkillVNum));
+            }
         }
 
         public void BackToMiniland()

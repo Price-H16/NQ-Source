@@ -4,6 +4,7 @@ using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject;
+using OpenNos.GameObject.Helpers;
 
 namespace OpenNos.Handler.PacketHandler.Mate
 {
@@ -55,15 +56,21 @@ namespace OpenNos.Handler.PacketHandler.Mate
 
             var attacker = Session.Character.Mates.FirstOrDefault(x => x.MateTransportId == upetPacket.MateTransportId);
             if (attacker == null) return;
-
             NpcMonsterSkill mateSkill = null;
+            if (attacker.Monster.Skills.Any())
+            {
+                mateSkill = attacker.Monster.Skills.FirstOrDefault(sk => MateHelper.Instance.PetSkills.Contains(sk.SkillVNum));
+            }
+            
             if (attacker.Monster.Skills.Any()) mateSkill = attacker.Monster.Skills.FirstOrDefault(x => x.Rate == 0);
 
             if (mateSkill == null)
+            {
                 mateSkill = new NpcMonsterSkill
                 {
                     SkillVNum = 200
                 };
+            }
 
             if (attacker.IsSitting) return;
 

@@ -222,7 +222,12 @@ namespace OpenNos.Handler.PacketHandler.Basic
             Session.SendPacket(UserInterfaceHelper.GeneratePClear());
             Session.SendPacket(Session.Character.GeneratePinit());
             Session.SendPackets(Session.Character.GeneratePst());
+            Session.SendPacket(Session.Character.GeneratePetskill());
 
+            foreach (var mate in Session.Character.Mates.Where(s => s.IsTeamMember))
+            {
+                mate.AddTeamMember();
+            }
             Session.SendPacket("zzim");
             Session.SendPacket($"twk 1 {Session.Character.CharacterId} {Session.Account.Name} {Session.Character.Name} shtmxpdlfeoqkr");
 

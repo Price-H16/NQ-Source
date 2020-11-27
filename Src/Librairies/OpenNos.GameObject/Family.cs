@@ -78,6 +78,7 @@ namespace OpenNos.GameObject
         public void ChangeFaction(byte faction, ClientSession session)
         {
             session.Character.Family.FamilyFaction = faction;
+            session.Character.LastFactionChange = DateTime.Now.Ticks;
             session.Character.Family.LastFactionChange = DateTime.Now.Ticks;
             FamilyDTO fam = session.Character.Family;
             DAOFactory.FamilyDAO.InsertOrUpdate(ref fam);

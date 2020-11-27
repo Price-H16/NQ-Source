@@ -998,7 +998,11 @@ namespace OpenNos.GameObject
                             session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SAME_FACTION"), 0));
                             return;
                         }
-
+                        if (session.Character.LastFactionChange > DateTime.Now.AddDays(-1).Ticks)
+                        {
+                            session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHANGE_NOT_PERMITTED"), 0));
+                            return;
+                        }
                         session.SendPacket(session.Character.Family == null
                             ? $"qna #guri^750^{EffectValue} {Language.Instance.GetMessageFromKey($"ASK_CHANGE_FACTION{EffectValue}")}"
                             : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),

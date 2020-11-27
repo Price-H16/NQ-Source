@@ -220,6 +220,10 @@
     <Compile Include="Migrations\202011252244274_Faction.designer.cs">
       <DependentUpon>202011252244274_Faction.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011272004483_UPDT.cs" />
+    <Compile Include="Migrations\202011272004483_UPDT.designer.cs">
+      <DependentUpon>202011272004483_UPDT.cs</DependentUpon>
+    </Compile>
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="Quest.cs" />
     <Compile Include="QuestLog.cs" />
@@ -398,6 +402,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011252244274_Faction.resx">
       <DependentUpon>202011252244274_Faction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011272004483_UPDT.resx">
+      <DependentUpon>202011272004483_UPDT.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

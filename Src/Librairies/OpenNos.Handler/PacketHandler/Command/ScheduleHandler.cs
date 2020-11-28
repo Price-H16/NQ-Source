@@ -38,11 +38,18 @@ namespace OpenNos.Handler.PacketHandler.Command
             Session.Character.LastSchedule = DateTime.Now;
 
             Session.SendPacket(Session.Character.GenerateSay("---------Event Schedule--------", 10));
-            Session.SendPacket(Session.Character.GenerateSay($"LOD: 14:30", 12));
-            Session.SendPacket(Session.Character.GenerateSay($"LOD: 16:30", 12));
-            Session.SendPacket(Session.Character.GenerateSay($"LOD: 18:30", 12));
-            Session.SendPacket(Session.Character.GenerateSay($"LOD: 21:00", 12));
             Session.SendPacket(Session.Character.GenerateSay($"LOD: 00:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 02:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 04:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 06:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 08:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 10:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 12:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 14:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 16:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 18:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 20:00", 12));
+            Session.SendPacket(Session.Character.GenerateSay($"LOD: 22:00", 12));
             Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 10:00", 12));
             Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 13:00", 12));
             Session.SendPacket(Session.Character.GenerateSay($"RAINBOWBATTLE: 16:00", 12));

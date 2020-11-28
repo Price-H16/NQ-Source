@@ -51,7 +51,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     Session.Character.NoMove = true;
                     Session.Character.VerifiedLock = false;
                     #endregion
-                    Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
+                    Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
                 }
                 else
                 {
@@ -64,7 +64,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                     Session.Character.NoMove = false;
                     Session.Character.VerifiedLock = true;
                     #endregion
-                    Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
+                    Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
                 }
             }
             else
@@ -126,6 +126,15 @@ namespace OpenNos.Handler.PacketHandler.Basic
                 Session.SendPacket(Session.Character.GenerateSay($"Mob Kill Counter: {Session.Character.MobKillCounter.ToString("###,##0")}", 10));
                 Session.SendPacket(Session.Character.GenerateSay("--------------------------------------------------", 10));
                 Session.ReceivePacket("$Stat 1", true);
+            }
+
+            if (Session?.Character.LockCode != null)
+            {
+                Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
+            }
+            else
+            {
+                Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
             }
 
             if (Session?.Character?.Level == 1)

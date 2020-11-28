@@ -109,7 +109,8 @@ namespace Plugins.BasicImplementations.Guri.Handler
                 if (e.Argument == 3 && (Session.Character.Inventory.CountItem(speakerVNum) > 0 || Session.Character.Inventory.CountItem(limitedSpeakerVNum) > 0))
                 {
                     string sayPacket = "";
-                    string message = $"<{Language.Instance.GetMessageFromKey("SPEAKER")} {Language.Instance.GetMessageFromKey("CH")}{ServerManager.Instance.ChannelId}> [{Session.Character.Name}]: ";
+                    string message =
+                        $"<{Language.Instance.GetMessageFromKey("SPEAKER")} {Language.Instance.GetMessageFromKey("CH")}{ServerManager.Instance.ChannelId}> [{Session.Character.Name}]: ";
                     byte sayItemInventory = 0;
                     short sayItemSlot = 0;
                     int baseLength = message.Length;
@@ -121,12 +122,6 @@ namespace Plugins.BasicImplementations.Guri.Handler
 
                     if (e.Data == 999 && (valuesplit.Length < 3 || !byte.TryParse(valuesplit[0], out sayItemInventory) || !short.TryParse(valuesplit[1], out sayItemSlot)))
                     {
-                        return;
-                    }
-
-                    if (Session.Character.LastSpeaker.AddSeconds(10) > DateTime.Now)
-                    {
-                        Session.SendPacket(UserInterfaceHelper.GenerateInfo("Speaker in cooldown, wait please."));
                         return;
                     }
 
@@ -157,14 +152,21 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     }
                     else
                     {
-                        sayPacket = Session.Character.GenerateSay(message, 13);
+                        //sayPacket = Session.Character.GenerateSay(message, 13);    
+                        CommunicationServiceClient.Instance.SendMessageToCharacter(new SCSCharacterMessage
+                        {
+                            DestinationCharacterId = null,
+                            SourceCharacterId = Session.Character.CharacterId,
+                            SourceWorldId = ServerManager.Instance.WorldId,
+                            Message = Session.Character.GenerateSay(message, 13),
+                            Type = MessageType.Broadcast
+                        });
+                        Session.Character.LastSpeaker = DateTime.Now;
                     }
 
                     if (Session.Character.IsMuted())
                     {
-                        Session.SendPacket(
-                            Session.Character.GenerateSay(
-                                Language.Instance.GetMessageFromKey("SPEAKER_CANT_BE_USED"), 10));
+                        Session.SendPacket(Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("SPEAKER_CANT_BE_USED"), 10));
                         return;
                     }
 
@@ -186,20 +188,7 @@ namespace Plugins.BasicImplementations.Guri.Handler
                     {
                         ServerManager.Instance.Broadcast(Session, sayPacket, ReceiverType.All);
                     }
-
-                    Session.Character.LastSpeaker = DateTime.Now;
-
-                    ServerManager.Instance.ChatLogs.Add(new ChatLogDTO
-                    {
-                        AccountId = (int)Session.Account.AccountId,
-                        CharacterId = (int)Session.Character.CharacterId,
-                        CharacterName = Session.Character.Name,
-                        DateTime = DateTime.Now,
-                        Message = message,
-                        Type = DialogType.Speaker
-                    });
                 }
-            }
 
                 // Bubble
 

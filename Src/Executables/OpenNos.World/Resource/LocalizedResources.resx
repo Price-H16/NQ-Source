@@ -881,7 +881,7 @@
     <value>You don't have enough sp points to do this.</value>
   </data>
   <data name="SPEAKER" xml:space="preserve">
-    <value>Speaker</value>
+    <value>Total</value>
   </data>
   <data name="TRANSFORMATION_NEEDED" xml:space="preserve">
     <value>You need to be transformed to reset your sp points.</value>

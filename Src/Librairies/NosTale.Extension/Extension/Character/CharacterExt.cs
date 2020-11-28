@@ -57,6 +57,9 @@ namespace NosTale.Extension.GameExtension.Character
                 "[supporter]",
                 "bitch",
                 "ass",
+                "fuck",
+                "fucker",
+                "nigger",
             };
 
             if (BlackListed.Any(s => characterName.ToLower().Contains(s)))
@@ -200,6 +203,7 @@ namespace NosTale.Extension.GameExtension.Character
                 startupInventory.AddNewToInventory(1008, 10, InventoryType.Main);
                 startupInventory.AddNewToInventory(1012, 5, InventoryType.Main); //seeds
                 startupInventory.AddNewToInventory(5332, 1, InventoryType.Main);
+                startupInventory.AddNewToInventory(9041, 1, InventoryType.Main);
                 startupInventory.AddNewToInventory(800, 5, InventoryType.Equipment); 
                 startupInventory.AddNewToInventory(801, 5, InventoryType.Equipment); 
                 startupInventory.AddNewToInventory(802, 5, InventoryType.Equipment);

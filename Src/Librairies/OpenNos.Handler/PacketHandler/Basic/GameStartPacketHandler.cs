@@ -103,15 +103,6 @@ namespace OpenNos.Handler.PacketHandler.Basic
             //{
             //    Session.SendPacket("scene 40");
             //}
-
-            #region Count Online Players
-
-            foreach (string message in CommunicationServiceClient.Instance.RetrieveServerStatisticsPlayer())
-            {
-                Session.SendPacket(Session.Character.GenerateSay(message, 13));
-            }
-
-            #endregion
             if (ServerManager.Instance.Configuration.WorldInformation)
             {
                 var assembly = Assembly.GetEntryAssembly();
@@ -125,16 +116,19 @@ namespace OpenNos.Handler.PacketHandler.Basic
                 Session.SendPacket(Session.Character.GenerateSay("------------------[Counter]--------------------", 10));
                 Session.SendPacket(Session.Character.GenerateSay($"Mob Kill Counter: {Session.Character.MobKillCounter.ToString("###,##0")}", 10));
                 Session.SendPacket(Session.Character.GenerateSay("--------------------------------------------------", 10));
-                Session.ReceivePacket("$Stat 1", true);
+                #region Count Online Players
+
+                foreach (string message in CommunicationServiceClient.Instance.RetrieveServerStatisticsPlayer())
+                {
+                    Session.SendPacket(Session.Character.GenerateSay(message, 13));
+                }
+
+                #endregion
             }
 
-            if (Session?.Character.LockCode != null)
+            if (Session.Character.LockCode != null)
             {
                 Session.SendPacket(Session.Character.GenerateSay($"Your account doesn't have a lock. If you want more security, use $SetLock and a code.", 12));
-            }
-            else
-            {
-                Session.SendPacket(Session.Character.GenerateSay($"Your account is locked. Please, use $Unlock command.", 12));
             }
 
             if (Session?.Character?.Level == 1)
@@ -144,7 +138,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
             else
             {
                 Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(s => Session.SendPacket(Session.Character.GenerateSay("Welcome back, " + Session.Character.Name, 12)));
-                Session.SendPacket(Session.Character.GenerateSay("You have access to $Warp - Unlock maps as you visit them!", 12));
+                //Session.SendPacket(Session.Character.GenerateSay("You have access to $Warp - Unlock maps as you visit them!", 12));
                 Observable.Timer(TimeSpan.FromSeconds(2)).Subscribe(s => Session.SendPacket(Session.Character.GenerateSay("Stay updated and check #upcoming-patch in our discord!", 12)));
             }
 

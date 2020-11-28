@@ -6370,7 +6370,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Speaker.
+        ///   Looks up a localized string similar to Total.
         /// </summary>
         internal static string SPEAKER {
             get {

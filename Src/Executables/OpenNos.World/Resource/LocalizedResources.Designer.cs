@@ -1411,6 +1411,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have a lock code already active, if you want to change it use $ Unlock &amp;amp; then.
+        /// </summary>
+        internal static string CHANGE_LOCK_CODE {
+            get {
+                return ResourceManager.GetString("CHANGE_LOCK_CODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Relog in order to change your nickname!.
         /// </summary>
         internal static string CHANGE_NAME_0 {
@@ -3486,6 +3495,15 @@ namespace OpenNos.World.Resource {
         internal static string LIMITED_ACCOUNT {
             get {
                 return ResourceManager.GetString("LIMITED_ACCOUNT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The code to lock code must contain 8 characters..
+        /// </summary>
+        internal static string LOCK_CODE_MUST_CONTAINS_8_CHARACTERS {
+            get {
+                return ResourceManager.GetString("LOCK_CODE_MUST_CONTAINS_8_CHARACTERS", resourceCulture);
             }
         }
         
@@ -6469,6 +6487,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to : Please take a screenshot so that you can recover your account in the event of a problem..
+        /// </summary>
+        internal static string TAKE_SCREENSHOT_FOR_RECOVERY {
+            get {
+                return ResourceManager.GetString("TAKE_SCREENSHOT_FOR_RECOVERY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t start matchmaking if you are on a group..
         /// </summary>
         internal static string TALENT_ARENA_GROUP {
@@ -6681,6 +6708,15 @@ namespace OpenNos.World.Resource {
         internal static string UNDER_EFFECT {
             get {
                 return ResourceManager.GetString("UNDER_EFFECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must first unlock your character before changing his code. If you want to change it use $Unlock &amp;amp; then.
+        /// </summary>
+        internal static string UNLOCK_BEFORE_CHANGE_LOCK_CODE {
+            get {
+                return ResourceManager.GetString("UNLOCK_BEFORE_CHANGE_LOCK_CODE", resourceCulture);
             }
         }
         
@@ -7086,6 +7122,15 @@ namespace OpenNos.World.Resource {
         internal static string YOU_REFUSED {
             get {
                 return ResourceManager.GetString("YOU_REFUSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your lock code is.
+        /// </summary>
+        internal static string YOUR_LOCK_CODE_IS {
+            get {
+                return ResourceManager.GetString("YOUR_LOCK_CODE_IS", resourceCulture);
             }
         }
         

@@ -2464,4 +2464,19 @@
   <data name="HUNTING" xml:space="preserve">
     <value>Hunted</value>
   </data>
+  <data name="CHANGE_LOCK_CODE" xml:space="preserve">
+    <value>You have a lock code already active, if you want to change it use $ Unlock &amp;amp; then</value>
+  </data>
+  <data name="LOCK_CODE_MUST_CONTAINS_8_CHARACTERS" xml:space="preserve">
+    <value>The code to lock code must contain 8 characters.</value>
+  </data>
+  <data name="TAKE_SCREENSHOT_FOR_RECOVERY" xml:space="preserve">
+    <value>: Please take a screenshot so that you can recover your account in the event of a problem.</value>
+  </data>
+  <data name="UNLOCK_BEFORE_CHANGE_LOCK_CODE" xml:space="preserve">
+    <value>You must first unlock your character before changing his code. If you want to change it use $Unlock &amp;amp; then</value>
+  </data>
+  <data name="YOUR_LOCK_CODE_IS" xml:space="preserve">
+    <value>Your lock code is</value>
+  </data>
 </root>

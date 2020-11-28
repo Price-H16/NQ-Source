@@ -7,50 +7,20 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using OpenNos.GameObject.Networking;
-using Plugins.DiscordWebhook;
 using Autofac;
-using ChickenAPI.Plugins.Exceptions;
-using ChickenAPI.Plugins;
 
 namespace OpenNos.GameObject.Event
 {
     public static class InstantBattle
     {
-        private static IContainer BuildCoreContainer()
-        {
-            var pluginBuilder = new ContainerBuilder();
-            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
-            var container = pluginBuilder.Build();
-
-            var coreBuilder = new ContainerBuilder();
-            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
-            {
-                try
-                {
-                    plugin.OnLoad(coreBuilder);
-                }
-                catch (PluginException e)
-                {
-                }
-            }
-
-
-            return coreBuilder.Build();
-        }
         #region Methods
 
         public static void GenerateInstantBattle()
         {
-            var pluginBuilder = new ContainerBuilder();
-            IContainer container = pluginBuilder.Build();
-            using var coreContainer = BuildCoreContainer();
-            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "5");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 0));
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 5), 1));
             Thread.Sleep(4 * 60 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 0));
-            ss.NotifyAllAsync(NotifiableEventType.INSTANT_BATTLE_STARTS_IN_5_MINUTES, "1");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_MINUTES"), 1), 1));
             Thread.Sleep(30 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("INSTANTBATTLE_SECONDS"), 30), 0));
@@ -123,14 +93,17 @@ namespace OpenNos.GameObject.Event
 
         #endregion
 
+        #region Classes
+
         public class InstantBattleTask
         {
+            #region Methods
 
             public static void Run(Tuple<MapInstance, byte> mapinstance)
             {
                 long maxGold = ServerManager.Instance.Configuration.MaxGold;
                 Thread.Sleep(10 * 1000);
-                if (!mapinstance.Item1.Sessions.Skip(2 - 1).Any())
+                if (!mapinstance.Item1.Sessions.Skip(3 - 1).Any())
                 {
                     mapinstance.Item1.Sessions.Where(s => s.Character != null).ToList().ForEach(s => {
                         s.Character.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>()
@@ -152,12 +125,12 @@ namespace OpenNos.GameObject.Event
                             mapinstance.Item1.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("INSTANTBATTLE_SUCCEEDED"), 0));
                             foreach (ClientSession cli in mapinstance.Item1.Sessions.Where(s => s.Character != null).ToList())
                             {
-                                cli.Character.GenerateFamilyXp(1000);
+                                cli.Character.GenerateFamilyXp(cli.Character.Level * 15);
                                 cli.Character.GetReputation(cli.Character.Level * 100);
-                                cli.Character.Gold += cli.Character.Level * 200;
+                                cli.Character.Gold += cli.Character.Level * 10000;
                                 cli.Character.GiftAdd(2236, 1);
                                 cli.Character.Gold = cli.Character.Gold > maxGold ? maxGold : cli.Character.Gold;
-                                cli.Character.SpAdditionPoint += cli.Character.Level * 100;
+                                cli.Character.SpAdditionPoint += cli.Character.Level * 1000;
 
                                 if (cli.Character.SpAdditionPoint > 1000000)
                                 {
@@ -166,13 +139,13 @@ namespace OpenNos.GameObject.Event
 
                                 cli.SendPacket(cli.Character.GenerateSpPoint());
                                 cli.SendPacket(cli.Character.GenerateGold());
-                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 200), 10));
+                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 10000), 10));
                                 cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"), cli.Character.Level * 100), 10));
                                 if (cli.Character.Family != null)
                                 {
-                                    cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_FXP"), 1000), 10));
+                                    cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_FXP"), cli.Character.Level * 15), 10));
                                 }
-                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_SP_POINT"), cli.Character.Level * 100), 10));
+                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_SP_POINT"), cli.Character.Level * 1000), 10));
                             }
                             break;
                         }
@@ -832,5 +805,7 @@ namespace OpenNos.GameObject.Event
 
             #endregion IC Monsters
         }
+        #endregion
     }
 }
+#endregion

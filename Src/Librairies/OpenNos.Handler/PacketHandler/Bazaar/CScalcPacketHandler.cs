@@ -74,24 +74,28 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 
                 if (bazaarItemDTO.DateStart.AddMinutes(2) >= DateTime.Now)
                 {
-                    Session.SendPacket(UserInterfaceHelper.GenerateInfo("You have to wait at least 10 minutes after publishing the item to take it out from NosBazaar"));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo("You have to wait at least 2 minutes after publishing the item to take it out from NosBazaar"));
                     return;
                 }
 
                 if (itemInstance.Amount == 0 || Session.Character.Inventory.CanAddItem(itemInstance.ItemVNum))
                 {
+
+                    if (itemInstance.Amount != bazaarItemDTO.Amount - cScalcPacket.Amount)
+                    {
+                        Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("EXPLOIT_LOGGED"), 0));
+                        return;
+                    }
                     if (Session.Character.Gold + price <= ServerManager.Instance.Configuration.MaxGold)
                     {
                         Session.Character.Gold += price;
                         Session.SendPacket(Session.Character.GenerateGold());
-                        Session.SendPacket(Session.Character.GenerateSay(
-                            string.Format(Language.Instance.GetMessageFromKey("REMOVE_FROM_BAZAAR"), price), 10));
+                        Session.SendPacket(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("REMOVE_FROM_BAZAAR"), price), 10));
 
-                        // Edit this soo we dont generate new guid every single time we take
-                        // something out.
+                        // Edit this soo we dont generate new guid every single time we take something out.
                         if (itemInstance.Amount != 0)
                         {
-                            var newItemInstance = itemInstance.DeepCopy();
+                            ItemInstance newItemInstance = itemInstance.DeepCopy();
                             newItemInstance.Id = Guid.NewGuid();
                             newItemInstance.Type = newItemInstance.Item.Type;
                             Session.Character.Inventory.AddToInventory(newItemInstance);
@@ -119,23 +123,19 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                     }
                     else
                     {
-                        Session.SendPacket(
-                            UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MAX_GOLD"), 0));
-                        Session.SendPacket(UserInterfaceHelper.GenerateBazarRecollect(bazaarItemDTO.Price, 0,
-                            bazaarItemDTO.Amount, 0, 0, name));
+                        Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MAX_GOLD"), 0));
+                        Session.SendPacket($"rc_scalc 0 -1 -1 -1 -1 -1 -1");
                     }
                 }
                 else
                 {
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("NOT_ENOUGH_PLACE")));
-                    Session.SendPacket(UserInterfaceHelper.GenerateBazarRecollect(bazaarItemDTO.Price, 0,
-                        bazaarItemDTO.Amount, 0, 0, name));
+                    Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("NOT_ENOUGH_PLACE")));
+                    Session.SendPacket($"rc_scalc 0 -1 -1 -1 -1 -1 -1");
                 }
             }
             else
             {
-                Session.SendPacket(UserInterfaceHelper.GenerateBazarRecollect(0, 0, 0, 0, 0, "None"));
+                Session.SendPacket($"rc_scalc 0 -1 -1 -1 -1 -1 -1");
             }
         }
 

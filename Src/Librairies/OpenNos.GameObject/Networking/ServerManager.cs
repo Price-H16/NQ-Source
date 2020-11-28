@@ -985,7 +985,7 @@ namespace OpenNos.GameObject.Networking
             }
 
             InShutdown = true;
-            Instance.SaveAll(true);
+            Instance.SaveAll();
 
             Instance.DisconnectAll();
             CommunicationServiceClient.Instance.UnregisterWorldServer(WorldId);
@@ -2737,7 +2737,7 @@ namespace OpenNos.GameObject.Networking
             }
         }
 
-        public void SaveAll(bool onShutDown)
+        public void SaveAll()
         {
             try
             {
@@ -2803,9 +2803,8 @@ namespace OpenNos.GameObject.Networking
                     return;
                 }
             }
-
             InShutdown = true;
-            Instance.SaveAll(true);
+            Instance.SaveAll();
             Instance.DisconnectAll();
             CommunicationServiceClient.Instance.UnregisterWorldServer(WorldId);
             if (IsReboot)
@@ -2896,6 +2895,7 @@ namespace OpenNos.GameObject.Networking
         {
             Instance.ShutdownStop = true;
             Instance.TaskShutdown = null;
+            Instance.SaveAll();
         }
 
         internal List<NpcMonsterSkill> GetNpcMonsterSkillsByMonsterVNum(short npcMonsterVNum) => _monsterSkills.ContainsKey(npcMonsterVNum)
@@ -3913,7 +3913,7 @@ namespace OpenNos.GameObject.Networking
             try
             {
                 Logger.Info(Language.Instance.GetMessageFromKey("SAVING_ALL"));
-                SaveAll(false);
+                SaveAll();
             }
             catch (Exception e)
             {

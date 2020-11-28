@@ -46,7 +46,7 @@ namespace Plugins.BasicImplementations.Guri.Handler
                 {
                     if ((byte)faction < 3) // Single faction change
                     {
-                        if (Session.Character.LastFactionChange > DateTime.Now.AddDays(-1).Ticks)
+                        if (Session.Character.LastFactionChange > DateTime.Now.AddDays(1).Ticks)
                         {
                             Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHANGE_NOT_PERMITTED"), 0));
                             return;
@@ -57,9 +57,7 @@ namespace Plugins.BasicImplementations.Guri.Handler
                         }
                         if (Session.Character.Family != null)
                         {
-                            Session.SendPacket(
-                                UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),
-                                    0));
+                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("IN_FAMILY"),0));
                             return;
                         }
                         Session.Character.Inventory.RemoveItemAmount(baseVnum + (byte)faction);

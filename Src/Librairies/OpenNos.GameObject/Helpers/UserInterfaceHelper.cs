@@ -516,7 +516,7 @@ namespace OpenNos.GameObject.Helpers
                 foreach (var bzlink in definitivelist
                     .Where(s =>
                         (s.BazaarItem.DateStart.AddHours(s.BazaarItem.Duration) - DateTime.Now).TotalMinutes > 0 &&
-                        s.Item.Amount > 0).Skip(packet.Index * 30).Take(30))
+                        s.Item.Amount > 0).Skip(packet.Index * 50).Take(50))
                 {
                     var time = (long)(bzlink.BazaarItem.DateStart.AddHours(bzlink.BazaarItem.Duration) - DateTime.Now)
                         .TotalMinutes;

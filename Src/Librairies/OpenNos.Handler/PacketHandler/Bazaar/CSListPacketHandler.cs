@@ -25,6 +25,15 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
         public void RefreshPersonalBazarList(CSListPacket csListPacket)
         {
+            if (ServerManager.Instance.InShutdown)
+            {
+                return;
+            }
+            if (Session.Character.IsMuted())
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg("Tu es sanctonné tu ne peux pas faire ça", 0));
+                return;
+            }
             if (!Session.Character.CanUseNosBazaar())
             {
                 Session.SendPacket(

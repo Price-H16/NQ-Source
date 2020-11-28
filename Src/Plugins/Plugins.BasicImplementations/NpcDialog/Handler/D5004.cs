@@ -18,7 +18,8 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
            var npc = packet.Npc;
            if (npc != null)
            {
-               ServerManager.Instance.ChangeMap(Session.Character.CharacterId, 145, 52, 41);
+                Session.Character.Save();
+                ServerManager.Instance.ChangeMap(Session.Character.CharacterId, 145, 52, 41);
            }
         }
     }

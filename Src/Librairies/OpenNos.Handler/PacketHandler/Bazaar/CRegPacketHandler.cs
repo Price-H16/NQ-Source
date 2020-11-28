@@ -90,7 +90,6 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 Thread.Sleep(1000);
                 Session.SendPacket(UserInterfaceHelper.GenerateMsg(("Really you dupe man ?"), 0));
                 ServerManager.Instance.Kick(Session.Character.Name);
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(("Really you dupe man ?"), 0));
                 return;
             }
 
@@ -130,10 +129,6 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
             var it = Session.Character.Inventory.LoadBySlotAndType(cRegPacket.Slot,
                 cRegPacket.Inventory == 4 ? 0 : (InventoryType) cRegPacket.Inventory);
-
-            // This is done on purpose, because when an item is fresh created and has shell (hero eq), its shell effects are being deleted cause they're not being saved in DB before adding items to NB.
-            // TODO: Find a better way to do it, ending the issue from the root.
-            Session.Character.PerformItemSave(it);//pogg
 
             if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable ||
                 it.IsBound && it.ItemDeleteTime != null) return;

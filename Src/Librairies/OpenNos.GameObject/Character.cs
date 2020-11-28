@@ -1456,7 +1456,7 @@ namespace OpenNos.GameObject
             Session.IsDisposing = true;
             CommunicationServiceClient.Instance.RegisterCrossServerAccountLogin(Session.Account.AccountId, Session.SessionId);
             Save();
-            Session.Disconnect();
+            Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(observer => Session.Disconnect());
         }
 
         public void ChangeClass(ClassType characterClass, bool fromCommand)
@@ -2797,6 +2797,7 @@ namespace OpenNos.GameObject
                 ShellEffectMain.Clear();
                 RuneEffectMain.Clear();
                 ShellEffectSecondary.Clear();
+                CellonOptions.Clear();
 
                 if (Inventory != null)
                 {
@@ -2845,6 +2846,13 @@ namespace OpenNos.GameObject
                                                 break;
                                         }
 
+                                        break;
+
+                                    case ItemType.Jewelery: //Antidupe Cellon / Shell infinite
+                                        foreach (CellonOptionDTO dto in item.CellonOptions)
+                                        {
+                                            CellonOptions.Add(dto);
+                                        }
                                         break;
                                 }
                             }
@@ -6880,11 +6888,6 @@ namespace OpenNos.GameObject
             }
         }
 
-        public void PerformItemSave(ItemInstance it)
-        {
-            DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(it.ShellEffects, it.EquipmentSerialId);
-            DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(it.CellonOptions, it.EquipmentSerialId);
-        }
         public void SaveEq()
         {
             try
@@ -6980,7 +6983,14 @@ namespace OpenNos.GameObject
                         IEnumerable<MinilandObjectDTO> currentlySavedMinilandObjectEntries = DAOFactory.MinilandObjectDAO.LoadByCharacterId(CharacterId).ToList();
                         foreach (MinilandObjectDTO mobjToDelete in currentlySavedMinilandObjectEntries.Except(MinilandObjects))
                         {
-                            DAOFactory.MinilandObjectDAO.DeleteById(mobjToDelete.MinilandObjectId);
+                            try
+                            {
+                                DAOFactory.MinilandObjectDAO.DeleteById(mobjToDelete.MinilandObjectId);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                            }
                         }
 
                         DAOFactory.ItemInstanceDAO.DeleteGuidList(currentlySavedInventoryIds.Except(inventories.Select(i => i.Id)));
@@ -7014,136 +7024,236 @@ namespace OpenNos.GameObject
 
                 if (Skills != null)
                 {
-                    IEnumerable<Guid> currentlySavedCharacterSkills = DAOFactory.CharacterSkillDAO.LoadKeysByCharacterId(CharacterId).ToList();
-
-                    foreach (Guid characterSkillToDeleteId in currentlySavedCharacterSkills.Except(Skills.Select(s => s.Id)))
+                    try
                     {
-                        DAOFactory.CharacterSkillDAO.Delete(characterSkillToDeleteId);
+                        IEnumerable<Guid> currentlySavedCharacterSkills = DAOFactory.CharacterSkillDAO.LoadKeysByCharacterId(CharacterId).ToList();
+
+                        foreach (Guid characterSkillToDeleteId in currentlySavedCharacterSkills.Except(Skills.Select(s => s.Id)))
+                        {
+                            DAOFactory.CharacterSkillDAO.Delete(characterSkillToDeleteId);
+                        }
+
+                        foreach (CharacterSkill characterSkill in Skills.GetAllItems())
+                        {
+                            DAOFactory.CharacterSkillDAO.InsertOrUpdate(characterSkill);
+                        }
                     }
-
-                    foreach (CharacterSkill characterSkill in Skills.GetAllItems())
+                    catch (Exception ex)
                     {
-                        DAOFactory.CharacterSkillDAO.InsertOrUpdate(characterSkill);
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                     }
                 }
 
                 if (Title != null)
                 {
-                    IEnumerable<long> currentlySavedTitles = DAOFactory.CharacterTitleDAO.LoadByCharacterId(CharacterId).Select(s => s.CharacterTitleId);
-
-                    foreach (long TitleToDeleteId in currentlySavedTitles.Except(Title.Select(s => s.CharacterTitleId)))
+                    try
                     {
-                        DAOFactory.CharacterTitleDAO.Delete(TitleToDeleteId);
+                        IEnumerable<long> currentlySavedTitles = DAOFactory.CharacterTitleDAO.LoadByCharacterId(CharacterId).Select(s => s.CharacterTitleId);
+
+                        foreach (long TitleToDeleteId in currentlySavedTitles.Except(Title.Select(s => s.CharacterTitleId)))
+                        {
+                            DAOFactory.CharacterTitleDAO.Delete(TitleToDeleteId);
+                        }
+
+                        foreach (var tit in Title)
+                        {
+                            CharacterTitleDTO titsave = tit;
+                            DAOFactory.CharacterTitleDAO.InsertOrUpdate(ref titsave);
+                        }
                     }
-
-                    foreach (var tit in Title)
+                    catch (Exception ex)
                     {
-                        CharacterTitleDTO titsave = tit;
-                        DAOFactory.CharacterTitleDAO.InsertOrUpdate(ref titsave);
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                     }
                 }
 
                 if (CharacterVisitedMaps != null)
                 {
-                    DAOFactory.CharacterVisitedMapsDAO.InsertOrUpdateFromList(CharacterVisitedMaps, CharacterId);
+                    try
+                    {
+                        DAOFactory.CharacterVisitedMapsDAO.InsertOrUpdateFromList(CharacterVisitedMaps, CharacterId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 IEnumerable<long> currentlySavedMates = DAOFactory.MateDAO.LoadByCharacterId(CharacterId).Select(s => s.MateId);
 
                 foreach (long matesToDeleteId in currentlySavedMates.Except(Mates.Select(s => s.MateId)))
                 {
-                    DAOFactory.MateDAO.Delete(matesToDeleteId);
+                    try
+                    {
+                        DAOFactory.MateDAO.Delete(matesToDeleteId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 foreach (Mate mate in Mates)
                 {
-                    MateDTO matesave = mate;
-                    DAOFactory.MateDAO.InsertOrUpdate(ref matesave);
+                    try
+                    {
+                        MateDTO matesave = mate;
+                        DAOFactory.MateDAO.InsertOrUpdate(ref matesave);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 IEnumerable<QuicklistEntryDTO> quickListEntriesToInsertOrUpdate = QuicklistEntries.ToList();
 
-                IEnumerable<Guid> currentlySavedQuicklistEntries = DAOFactory.QuicklistEntryDAO.LoadKeysByCharacterId(CharacterId).ToList();
-                foreach (Guid quicklistEntryToDelete in currentlySavedQuicklistEntries.Except(QuicklistEntries.Select(s => s.Id)))
+                try
                 {
-                    DAOFactory.QuicklistEntryDAO.Delete(quicklistEntryToDelete);
-                }
+                    IEnumerable<Guid> currentlySavedQuicklistEntries =
+                        DAOFactory.QuicklistEntryDAO.LoadKeysByCharacterId(CharacterId).ToList();
+                    foreach (Guid quicklistEntryToDelete in currentlySavedQuicklistEntries.Except(
+                        QuicklistEntries.Select(s => s.Id)))
+                    {
+                        DAOFactory.QuicklistEntryDAO.Delete(quicklistEntryToDelete);
+                    }
 
-                foreach (QuicklistEntryDTO quicklistEntry in quickListEntriesToInsertOrUpdate)
+                    foreach (QuicklistEntryDTO quicklistEntry in quickListEntriesToInsertOrUpdate)
+                    {
+                        DAOFactory.QuicklistEntryDAO.InsertOrUpdate(quicklistEntry);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    DAOFactory.QuicklistEntryDAO.InsertOrUpdate(quicklistEntry);
+                    Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                 }
 
                 foreach (MinilandObjectDTO mobjEntry in (IEnumerable<MinilandObjectDTO>) MinilandObjects.ToList())
                 {
-                    MinilandObjectDTO mobj = mobjEntry;
-                    DAOFactory.MinilandObjectDAO.InsertOrUpdate(ref mobj);
+                    try
+                    {
+                        MinilandObjectDTO mobj = mobjEntry;
+                        DAOFactory.MinilandObjectDAO.InsertOrUpdate(ref mobj);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 IEnumerable<short> currentlySavedBuff = DAOFactory.StaticBuffDAO.LoadByTypeCharacterId(CharacterId);
                 foreach (short bonusToDelete in currentlySavedBuff.Except(Buff.Select(s => s.Card.CardId)))
                 {
-                    DAOFactory.StaticBuffDAO.Delete(bonusToDelete, CharacterId);
+                    try
+                    {
+                        DAOFactory.StaticBuffDAO.Delete(bonusToDelete, CharacterId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 if (_isStaticBuffListInitial)
                 {
-                    foreach (Buff buff in Buff.Where(s => s.StaticBuff).ToArray())
+                    try
                     {
-                        if (buff.Card.CardId == 360 || buff.Card.CardId == 361) //GLOBAL FAMILY BUFFS
-                            continue;
-                        StaticBuffDTO bf = new StaticBuffDTO
+                        foreach (Buff buff in Buff.Where(s => s.StaticBuff).ToArray())
                         {
-                            CharacterId = CharacterId,
-                            RemainingTime = (int) (buff.RemainingTime - (DateTime.Now - buff.Start).TotalSeconds),
-                            CardId = buff.Card.CardId
-                        };
-                        DAOFactory.StaticBuffDAO.InsertOrUpdate(ref bf);
+                            if (buff.Card.CardId == 360 || buff.Card.CardId == 361) //GLOBAL FAMILY BUFFS
+                                continue;
+                            StaticBuffDTO bf = new StaticBuffDTO
+                            {
+                                CharacterId = CharacterId,
+                                RemainingTime = (int)(buff.RemainingTime - (DateTime.Now - buff.Start).TotalSeconds),
+                                CardId = buff.Card.CardId
+                            };
+                            DAOFactory.StaticBuffDAO.InsertOrUpdate(ref bf);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                     }
                 }
 
                 //Quest
                 foreach (CharacterQuestDTO q in DAOFactory.CharacterQuestDAO.LoadByCharacterId(CharacterId).ToList())
                 {
-                    DAOFactory.CharacterQuestDAO.Delete(CharacterId, q.QuestId);
+                    try
+                    {
+                        DAOFactory.CharacterQuestDAO.Delete(CharacterId, q.QuestId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 foreach (CharacterQuest qst in Quests.ToList())
                 {
-                    CharacterQuestDTO qstDTO = new CharacterQuestDTO
+                    try
                     {
-                        CharacterId = qst.CharacterId,
-                        QuestId = qst.QuestId,
-                        FirstObjective = qst.FirstObjective,
-                        SecondObjective = qst.SecondObjective,
-                        ThirdObjective = qst.ThirdObjective,
-                        FourthObjective = qst.FourthObjective,
-                        FifthObjective = qst.FifthObjective,
-                        IsMainQuest = qst.IsMainQuest
-                    };
-                    DAOFactory.CharacterQuestDAO.InsertOrUpdate(qstDTO);
+                        CharacterQuestDTO qstDTO = new CharacterQuestDTO
+                        {
+                            CharacterId = qst.CharacterId,
+                            QuestId = qst.QuestId,
+                            FirstObjective = qst.FirstObjective,
+                            SecondObjective = qst.SecondObjective,
+                            ThirdObjective = qst.ThirdObjective,
+                            FourthObjective = qst.FourthObjective,
+                            FifthObjective = qst.FifthObjective,
+                            IsMainQuest = qst.IsMainQuest
+                        };
+                        DAOFactory.CharacterQuestDAO.InsertOrUpdate(qstDTO);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 foreach (StaticBonusDTO bonus in StaticBonusList.ToArray())
                 {
-                    StaticBonusDTO bonus2 = bonus;
-                    DAOFactory.StaticBonusDAO.InsertOrUpdate(ref bonus2);
+                    try
+                    {
+                        StaticBonusDTO bonus2 = bonus;
+                        DAOFactory.StaticBonusDAO.InsertOrUpdate(ref bonus2);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
+                    }
                 }
 
                 foreach (GeneralLogDTO general in GeneralLogs.GetAllItems())
                 {
-                    if (!DAOFactory.GeneralLogDAO.IdAlreadySet(general.LogId))
+                    try
                     {
-                        DAOFactory.GeneralLogDAO.Insert(general);
+                        if (!DAOFactory.GeneralLogDAO.IdAlreadySet(general.LogId))
+                        {
+                            DAOFactory.GeneralLogDAO.Insert(general);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                     }
                 }
 
                 foreach (RespawnDTO Resp in Respawns)
                 {
-                    RespawnDTO res = Resp;
-                    if (Resp.MapId != 0 && Resp.X != 0 && Resp.Y != 0)
+                    try
                     {
-                        DAOFactory.RespawnDAO.InsertOrUpdate(ref res);
+                        RespawnDTO res = Resp;
+                        if (Resp.MapId != 0 && Resp.X != 0 && Resp.Y != 0)
+                        {
+                            DAOFactory.RespawnDAO.InsertOrUpdate(ref res);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogUserEventError("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "ERROR", ex);
                     }
                 }
 

@@ -33,6 +33,6 @@ namespace OpenNos.Domain
         Garden = 31,
         Minigame = 32,
         Terrace = 33,
-        MinilandTheme = 34
+        MinilandTheme = 34,
     }
 }

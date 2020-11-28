@@ -368,7 +368,7 @@ namespace OpenNos.Handler.PacketHandler.Basic
                 Session.SendPacket(Session.Character.GenerateSay("==========Owner==========", 10));
                 Session.SendPacket(Session.Character.GenerateSay("Welcome " + Session.Character.Name, 12));
                 Session.SendPacket(Session.Character.GenerateSay("Use $Bank Help for info about Bank.", 10));
-                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a BLZ Team", 10));
+                Session.SendPacket(Session.Character.GenerateSay("Use $HelpMe to contact a NQ Team", 10));
                 Session.SendPacket(Session.Character.GenerateSay("Use $Warp + Name to Move Map", 10));
                 Session.SendPacket(Session.Character.GenerateSay("Use $Help to see the list of additional commands available", 10));
                 Session.SendPacket(Session.Character.GenerateSay("Use $CheckStat for check status Glacer and Act6", 10));

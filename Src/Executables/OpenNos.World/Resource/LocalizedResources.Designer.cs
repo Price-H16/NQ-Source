@@ -1582,6 +1582,15 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to : Collecte.
+        /// </summary>
+        internal static string COLLECTING {
+            get {
+                return ResourceManager.GetString("COLLECTING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You can only compliment one player per day..
         /// </summary>
         internal static string COMPLIMENT_COOLDOWN {

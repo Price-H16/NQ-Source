@@ -36,7 +36,14 @@ namespace OpenNos.Handler.PacketHandler.Inventory
             if (mviPacket != null)
             {
                 if (mviPacket.InventoryType != InventoryType.Equipment && mviPacket.InventoryType != InventoryType.Main && mviPacket.InventoryType != InventoryType.Etc && mviPacket.InventoryType != InventoryType.Miniland)
+                {
                     return;
+                }
+
+                if (mviPacket.Amount < 1)
+                {
+                    return;
+                }
 
                 if (mviPacket.Slot == mviPacket.DestinationSlot)
                 {
@@ -48,9 +55,6 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                     return;
                 }
 
-                if (mviPacket.Amount < 1) return;
-
-                if (mviPacket.Slot == mviPacket.DestinationSlot) return;
 
                 lock (Session.Character.Inventory)
                 {

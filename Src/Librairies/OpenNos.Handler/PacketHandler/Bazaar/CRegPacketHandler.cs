@@ -64,7 +64,13 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             {
                 return;
             }
+            ItemInstance it = Session.Character.Inventory.LoadBySlotAndType(cRegPacket.Slot, cRegPacket.Inventory == 4 ? 0 : (InventoryType)cRegPacket.Inventory);
+            Session.Character.PerformItemSave(it);
 
+            if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable || it.IsBound )
+            {
+                return;
+            }
             if (cRegPacket.Type == 9)
             {
                 return;
@@ -198,7 +204,10 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 SellerId = Session.Character.CharacterId,
                 ItemInstanceId = bazaar.Id
             };
-
+            #region !DiscordWebhook!
+#pragma warning disable 4014
+            DiscordWebhookHelper.DiscordEventNosBazar($"Seller: {Session.Character.Name} ItemName: {bazaar.Item.Name} Amount: {cRegPacket.Amount} Price: {cRegPacket.Price} ");
+            #endregion
             DAOFactory.BazaarItemDAO.InsertOrUpdate(ref bazaarItem);
             ServerManager.Instance.BazaarRefresh(bazaarItem.BazaarItemId);
 

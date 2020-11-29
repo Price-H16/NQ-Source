@@ -4,6 +4,7 @@ using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Extension;
+using OpenNos.GameObject.Helpers;
 
 namespace OpenNos.Handler.PacketHandler.Command
 {
@@ -30,9 +31,12 @@ namespace OpenNos.Handler.PacketHandler.Command
                 Session.AddLogsCmd(addPartnerPacket);
 
                 Session.AddMate(addPartnerPacket.MonsterVNum, addPartnerPacket.Level, MateType.Partner);
+#pragma warning disable 4014
+                DiscordWebhookHelper.DiscordEventlog($"AdministradorLog: {Session.Character.Name} NpcMonsterVNum: {addPartnerPacket.MonsterVNum} Level: {addPartnerPacket.Level} {addPartnerPacket} Comando usado!");
             }
             else
             {
+
                 Session.SendPacket(Session.Character.GenerateSay(AddPartnerPacket.ReturnHelp(), 10));
             }
         }

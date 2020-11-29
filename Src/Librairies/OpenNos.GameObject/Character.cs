@@ -176,6 +176,8 @@ namespace OpenNos.GameObject
 
         public string BubbleMessage { get; set; }
 
+        public DateTime LastISort { get; set; }
+
         public DateTime BubbleMessageEnd { get; set; }
 
         public ThreadSafeSortedList<short, Buff> Buff => BattleEntity.Buffs;
@@ -5906,6 +5908,7 @@ namespace OpenNos.GameObject
             LastWithdraw = DateTime.Now;
             LastBazaarInsert = DateTime.Now;
             LastBazaarModeration = DateTime.Now;
+            LastISort = DateTime.Now;
             Session = null;
             MailList = new Dictionary<int, MailDTO>();
             BattleEntity = new BattleEntity(this, null);
@@ -6954,6 +6957,12 @@ namespace OpenNos.GameObject
                 DAOFactory.MateDAO.InsertOrUpdate(ref matesave);
             }
         }
+        public void PerformItemSave(ItemInstance it)
+        {
+            DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(it.ShellEffects, it.EquipmentSerialId);
+            DAOFactory.CellonOptionDAO.InsertOrUpdateFromList(it.CellonOptions, it.EquipmentSerialId);
+        }
+
         public void Save()
         {
             Logger.LogUserEvent("CHARACTER_DB_SAVE", Session.GenerateIdentity(), "START");

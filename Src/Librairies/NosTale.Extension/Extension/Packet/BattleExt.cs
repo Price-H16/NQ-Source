@@ -479,12 +479,13 @@ namespace NosTale.Extension.Extension.Packet
                         target.Character.isFreezed = true;
                         target.SendPacket(target?.Character?.GenerateCond());
 
+
                         Observable.Timer(TimeSpan.FromSeconds(20)).Subscribe(o =>
                         {
                             if (target.Character.isFreezed)
                             {
-                                target.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(117, 117) : ServerManager.RandomNumber<short>(0, 0);
-                                target.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(27, 59) : ServerManager.RandomNumber<short>(20, 51);
+                                target.Character.PositionX = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(30, 32) : ServerManager.RandomNumber<short>(83, 85);
+                                target.Character.PositionY = rbb.TeamEntity == RainbowTeamBattleType.Red ? ServerManager.RandomNumber<short>(73, 76) : ServerManager.RandomNumber<short>(2, 4);
                                 target?.CurrentMapInstance?.Broadcast(target.Character.GenerateTp());
                                 target.Character.NoAttack = false;
                                 target.Character.NoMove = false;
@@ -496,9 +497,12 @@ namespace NosTale.Extension.Extension.Packet
                     }
                     else
                     {
+                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay( $"[{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]", 10));
+#pragma warning disable 4014
+                        DiscordWebhookHelper.DiscordEventlogPVP($"ScoreArena: {target.Character.Name}  was killed by { hitRequest.Session.Character.Name} Record");
                         hitRequest.Session.Character.BattleEntity.ApplyScoreArena(target.Character.BattleEntity);
-                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
-                        hitRequest.Session.Character.Name, target.Character.Name), 10));
+                        hitRequest.Session.SendPacket($"msg 4 [{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]");
+                        target.SendPacket($"msg 4 [{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]");
                         if (target.Character.IsVehicled)
                         {
                             target.Character.RemoveVehicle();

@@ -329,13 +329,17 @@ namespace OpenNos.GameObject
                 }
             }
 
-            ShellEffects.Clear(); //Lose Shells
+            
             DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(EquipmentSerialId);
             var shellLevel = Item.LevelMinimum == 25 ? 101 : 106;
-            ShellEffects.AddRange( //Dupe
-                ShellGeneratorHelper.Instance.GenerateShell(shellType, Rare == 8 ? 7 : Rare, shellLevel));
+            AddShellsFixed(ShellGeneratorHelper.Instance.GenerateShell(shellType, Rare == 8 ? 7 : Rare, shellLevel));
         }
-
+        public void AddShellsFixed(List<ShellEffectDTO> list)
+        {
+            DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(this.EquipmentSerialId);
+            ShellEffects.Clear();
+            ShellEffects.AddRange(list);
+        }
         public void GenerateHeroicShellFutur(ClientSession session, RarifyProtection protection)
         {
             if (protection != RarifyProtection.RandomHeroicAmulet)

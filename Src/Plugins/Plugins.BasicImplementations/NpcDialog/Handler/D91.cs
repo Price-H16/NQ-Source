@@ -16,10 +16,10 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
         public async Task Execute(ClientSession Session, NpcDialogEvent packet)
         {
            var npc = packet.Npc;
-           //if (npc != null && ServerManager.Instance.Configuration.ChristmasEvent)
-           //{
-           //    Session.Character.AddQuest(5938);
-           //}
+            if (npc != null && ServerManager.Instance.Configuration.ChristmasEvent)
+            {
+                Session.Character.AddQuest(5938);
+            }
         }
     }
 }

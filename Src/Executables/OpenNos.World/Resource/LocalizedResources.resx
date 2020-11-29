@@ -2467,6 +2467,9 @@
   <data name="CHANGE_LOCK_CODE" xml:space="preserve">
     <value>You have a lock code already active, if you want to change it use $ Unlock &amp;amp; then</value>
   </data>
+  <data name="COLLECTING" xml:space="preserve">
+    <value>: Collecte</value>
+  </data>
   <data name="LOCK_CODE_MUST_CONTAINS_8_CHARACTERS" xml:space="preserve">
     <value>The code to lock code must contain 8 characters.</value>
   </data>

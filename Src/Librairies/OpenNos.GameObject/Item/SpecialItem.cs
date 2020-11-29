@@ -443,6 +443,8 @@ namespace OpenNos.GameObject
                                 }
                             }
                         }
+#pragma warning disable 4014
+                        DiscordWebhookHelper.DiscordEventRaid($"{session.Character.Name} Opened a seal of Raid {raid.Label}");
                     }
 
                     break;

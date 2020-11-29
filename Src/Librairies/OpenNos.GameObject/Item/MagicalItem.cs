@@ -125,17 +125,13 @@ namespace OpenNos.GameObject
 
                                             wearable.BoundCharacterId = session.Character.CharacterId;
                                             wearable.ShellRarity = inv.Rare;
-                                            wearable.ShellEffects.Clear(); //Lose
-                                            DAOFactory.ShellEffectDAO.DeleteByEquipmentSerialId(
-                                                wearable.EquipmentSerialId);
-                                            wearable.ShellEffects.AddRange(inv.ShellEffects); //Dupe
                                             if (wearable.EquipmentSerialId == Guid.Empty)
+                                            {
                                                 wearable.EquipmentSerialId = Guid.NewGuid();
-                                            DAOFactory.ShellEffectDAO.InsertOrUpdateFromList(wearable.ShellEffects,
-                                                wearable.EquipmentSerialId);
+                                            }
+                                            wearable.AddShellsFixed(inv.ShellEffects);
                                             session.Character.DeleteItemByItemInstanceId(inv.Id);
-                                            session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                                Language.Instance.GetMessageFromKey("OPTION_SUCCESS"), 0));
+                                            session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("OPTION_SUCCESS"), 0));
                                         }
 
                                         break;

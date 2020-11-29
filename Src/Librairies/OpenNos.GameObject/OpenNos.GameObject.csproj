@@ -125,6 +125,7 @@
     <Compile Include="FamilySkillMission.cs" />
     <Compile Include="Helpers\ChangeClassHelper.cs" />
     <Compile Include="Helpers\DamageHelper.cs" />
+    <Compile Include="Helpers\DiscordWebhookHelper.cs" />
     <Compile Include="Helpers\FamilySystemHelper.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\MallAPIHelper.cs" />

@@ -99,9 +99,13 @@ namespace OpenNos.Handler.PacketHandler.Basic
             }
             else
             {
+#pragma warning disable 4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                DiscordWebhookHelper.DiscordEventSay($"GlobalChat:  Sender: {Session.Character.Name} SenderId: {Session.Character.CharacterId} Receiver: {Session.CurrentMapInstance?.Map.Name} ReceiverId: {Session.CurrentMapInstance?.Map.MapId} IP: {Session.IpAddress} Mensaje:  {message} ");
+
                 byte type = CharacterHelper.AuthorityChatColor(Session.Character.Authority);
 
                 ConcurrentBag<ArenaTeamMember> member = null;
+
                 lock (ServerManager.Instance.ArenaTeams)
                 {
                     member = ServerManager.Instance.ArenaTeams.ToList().FirstOrDefault(s => s.Any(e => e.Session == Session));

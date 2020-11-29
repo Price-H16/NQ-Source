@@ -19,7 +19,8 @@ namespace OpenNos.GameObject.Event
             const int HORN_TIME = 45;
             const int HORN_STAY_TIME = 1;
             const int HORN_RESPAWN_TIME = 3;
-
+#pragma warning disable 4014
+            DiscordWebhookHelper.DiscordEventT($"ServerEvent: Land Of Death has been opened!");
             EventHelper.Instance.RunEvent(new EventContainer(ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(98)), EventActionType.NPCSEFFECTCHANGESTATE, true));
             var lodThread = new LODThread();
             Observable.Timer(TimeSpan.FromSeconds(5)).Subscribe(s => lodThread.Run(LOD_TIME * 60, (HORN_TIME + 1) * 60, (HORN_RESPAWN_TIME + HORN_STAY_TIME) * 60, HORN_STAY_TIME * 60));         

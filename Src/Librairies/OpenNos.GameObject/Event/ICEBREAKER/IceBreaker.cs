@@ -59,27 +59,6 @@ namespace OpenNos.GameObject.Event
         #endregion
 
         #region Methods
-        private static IContainer BuildCoreContainer()
-        {
-            var pluginBuilder = new ContainerBuilder();
-            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
-            var container = pluginBuilder.Build();
-
-            var coreBuilder = new ContainerBuilder();
-            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
-            {
-                try
-                {
-                    plugin.OnLoad(coreBuilder);
-                }
-                catch (PluginException e)
-                {
-                }
-            }
-
-
-            return coreBuilder.Build();
-        }
 
         public static void GenerateIceBreaker(int Bracket)
         {
@@ -87,15 +66,12 @@ namespace OpenNos.GameObject.Event
             {
                 return;
             }
-            var pluginBuilder = new ContainerBuilder();
-            IContainer container = pluginBuilder.Build();
-            using var coreContainer = BuildCoreContainer();
             currentBracket = Bracket;
             AlreadyFrozenPlayers = new List<ClientSession>();
             Map = ServerManager.GenerateMapInstance(2005, MapInstanceType.IceBreakerInstance, new InstanceBag());
-            var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-            ss.NotifyAllAsync(NotifiableEventType.ICEBREAKER_STARTS_IN_5_MINUTES);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 5, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
+#pragma warning disable 4014
+            DiscordWebhookHelper.DiscordEventT($"ServerEvent: IceBreaker will start in 5 minutes, are you ready to fight?");
             Thread.Sleep(5 * 60 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_MINUTES"), 1, LevelBrackets[currentBracket].Item1, LevelBrackets[currentBracket].Item2), 1));
             Thread.Sleep(1 * 60 * 1000);

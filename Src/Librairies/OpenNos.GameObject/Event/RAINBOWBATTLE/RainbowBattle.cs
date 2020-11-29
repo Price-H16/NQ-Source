@@ -71,6 +71,8 @@ namespace OpenNos.GameObject.Event.RAINBOWBATTLE
         public static void SendEvent()
         {
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 0));
+#pragma warning disable 4014
+            DiscordWebhookHelper.DiscordEventT($"ServerEvent: RainbowBattle will start in 5 minutes, are you ready?");
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 5), 1));
             Thread.Sleep(4 * 60 * 1000);
             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_MINUTES"), 1), 0));

@@ -90,6 +90,7 @@
     <Compile Include="Packets\ClientPackets\GroupSayPacket.cs" />
     <Compile Include="Packets\ClientPackets\GuriPacket.cs" />
     <Compile Include="Packets\ClientPackets\HeroPacket.cs" />
+    <Compile Include="Packets\ClientPackets\IsortPacket.cs" />
     <Compile Include="Packets\ClientPackets\JoinFamilyPacket.cs" />
     <Compile Include="Packets\ClientPackets\LbsPacket.cs" />
     <Compile Include="Packets\ClientPackets\LoginPacket.cs" />

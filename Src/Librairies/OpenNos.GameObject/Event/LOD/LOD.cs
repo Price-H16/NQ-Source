@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Threading;
-using OpenNos.Core;
+﻿using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
+using OpenNos.Master.Library.Client;
+using OpenNos.Master.Library.Data;
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Threading;
 
 namespace OpenNos.GameObject.Event
 {
@@ -15,16 +17,8 @@ namespace OpenNos.GameObject.Event
 
         public static void GenerateLod()
         {
-            const int LOD_TIME = 60;
-            const int HORN_TIME = 45;
-            const int HORN_STAY_TIME = 1;
-            const int HORN_RESPAWN_TIME = 3;
-#pragma warning disable 4014
-            DiscordWebhookHelper.DiscordEventT($"ServerEvent: Land Of Death has been opened!");
             EventHelper.Instance.RunEvent(new EventContainer(ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(98)), EventActionType.NPCSEFFECTCHANGESTATE, true));
-            var lodThread = new LODThread();
-            Observable.Timer(TimeSpan.FromSeconds(5)).Subscribe(s => lodThread.Run(LOD_TIME * 60, (HORN_TIME + 1) * 60, (HORN_RESPAWN_TIME + HORN_STAY_TIME) * 60, HORN_STAY_TIME * 60));         
-
+            LODThread lodThread = new LODThread();
         }
 
         #endregion
@@ -32,7 +26,7 @@ namespace OpenNos.GameObject.Event
 
     public class LODThread
     {
-        #region Properties
+        #region Members
 
         public bool IsOpen { get; set; } = true;
 
@@ -44,32 +38,35 @@ namespace OpenNos.GameObject.Event
         {
             ChangePortalEffect(855);
 
-            const int interval = 30;
-            var dhspawns = 0;
+            const int interval = 60;
+            int dhspawns = 0;
 
             while (lodTime > 0)
             {
                 refreshLOD(lodTime);
 
-                if (lodTime == hornTime || lodTime == hornTime - hornRespawn * dhspawns)
+                if (lodTime == hornTime || (lodTime == hornTime - (hornRespawn * dhspawns)))
                 {
-                    foreach (var fam in ServerManager.Instance.FamilyList.GetAllItems())
+                    foreach (Family fam in ServerManager.Instance.FamilyList.GetAllItems())
+                    {
                         if (fam.LandOfDeath != null)
                         {
-                            //fam.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LOD_RATES_INCREASED"), 0)); fix this
-                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEXPRATE, 2));
-                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEDROPRATE, 3));
+                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEXPRATE, 4));
+                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEDROPRATE, 2));
                             spawnDH(fam.LandOfDeath);
                         }
+                    }
                 }
-                else if (lodTime == hornTime - hornRespawn * dhspawns - hornStay)
+                else if (lodTime == hornTime - (hornRespawn * dhspawns) - hornStay)
                 {
-                    foreach (var fam in ServerManager.Instance.FamilyList.GetAllItems())
+                    foreach (Family fam in ServerManager.Instance.FamilyList.GetAllItems())
+                    {
                         if (fam.LandOfDeath != null)
                         {
                             despawnDH(fam.LandOfDeath);
                         }
-                           
+                    }
+
                     dhspawns++;
                 }
 
@@ -101,38 +98,37 @@ namespace OpenNos.GameObject.Event
 
         private void endLOD()
         {
-            foreach (var fam in ServerManager.Instance.FamilyList.GetAllItems())
+            foreach (Family fam in ServerManager.Instance.FamilyList.GetAllItems())
+            {
                 if (fam.LandOfDeath != null)
                 {
                     EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.DISPOSEMAP, null));
                     fam.LandOfDeath = null;
                 }
+            }
 
             ServerManager.Instance.StartedEvents.Remove(EventType.LOD);
         }
 
         private void refreshLOD(int remaining)
         {
-            foreach (var fam in ServerManager.Instance.FamilyList.GetAllItems())
+            foreach (Family fam in ServerManager.Instance.FamilyList.GetAllItems())
             {
                 if (fam.LandOfDeath == null)
                 {
                     fam.LandOfDeath = ServerManager.GenerateMapInstance(150, MapInstanceType.LodInstance, new InstanceBag());
                 }
-                   
+
                 EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CLOCK, remaining * 10));
                 EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.STARTCLOCK, new Tuple<List<EventContainer>, List<EventContainer>>(new List<EventContainer>(), new List<EventContainer>())));
-
             }
         }
 
         private void spawnDH(MapInstance LandOfDeath)
         {
-
             EventHelper.Instance.RunEvent(new EventContainer(LandOfDeath, EventActionType.SPAWNONLASTENTRY, 443));
             EventHelper.Instance.RunEvent(new EventContainer(LandOfDeath, EventActionType.SENDPACKET, "df 2"));
             EventHelper.Instance.RunEvent(new EventContainer(LandOfDeath, EventActionType.SENDPACKET, UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("HORN_APPEAR"), 0)));
-
         }
 
         #endregion

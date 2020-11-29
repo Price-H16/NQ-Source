@@ -17,6 +17,8 @@ namespace OpenNos.GameObject.Event
 
         public static void GenerateLod()
         {
+#pragma warning disable 4014
+            DiscordWebhookHelper.DiscordEventT($"ServerEvent: Land Of Death has been opened!");
             EventHelper.Instance.RunEvent(new EventContainer(ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(98)), EventActionType.NPCSEFFECTCHANGESTATE, true));
             LODThread lodThread = new LODThread();
         }

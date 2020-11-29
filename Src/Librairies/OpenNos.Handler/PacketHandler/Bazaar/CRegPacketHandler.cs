@@ -64,13 +64,6 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             {
                 return;
             }
-            ItemInstance it = Session.Character.Inventory.LoadBySlotAndType(cRegPacket.Slot, cRegPacket.Inventory == 4 ? 0 : (InventoryType)cRegPacket.Inventory);
-            Session.Character.PerformItemSave(it);
-
-            if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable || it.IsBound )
-            {
-                return;
-            }
             if (cRegPacket.Type == 9)
             {
                 return;
@@ -133,11 +126,13 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                                              Session.Character.IsShopping)
                 return;
 
-            var it = Session.Character.Inventory.LoadBySlotAndType(cRegPacket.Slot,
-                cRegPacket.Inventory == 4 ? 0 : (InventoryType) cRegPacket.Inventory);
+            ItemInstance it = Session.Character.Inventory.LoadBySlotAndType(cRegPacket.Slot, cRegPacket.Inventory == 4 ? 0 : (InventoryType)cRegPacket.Inventory);
+            Session.Character.PerformItemSave(it);
 
-            if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable ||
-                it.IsBound && it.ItemDeleteTime != null) return;
+            if (it == null || !it.Item.IsSoldable || !it.Item.IsTradable || it.IsBound)
+            {
+                return;
+            }
 
             if (Session.Character.Inventory.CountItemInAnInventory(InventoryType.Bazaar)
                 >= 10 * (medal == null ? 2 : 10))

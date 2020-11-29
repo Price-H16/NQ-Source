@@ -14,3 +14,4 @@ namespace NosTale.Packets.Packets.ClientPackets
 
         #endregion
     }
+}

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Reactive.Linq;
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.DAL;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
@@ -42,11 +44,54 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             {
                 return;
             }
+            Session.Character.BazarRequests++;
             if (!Session.Character.VerifiedLock)
             {
-                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CHARACTER_LOCKED_USE_UNLOCK"), 0));
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg("You cant do this because your account is blocked. Use $Unlock", 0));
                 return;
             }
+            if (Session.Character.InExchangeOrTrade)
+            {
+                return;
+            }
+
+            if (ServerManager.Instance.InShutdown)
+            {
+                return;
+
+            }
+
+            if (Session.Character.InExchangeOrTrade || Session.Character.HasShopOpened)
+            {
+                return;
+            }
+
+
+            if (Session.Character.IsMuted())
+            {
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg("Tu es sanctonné tu ne peux pas faire ça", 0));
+                return;
+            }
+            if (Session.Character.BazarRequests > 20)
+            {
+                PenaltyLogDTO log = new PenaltyLogDTO
+                {
+                    AccountId = Session.Account.AccountId,
+                    Reason = "Auto ban c_buy PL",
+                    Penalty = PenaltyType.Banned,
+                    DateStart = DateTime.Now,
+                    DateEnd = DateTime.Now.AddYears(2),
+                };
+                Character.InsertOrUpdatePenalty(log);
+                Session?.Disconnect();
+                return;
+            }
+
+            Observable.Timer(TimeSpan.FromSeconds(10)).Subscribe(x =>
+            {
+                if (Session?.Character?.BazarRequests > 0)
+                    Session.Character.BazarRequests = 0;
+            });
             if (cBuyPacket.Price * cBuyPacket.Amount < 501)
             {
                 Session.SendPacket(UserInterfaceHelper.GenerateInfo(Language.Instance.GetMessageFromKey("MINIMUM_BUY_PRICE_IS_501")));

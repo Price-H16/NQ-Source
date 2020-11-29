@@ -178,6 +178,8 @@ namespace OpenNos.GameObject
 
         public DateTime LastISort { get; set; }
 
+        public byte BazarRequests { get; set; }
+
         public DateTime BubbleMessageEnd { get; set; }
 
         public ThreadSafeSortedList<short, Buff> Buff => BattleEntity.Buffs;

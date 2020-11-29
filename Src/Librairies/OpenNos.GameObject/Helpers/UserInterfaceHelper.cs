@@ -215,7 +215,7 @@ namespace OpenNos.GameObject.Helpers
             List<string> itemssearch = packet.ItemVNumFilter == "0" ? new List<string>() : packet.ItemVNumFilter.Split(' ').ToList();
             List<BazaarItemLink> bzlist = new List<BazaarItemLink>();
             BazaarItemLink[] billist = new BazaarItemLink[ServerManager.Instance.BazaarList.Count + 20];
-            ServerManager.Instance.BazaarList.Where(s => s != null).CopyTo(billist);
+            ServerManager.Instance.BazaarList.CopyTo(billist);
             try
             {
                 foreach (BazaarItemLink bz in billist)
@@ -371,7 +371,7 @@ namespace OpenNos.GameObject.Helpers
                             bzlink.Item?.GenerateEInfo() : bzlink.Item.Item.SpType == 0 && bzlink.Item.Item.ItemSubType == 4 ?
                             bzlink.Item?.GeneratePslInfo() : bzlink.Item?.GenerateSlInfo()).Replace(' ', '^').Replace("slinfo^", "").Replace("e_info^", "");
                     }
-                    itembazar += $"{bzlink.BazaarItem.BazaarItemId}|{bzlink.BazaarItem.SellerId}|{bzlink.Owner}|{bzlink.Item.Item.VNum}|{bzlink.Item.Amount}|{(bzlink.BazaarItem.IsPackage ? 1 : 0)}|{bzlink.BazaarItem.Price}|{time}|2|0|{bzlink.Item.Rare}|{bzlink.Item.Upgrade}|{bzlink.Item.RuneCount}|0|{info} ";
+                    itembazar += $"{bzlink.BazaarItem.BazaarItemId}|{bzlink.BazaarItem.SellerId}|{bzlink.Owner}|{bzlink.Item.Item.VNum}|{bzlink.Item.Amount}|{(bzlink.BazaarItem.IsPackage ? 1 : 0)}|{bzlink.BazaarItem.Price}|{time}|2|0|{bzlink.Item.Rare}|{bzlink.Item.Upgrade}|{bzlink.Item.RuneAmount}|0|{info} ";
                 }
 
                 return $"rc_blist {packet.Index} {itembazar} ";

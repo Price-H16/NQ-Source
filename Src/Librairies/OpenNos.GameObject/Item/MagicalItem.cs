@@ -155,20 +155,14 @@ namespace OpenNos.GameObject
 
                     break;
 
-                //respawn objects
                 case 1:
-                    if (session.Character.MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance ||
-                        session.Character.IsSeal)
+                    if (session.Character.MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance || session.Character.IsSeal)
                     {
-                        session.SendPacket(
-                            session.Character.GenerateSay(Language.Instance.GetMessageFromKey("CANT_USE_THAT"), 10));
+                        session.SendPacket(session.Character.GenerateSay(Language.Instance.GetMessageFromKey("CANT_USE_THAT"), 10));
                         return;
                     }
-
                     int type, secondaryType, inventoryType, slot;
-                    if (packetsplit?.Length > 6 && int.TryParse(packetsplit[2], out type) &&
-                        int.TryParse(packetsplit[3], out secondaryType) &&
-                        int.TryParse(packetsplit[4], out inventoryType) && int.TryParse(packetsplit[5], out slot))
+                    if (packetsplit?.Length > 6 && int.TryParse(packetsplit[2], out type) && int.TryParse(packetsplit[3], out secondaryType) && int.TryParse(packetsplit[4], out inventoryType) && int.TryParse(packetsplit[5], out slot))
                     {
                         int packetType;
                         switch (EffectValue)
@@ -282,11 +276,6 @@ namespace OpenNos.GameObject
                                             break;
 
                                         case 2:
-                                            if (DAOFactory.MapTypeMapDAO.GetMapTypeIdByMapId(session.CurrentMapInstance.Map.MapId) != DAOFactory.MapTypeMapDAO.GetMapTypeIdByMapId(respawn.DefaultMapId))
-                                            {
-                                                session.SendPacket(UserInterfaceHelper.GenerateInfo("You are not in the same act to go. Please, go to the same act."));
-                                                return;
-                                            }
                                             if (respawn.DefaultX != 0 && respawn.DefaultY != 0 && respawn.DefaultMapId != 0)
                                             {
                                                 ServerManager.Instance.ChangeMap(session.Character.CharacterId, respawn.DefaultMapId, respawn.DefaultX, respawn.DefaultY);

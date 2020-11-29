@@ -7389,11 +7389,7 @@ namespace OpenNos.GameObject
                     RespawnDTO resp = Respawns.Find(s => s.RespawnMapTypeId == respawnmaptype);
                     if (resp == null)
                     {
-                        resp = new RespawnDTO
-                        {
-                            CharacterId = CharacterId, MapId = mapId, X = mapX, Y = mapY,
-                            RespawnMapTypeId = (long) respawnmaptype
-                        };
+                        resp = new RespawnDTO { CharacterId = CharacterId, MapId = mapId, X = mapX, Y = mapY, RespawnMapTypeId = (long)respawnmaptype };
                         Respawns.Add(resp);
                     }
                     else
@@ -7409,7 +7405,7 @@ namespace OpenNos.GameObject
                 RespawnDTO resp = Respawns.Find(s => s.RespawnMapTypeId == 1);
                 if (resp == null)
                 {
-                    resp = new RespawnDTO {CharacterId = CharacterId, MapId = mapId, X = mapX, Y = mapY, RespawnMapTypeId = 1};
+                    resp = new RespawnDTO { CharacterId = CharacterId, MapId = mapId, X = mapX, Y = mapY, RespawnMapTypeId = 1 };
                     Respawns.Add(resp);
                 }
                 else

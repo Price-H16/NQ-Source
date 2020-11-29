@@ -1,4 +1,18 @@
-﻿using OpenNos.Core;
+﻿/*
+ * This file is part of the OpenNos Emulator Project. See AUTHORS file for Copyright information
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject.Helpers;
 using System;
@@ -7,13 +21,13 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using OpenNos.GameObject.Networking;
-using Autofac;
 
 namespace OpenNos.GameObject.Event
 {
     public static class InstantBattle
     {
         #region Methods
+        //EXaMPLE OF HOW IT IS DONE YOU WILL DO IT IN ALL DO IT IN ALL THE EVENTS
 
         public static void GenerateInstantBattle()
         {
@@ -127,10 +141,9 @@ namespace OpenNos.GameObject.Event
                             mapinstance.Item1.Broadcast(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("INSTANTBATTLE_SUCCEEDED"), 0));
                             foreach (ClientSession cli in mapinstance.Item1.Sessions.Where(s => s.Character != null).ToList())
                             {
-                                cli.Character.GenerateFamilyXp(cli.Character.Level * 15);
-                                cli.Character.GetReputation(cli.Character.Level * 100);
-                                cli.Character.Gold += cli.Character.Level * 10000;
-                                cli.Character.GiftAdd(2236, 1);
+                                cli.Character.GenerateFamilyXp(cli.Character.Level * 20);
+                                cli.Character.GetReputation(cli.Character.Level * 300);
+                                cli.Character.Gold += cli.Character.Level * 15000;
                                 cli.Character.Gold = cli.Character.Gold > maxGold ? maxGold : cli.Character.Gold;
                                 cli.Character.SpAdditionPoint += cli.Character.Level * 1000;
 
@@ -141,11 +154,11 @@ namespace OpenNos.GameObject.Event
 
                                 cli.SendPacket(cli.Character.GenerateSpPoint());
                                 cli.SendPacket(cli.Character.GenerateGold());
-                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 10000), 10));
-                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"), cli.Character.Level * 100), 10));
+                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 15000), 10));
+                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"), cli.Character.Level * 300), 10));
                                 if (cli.Character.Family != null)
                                 {
-                                    cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_FXP"), cli.Character.Level * 15), 10));
+                                    cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_FXP"), cli.Character.Level * 20), 10));
                                 }
                                 cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_SP_POINT"), cli.Character.Level * 1000), 10));
                             }

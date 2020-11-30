@@ -44,7 +44,9 @@ namespace OpenNos.Handler.PacketHandler.Basic
                             const int saver = 1211;
                             if (Session.Character.Inventory.CountItem(saver) < 1)
                             {
-                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("NOT_ENOUGH_SAVER"), 0));
+                                Session.SendPacket(
+                                    UserInterfaceHelper.GenerateMsg(
+                                        Language.Instance.GetMessageFromKey("NOT_ENOUGH_SAVER"), 0));
                                 ServerManager.Instance.ReviveFirstPosition(Session.Character.CharacterId);
                             }
                             else

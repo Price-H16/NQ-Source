@@ -131,7 +131,8 @@ namespace OpenNos.GameObject.Helpers
                             }
                             else
                             {
-                                ServerManager.Instance.StartedEvents?.Remove(type);
+                                ServerManager.Instance.StartedEvents.Remove(type);
+                                return;
                             }
                             break;
 

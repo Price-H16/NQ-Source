@@ -928,13 +928,9 @@ namespace OpenNos.GameObject.Networking
                             session.SendPacket(UserInterfaceHelper.GenerateDialog($"#revival^0 #revival^1 {Language.Instance.GetMessageFromKey("ASK_REVIVE_LOD")}"));
                             ReviveTask(session);
                         }
-                      
                         else
                         {
-                            
-                            session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("NOT_ENOUGH_SAVER"), 0));
-                            Observable.Timer(TimeSpan.FromSeconds(5)).Subscribe(o => Instance.ReviveFirstPosition(session.Character.CharacterId));
-
+                            Observable.Timer(TimeSpan.FromSeconds(10)).Subscribe(o => ServerManager.Instance.ReviveFirstPosition(session.Character.CharacterId));
                         }
                         break;
 
@@ -2827,23 +2823,32 @@ namespace OpenNos.GameObject.Networking
 
         public void SynchronizeSheduling()
         {
-            if (Schedules.FirstOrDefault(s => s.Event == EventType.TALENTARENA)?.Time is TimeSpan
-                    arenaOfTalentsTime
-                && IsTimeBetween(DateTime.Now, arenaOfTalentsTime,
-                    arenaOfTalentsTime.Add(new TimeSpan(4, 0, 0))))
+            if (Schedules.FirstOrDefault(s => s.Event == EventType.TALENTARENA)?.Time is TimeSpan arenaOfTalentsTime
+                && IsTimeBetween(DateTime.Now, arenaOfTalentsTime, arenaOfTalentsTime.Add(new TimeSpan(4, 0, 0))))
             {
                 EventHelper.GenerateEvent(EventType.TALENTARENA);
             }
-
             Schedules.Where(s => s.Event == EventType.LOD).ToList().ForEach(lodSchedule =>
             {
-                if (IsTimeBetween(DateTime.Now, lodSchedule.Time,
-                        lodSchedule.Time.Add(new TimeSpan(2, 0, 0))))
+                if (IsTimeBetween(DateTime.Now, lodSchedule.Time, lodSchedule.Time.Add(new TimeSpan(2, 0, 0))))
                 {
                     EventHelper.GenerateEvent(EventType.LOD);
                 }
             });
         }
+
+        //private void InitAllProperty()
+        //{
+        //    Act4RaidStart = DateTime.Now;
+        //    Act4AngelStat = new Act4Stat();
+        //    Act4DemonStat = new Act4Stat();
+        //    Act6AngelStat = new Act6Stat();
+        //    Act6DemonStat = new Act6Stat();
+        //    ChatLogs = new ThreadSafeGenericList<ChatLogDTO>();
+        //    CommandsLogs = new ThreadSafeGenericList<LogCommandsDTO>();
+        //    LastFCSent = DateTime.Now;
+        //    CharacterScreenSessions = new ThreadSafeSortedList<long, ClientSession>();
+        //}
 
         public void TeleportOnRandomPlaceInMap(ClientSession session, Guid guid)
         {

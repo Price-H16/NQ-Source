@@ -143,18 +143,22 @@ namespace OpenNos.GameObject.Event
                             {
                                 cli.Character.GenerateFamilyXp(cli.Character.Level * 20);
                                 cli.Character.GetReputation(cli.Character.Level * 300);
-                                cli.Character.Gold += cli.Character.Level * 15000;
+                                cli.Character.Gold += cli.Character.Level * 7500;
                                 cli.Character.Gold = cli.Character.Gold > maxGold ? maxGold : cli.Character.Gold;
                                 cli.Character.SpAdditionPoint += cli.Character.Level * 1000;
 
+                                if (cli.Character.Level >= 60)
+                                {
+                                    cli.Character.GiftAdd(2236, 1);
+                                }
                                 if (cli.Character.SpAdditionPoint > 1000000)
                                 {
                                     cli.Character.SpAdditionPoint = 1000000;
                                 }
-
+                                
                                 cli.SendPacket(cli.Character.GenerateSpPoint());
                                 cli.SendPacket(cli.Character.GenerateGold());
-                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 15000), 10));
+                                cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_MONEY"), cli.Character.Level * 7500), 10));
                                 cli.SendPacket(cli.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"), cli.Character.Level * 300), 10));
                                 if (cli.Character.Family != null)
                                 {
@@ -203,7 +207,6 @@ namespace OpenNos.GameObject.Event
                 return dropParameters;
             }
 
-            #region IC Drops
             private static List<Tuple<short, int, short, short>> getInstantBattleDrop(Map map, short instantbattletype, int wave)
             {
                 List<Tuple<short, int, short, short>> dropParameters = new List<Tuple<short, int, short, short>>();
@@ -525,10 +528,6 @@ namespace OpenNos.GameObject.Event
                 return dropParameters;
             }
 
-            #endregion IC Drops
-
-
-            #region IC Monsters
             private static List<MonsterToSummon> getInstantBattleMonster(Map map, short instantbattletype, int wave)
             {
                 List<MonsterToSummon> SummonParameters = new List<MonsterToSummon>();
@@ -818,9 +817,9 @@ namespace OpenNos.GameObject.Event
                 return SummonParameters;
             }
 
-            #endregion IC Monsters
+            #endregion
         }
+
         #endregion
     }
 }
-#endregion

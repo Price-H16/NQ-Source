@@ -3,6 +3,7 @@ using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Helpers;
+using System.Linq;
 
 namespace OpenNos.Handler.PacketHandler.Inventory
 {
@@ -35,6 +36,14 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
             if (mviPacket != null)
             {
+                if (mviPacket.Amount <= 0 || mviPacket.InventoryType == InventoryType.Bazaar || mviPacket.InventoryType == InventoryType.Wear || mviPacket.InventoryType == InventoryType.FamilyWareHouse ||mviPacket.InventoryType == InventoryType.Warehouse ||mviPacket.Slot == mviPacket.DestinationSlot)
+                {
+                    return;
+                }
+                if (mviPacket.InventoryType >= (InventoryType)13 && mviPacket.InventoryType <= (InventoryType)24 && Session.Character.Mates.Count(s => s.MateType == MateType.Partner) < (byte)(mviPacket.InventoryType - 12))
+                {
+                    return;
+                }
                 if (mviPacket.InventoryType != InventoryType.Equipment && mviPacket.InventoryType != InventoryType.Main && mviPacket.InventoryType != InventoryType.Etc && mviPacket.InventoryType != InventoryType.Miniland)
                 {
                     return;

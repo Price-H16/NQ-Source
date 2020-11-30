@@ -79,7 +79,7 @@ namespace NosTale.Configuration
 
         public MaxConfiguration Max { get; set; } = new MaxConfiguration
         {
-            HeroicStartLevel = 88,
+            HeroicStartLevel = 85,
             MaxGold = int.MaxValue,
             MaxGoldBank = 100000000000,
             MaxHeroLevel = 60,

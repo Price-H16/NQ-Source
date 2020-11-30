@@ -34,7 +34,10 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
         public void BuyBazaar(CBuyPacket cBuyPacket) //Multiple dupes
         {
-            if (Session == null || Session.Character == null) return;
+            if (Session == null || Session.Character == null)
+            {
+                return;
+            }
 
             if (Session.Character == null || Session.Character.InExchangeOrTrade)
             {
@@ -55,17 +58,10 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (ServerManager.Instance.InShutdown)
-            {
-                return;
-
-            }
-
             if (Session.Character.InExchangeOrTrade || Session.Character.HasShopOpened)
             {
                 return;
             }
-
 
             if (Session.Character.IsMuted())
             {
@@ -125,16 +121,25 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                                     0));
                             return;
                         }
-                        
-                        if (Session.Character.LastBazaarBuy.AddSeconds(5) > DateTime.Now) return;
+
+                        if (Session.Character.LastBazaarInsert.AddSeconds(5) > DateTime.Now)
+                        {
+                            return;
+                        }
 
                         if (bzcree.Item != null)
                         {
-                            if (bz.IsPackage && cBuyPacket.Amount != bz.Amount) return;
+                            if (bz.IsPackage && cBuyPacket.Amount != bz.Amount)
+                            {
+                                return;
+                            }
 
-                            var bzitemdto =
-                                DAOFactory.ItemInstanceDAO.LoadById(bzcree.BazaarItem.ItemInstanceId);
-                            if (bzitemdto.Amount < cBuyPacket.Amount) return;
+                            var bzitemdto = DAOFactory.ItemInstanceDAO.LoadById(bzcree.BazaarItem.ItemInstanceId);
+
+                            if (bzitemdto.Amount < cBuyPacket.Amount)
+                            {
+                                return;
+                            }
 
                             // Edit this soo we dont generate new guid every single time we take
                             // something out.
@@ -172,6 +177,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                                 
                                 Logger.LogUserEvent("BAZAAR_BUY", Session.GenerateIdentity(),
                                     $"BazaarId: {cBuyPacket.BazaarId} VNum: {cBuyPacket.VNum} Amount: {cBuyPacket.Amount} Price: {cBuyPacket.Price}");
+                                Logger.LogUserEvent("BAZAAR_BUY_PACKET", Session.GenerateIdentity(), $"Packet string: {cBuyPacket.OriginalContent.ToString()}");
                             }
                         }
                     }

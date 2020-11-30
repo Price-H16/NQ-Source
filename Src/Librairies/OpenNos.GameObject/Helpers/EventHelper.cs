@@ -92,33 +92,6 @@ namespace OpenNos.GameObject.Helpers
                     ServerManager.Instance.StartedEvents.Add(type);
                     switch (type)
                     {
-                        case EventType.XPRATE:
-                            ServerManager.Shout($"XPRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateXP}");
-                            ServerManager.Instance.Configuration.RateXP = value;
-                            break;
-
-                        case EventType.DROPRATE:
-                            ServerManager.Shout($"DRORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateDrop}");
-                            ServerManager.Instance.Configuration.RateDrop = value;
-                            break;
-
-                        case EventType.FAIRYRATE:
-                            ServerManager.Shout($"FAIRYRATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateFairyXP}");
-                            ServerManager.Instance.Configuration.RateFairyXP = value;
-                            break;
-
-                        case EventType.HERORATE:
-                            ServerManager.Shout($"HERORATE changed to: {value} currently: {ServerManager.Instance.Configuration.RateHeroicXP}");
-                            ServerManager.Instance.Configuration.RateHeroicXP = value;
-                            break;
-
-                        case EventType.RESETRATE:
-                            ServerManager.Instance.Configuration.RateXP = a.Rate.RateXP;
-                            ServerManager.Instance.Configuration.RateDrop = a.Rate.RateDrop;
-                            ServerManager.Instance.Configuration.RateFairyXP = a.Rate.RateFairyXP;
-                            ServerManager.Instance.Configuration.RateHeroicXP = a.Rate.RateHeroicXP;
-                            break;
-
                         case EventType.RANKINGREFRESH:
                             ServerManager.Instance.RefreshRanking();
                             ServerManager.Instance.StartedEvents?.Remove(type);

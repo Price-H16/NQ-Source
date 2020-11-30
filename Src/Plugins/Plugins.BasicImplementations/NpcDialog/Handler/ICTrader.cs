@@ -19,12 +19,12 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
                 {
                     Session.SendPacket($"qna #n_run^{packet.Runner}^56^{packet.Value}^{packet.NpcId} {Language.Instance.GetMessageFromKey("ASK_TRADE")}");
                 }
-                else if (Session.Character.Inventory.CountItem(2236) >= 1)
+                else if (Session.Character.Inventory.CountItem(2236) >= 4)
                 {
                     Session.Character.DisposeShopAndExchange();
                     Session.SendPacket(Session.Character.GenerateCond());
                     Session.Character.GiftAdd(4240, 1);
-                    Session.Character.Inventory.RemoveItemAmount(2236, 1);
+                    Session.Character.Inventory.RemoveItemAmount(2236, 4);
                 }
                 else
                 {

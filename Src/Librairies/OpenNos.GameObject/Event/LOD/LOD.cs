@@ -1,9 +1,21 @@
-﻿using OpenNos.Core;
+﻿/*
+ * This file is part of the OpenNos Emulator Project. See AUTHORS file for Copyright information
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+using OpenNos.Core;
 using OpenNos.Domain;
 using OpenNos.GameObject.Helpers;
 using OpenNos.GameObject.Networking;
-using OpenNos.Master.Library.Client;
-using OpenNos.Master.Library.Data;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -17,8 +29,14 @@ namespace OpenNos.GameObject.Event
 
         public static void GenerateLod()
         {
+            const int LOD_TIME = 120;
+            const int HORN_TIME = 70;
+            const int HORN_STAY_TIME = 1;
+            const int HORN_RESPAWN_TIME = 4;
+
             EventHelper.Instance.RunEvent(new EventContainer(ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(98)), EventActionType.NPCSEFFECTCHANGESTATE, true));
             LODThread lodThread = new LODThread();
+            Observable.Timer(TimeSpan.FromMinutes(0)).Subscribe(s => lodThread.Run(LOD_TIME * 60, (HORN_TIME + 1) * 60, (HORN_RESPAWN_TIME + HORN_STAY_TIME) * 60, HORN_STAY_TIME * 60));
         }
 
         #endregion
@@ -36,11 +54,9 @@ namespace OpenNos.GameObject.Event
 
         public void Run(int lodTime, int hornTime, int hornRespawn, int hornStay)
         {
-#pragma warning disable 4014
-            DiscordWebhookHelper.DiscordEventT($"ServerEvent: Land Of Death has been opened!");
             ChangePortalEffect(855);
 
-            const int interval = 60;
+            const int interval = 30;
             int dhspawns = 0;
 
             while (lodTime > 0)
@@ -53,8 +69,8 @@ namespace OpenNos.GameObject.Event
                     {
                         if (fam.LandOfDeath != null)
                         {
-                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEXPRATE, 4));
-                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEDROPRATE, 2));
+                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEXPRATE, 6));
+                            EventHelper.Instance.RunEvent(new EventContainer(fam.LandOfDeath, EventActionType.CHANGEDROPRATE, 3));
                             spawnDH(fam.LandOfDeath);
                         }
                     }

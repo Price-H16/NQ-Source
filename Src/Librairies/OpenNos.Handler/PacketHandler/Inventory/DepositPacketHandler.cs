@@ -112,6 +112,8 @@ namespace OpenNos.Handler.PacketHandler.Inventory
             // actually move the item from source to destination
             Session.Character.Inventory.MoveItem(depositPacket.Inventory, InventoryType.Warehouse, depositPacket.Slot,
                 depositPacket.Amount, depositPacket.NewSlot, out originalItem, out anotherItem);
+            Logger.LogUserEvent("STASH_DEPOSIT", Session.GenerateIdentity(),$"[Deposit]OldIIId: {item?.Id} NewIIId: {itemdest?.Id} Amount: {depositPacket.Amount} PartnerBackpack: {depositPacket.PartnerBackpack}");
+            Logger.LogUserEvent("WAREHOUSE_DEPOSIT_LOG_PACKET", Session.GenerateIdentity(), $"Packet string: {depositPacket.OriginalContent.ToString()}");
 
             if (anotherItem == null)
             {

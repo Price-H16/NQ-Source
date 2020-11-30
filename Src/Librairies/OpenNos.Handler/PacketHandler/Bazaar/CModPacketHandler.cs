@@ -58,15 +58,27 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
             var bz = DAOFactory.BazaarItemDAO.LoadById(cModPacket.BazaarId);
             if (bz != null)
             {
-                if (bz.SellerId != Session.Character.CharacterId) return;
+                if (bz.SellerId != Session.Character.CharacterId)
+                {
+                    return;
+                }
 
                 var itemInstance = new ItemInstance(DAOFactory.ItemInstanceDAO.LoadById(bz.ItemInstanceId));
-                if (itemInstance == null || bz.Amount != itemInstance.Amount) return;
 
-                if ((bz.DateStart.AddHours(bz.Duration).AddDays(bz.MedalUsed ? 30 : 7) - DateTime.Now).TotalMinutes <=
-                    0) return;
+                if (itemInstance == null || bz.Amount != itemInstance.Amount)
+                {
+                    return;
+                }
 
-                if (cModPacket.Price <= 0) return;
+                if ((bz.DateStart.AddHours(bz.Duration).AddDays(bz.MedalUsed ? 30 : 7) - DateTime.Now).TotalMinutes <= 0)
+                {
+                    return;
+                }
+
+                if (cModPacket.Price <= 0)
+                {
+                    return;
+                }
 
                 var medal = Session.Character.StaticBonusList.Find(s =>
                     s.StaticBonusType == StaticBonusType.BazaarMedalGold
@@ -92,6 +104,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
                 Logger.LogUserEvent("BAZAAR_MOD", Session.GenerateIdentity(),
                     $"BazaarId: {bz.BazaarItemId}, IIId: {bz.ItemInstanceId} VNum: {itemInstance.ItemVNum} Amount: {bz.Amount} Price: {bz.Price} Time: {bz.Duration}");
+                Logger.LogUserEvent("BAZAAR_BUY_PACKET", Session.GenerateIdentity(), $"Packet string: {cModPacket.OriginalContent.ToString()}");
 
                 new CSListPacketHandler(Session).RefreshPersonalBazarList(new CSListPacket());
 

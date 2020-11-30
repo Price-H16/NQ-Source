@@ -30,18 +30,19 @@ namespace Plugins.BasicImplementations.NpcDialog.Handler
                     Session.Character.Family.LandOfDeath = ServerManager.GenerateMapInstance(150, MapInstanceType.LodInstance, new InstanceBag());
                 }
 
-                if (Session.Character.Level < 55)
+                if (Session.Character.Level >= 55)
+                {
+                    ServerManager.Instance.ChangeMapInstance(Session.Character.CharacterId, Session.Character.Family.LandOfDeath.MapInstanceId, 153, 145);
+                }
+                else
                 {
                     Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("LOD_REQUIERE_LVL"), 0));
-                    return;
                 }
 
                 if (Session.Character?.Family?.LandOfDeath != null)
                 {
                     ServerManager.Instance.ChangeMapInstance(Session.Character.CharacterId, Session.Character.Family.LandOfDeath.MapInstanceId, 153, 145);
-                }
-
-                
+                }            
 
             }
             

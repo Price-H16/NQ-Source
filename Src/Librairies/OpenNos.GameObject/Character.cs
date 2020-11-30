@@ -4393,7 +4393,7 @@ namespace OpenNos.GameObject
             return "";
         }
 
-        public string GenerateSayTime() => $"say 1 {CharacterId} 20 Info: {DateTime.Now.Hour:00}:{DateTime.Now.Minute:00} Channel: {Channel.ChannelId} Current Speed: {Speed}";
+        public string GenerateSayTime() => $"say 1 {CharacterId} 20  Date: {DateTime.Now.Day:00}/{DateTime.Now.Month:00}/{DateTime.Now.Year:00} - Hour: {DateTime.Now.Hour:00}:{DateTime.Now.Minute:00} Channel: {Channel.ChannelId}";
 
         public string GenerateScal() => $"char_sc 1 {CharacterId} {Size}";
 

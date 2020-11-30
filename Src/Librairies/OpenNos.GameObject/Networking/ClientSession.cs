@@ -74,6 +74,7 @@ namespace OpenNos.GameObject
         private long _lastPacketReceive;
 
         private int? _waitForPacketsAmount;
+        public DateTime LastCharacterCreate { get; set; } = DateTime.Now.AddSeconds(-50);
 
         #endregion
 

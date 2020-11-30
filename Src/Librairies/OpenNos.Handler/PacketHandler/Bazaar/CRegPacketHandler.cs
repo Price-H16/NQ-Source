@@ -75,9 +75,10 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
                 return;
             }
 
-            if (cRegPacket.Inventory < 0 || cRegPacket.Inventory >= 9)
+            if (cRegPacket.Inventory < 0 || cRegPacket.Inventory > 4 || cRegPacket.Inventory == 3 || cRegPacket.Taxes < 1 || cRegPacket.Taxes > 2000000000 || cRegPacket.Price < 1 || cRegPacket.Price > 2000000000 || cRegPacket.Durability > 4 || cRegPacket.Durability < 1)
             {
-                Logger.Info($"{Session.Character.Name} tried to dupe via bazar");
+                Session.SendPacket("msg 4 You will be kicked now");
+                Session.SendPacket(UserInterfaceHelper.GenerateMsg(("Really you dupe man?"), 0));
                 ServerManager.Instance.Kick(Session.Character.Name);
                 Logger.LogUserEvent("BAZAAR_CHEAT_TRY", Session.GenerateIdentity(), $"Packet string: {cRegPacket.OriginalContent.ToString()}");
                 return;
@@ -218,6 +219,7 @@ namespace OpenNos.Handler.PacketHandler.Bazaar
 
             Logger.LogUserEvent("BAZAAR_INSERT", Session.GenerateIdentity(),
                 $"BazaarId: {bazaarItem.BazaarItemId}, IIId: {bazaarItem.ItemInstanceId} VNum: {bazaar.ItemVNum} Amount: {cRegPacket.Amount} Price: {cRegPacket.Price} Time: {duration}");
+            Logger.LogUserEvent("BAZAAR_INSERT_PACKET", Session.GenerateIdentity(), $"Packet string: {cRegPacket.OriginalContent.ToString()}");
 
             Session.SendPacket("rc_reg 1");
         }

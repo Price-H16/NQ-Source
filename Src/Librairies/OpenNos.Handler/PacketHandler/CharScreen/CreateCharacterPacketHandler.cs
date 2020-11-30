@@ -2,6 +2,7 @@
 using NosTale.Packets.Packets.ClientPackets;
 using OpenNos.Core;
 using OpenNos.GameObject;
+using System;
 
 namespace OpenNos.Handler.BasicPacket.CharScreen
 {
@@ -39,6 +40,8 @@ namespace OpenNos.Handler.BasicPacket.CharScreen
 
             new EntryPointPacketHandler(Session).LoadCharacters(new OpenNosEntryPointPacket
                 {PacketData = characterCreatePacket.OriginalContent});
+
+            Session.LastCharacterCreate = DateTime.Now;
         }
 
         #endregion

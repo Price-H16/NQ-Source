@@ -285,6 +285,7 @@
     <Compile Include="PacketHandler\Family\UseFamilySkill.cs" />
     <Compile Include="PacketHandler\Family\JoinFamilyPacketHandler.cs" />
     <Compile Include="PacketHandler\Family\TodayPacketHandler.cs" />
+    <Compile Include="PacketHandler\Inventory\CloseExchangePacketHandler.cs" />
     <Compile Include="PacketHandler\Inventory\BIPacketHandler.cs" />
     <Compile Include="PacketHandler\Inventory\DepositPacketHandler.cs" />
     <Compile Include="PacketHandler\Inventory\EquipmentInfoPacketHandler.cs" />

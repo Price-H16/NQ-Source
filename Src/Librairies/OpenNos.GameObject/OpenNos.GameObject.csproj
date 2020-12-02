@@ -95,10 +95,11 @@
     <Compile Include="Event\ICEBREAKER\IceBreaker.cs" />
     <Compile Include="Event\PARTY TIMESPACE\PartyTimespace.cs" />
     <Compile Include="Event\RAINBOWBATTLE\RAINBOWBATTLE.cs" />
-    <Compile Include="Event\RTR\RoundToRound.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArena.cs" />
     <Compile Include="Event\TALENTARENA %28Unused%29\TalentArenaBattle.cs" />
-    <Compile Include="Event\WORLDBOSS\WorldBoss.cs" />
+    <Compile Include="Event\WORLDBOSS\GrasslinBoss.cs" />
+    <Compile Include="Event\WORLDBOSS\FafnirBoss.cs" />
+    <Compile Include="Event\WORLDBOSS\YertirandBoss.cs" />
     <Compile Include="Extension\BattleExtension.cs" />
     <Compile Include="Extension\CharacterExtension.cs" />
     <Compile Include="Extension\ExtraExtension.cs" />

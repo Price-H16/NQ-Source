@@ -48,8 +48,7 @@ namespace NosTale.Extension.Extension.Packet
             {
                 var item2 = item.DeepCopy();
                 item2.Id = Guid.NewGuid();
-                data +=
-                    $"[OldIIId: {item.Id} NewIIId: {item2.Id} ItemVNum: {item.ItemVNum} Amount: {item.Amount} Rare: {item.Rare} Upgrade: {item.Upgrade}]";
+                data += $"[OldIIId: {item.Id} NewIIId: {item2.Id} ItemVNum: {item.ItemVNum} Amount: {item.Amount} Rare: {item.Rare} Upgrade: {item.Upgrade}]";
                 var inv = targetSession.Character.Inventory.AddToInventory(item2);
                 if (inv.Count == 0)
                 {
@@ -62,16 +61,15 @@ namespace NosTale.Extension.Extension.Packet
 
             // handle gold
             sourceSession.Character.Gold -= sourceSession.Character.ExchangeInfo.Gold;
-            sourceSession.Account.GoldBank -= sourceSession.Character.ExchangeInfo.BankGold;
+            sourceSession.Account.BankMoney -= sourceSession.Character.ExchangeInfo.BankGold;
             sourceSession.SendPacket(sourceSession.Character.GenerateGold());
             targetSession.Character.Gold += sourceSession.Character.ExchangeInfo.Gold;
-            targetSession.Account.GoldBank += sourceSession.Character.ExchangeInfo.BankGold;
+            targetSession.Account.BankMoney += sourceSession.Character.ExchangeInfo.BankGold;
             targetSession.SendPacket(targetSession.Character.GenerateGold());
 
             // all items and gold from sourceSession have been transferred, clean exchange info
 
-            Logger.LogUserEvent("TRADE_COMPLETE", sourceSession.GenerateIdentity(),
-                $"[{targetSession.GenerateIdentity()}]Data: {data}");
+            Logger.LogUserEvent("TRADE_COMPLETE", sourceSession.GenerateIdentity(), $"[{targetSession.GenerateIdentity()}]Data: {data}");
 
             sourceSession.Character.ExchangeInfo = null;
         }
@@ -127,12 +125,8 @@ namespace NosTale.Extension.Extension.Packet
                 Session.Character.MorphUpgrade2 = sp.Design;
                 Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateCMode());
                 Session.SendPacket(Session.Character.GenerateLev());
-                Session.CurrentMapInstance?.Broadcast(
-                    StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId, 196),
-                    Session.Character.PositionX, Session.Character.PositionY);
-                Session.CurrentMapInstance?.Broadcast(
-                    UserInterfaceHelper.GenerateGuri(6, 1, Session.Character.CharacterId), Session.Character.PositionX,
-                    Session.Character.PositionY);
+                Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId, 196), Session.Character.PositionX, Session.Character.PositionY);
+                Session.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateGuri(6, 1, Session.Character.CharacterId), Session.Character.PositionX, Session.Character.PositionY);
                 Session.SendPacket(Session.Character.GenerateSpPoint());
                 Session.Character.LoadSpeed();
                 Session.SendPacket(Session.Character.GenerateCond());
@@ -140,8 +134,7 @@ namespace NosTale.Extension.Extension.Packet
                 Session.SendPackets(Session.Character.GenerateStatChar());
                 Session.Character.SkillsSp = new ThreadSafeSortedList<int, CharacterSkill>();
                 foreach (var skill in ServerManager.GetAllSkill())
-                    if (skill.UpgradeType == sp.Item.Morph && skill.SkillType == (byte) SkillType.CharacterSKill &&
-                        sp.SpLevel >= skill.LevelMinimum)
+                    if (skill.UpgradeType == sp.Item.Morph && skill.SkillType == (byte) SkillType.CharacterSKill && sp.SpLevel >= skill.LevelMinimum)
                         Session.Character.SkillsSp[skill.SkillVNum] = new CharacterSkill
                         {
                             SkillVNum = skill.SkillVNum,

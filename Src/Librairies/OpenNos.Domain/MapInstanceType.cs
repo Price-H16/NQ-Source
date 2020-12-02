@@ -28,7 +28,8 @@
         Act7Ship = 32,
         SealedVesselsMap = 33,
         TowerInstanceType,
-        WorldBossInstance,
-        YertirandBossInstance
+        FafnirBossInstance,
+        YertirandBossInstance,
+        GrasslinBossInstance
     }
 }

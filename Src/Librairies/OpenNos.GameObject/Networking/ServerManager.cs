@@ -151,6 +151,8 @@ namespace OpenNos.GameObject.Networking
 
         public bool InBazaarRefreshMode { get; set; }
 
+        public long MaxBankGold { get; set; }
+
         public bool IsReboot { get; set; }
 
         public bool IsWorldServer => WorldId != Guid.Empty;

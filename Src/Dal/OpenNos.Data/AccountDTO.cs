@@ -24,7 +24,7 @@ namespace OpenNos.Data
 
         public string VerificationToken { get; set; }
 
-        public long GoldBank { get; set; }
+        public long BankMoney { get; set; }
 
         #endregion
     }

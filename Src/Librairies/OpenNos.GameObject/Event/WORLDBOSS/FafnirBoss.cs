@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace OpenNos.GameObject.Event.WORLDBOSS
 {
 
-    public static class WorldBoss
+    public static class FafnirRad
     {
         #region Properties
 
@@ -39,14 +39,14 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
 
         public static void Run()
         {
-            WolrdBoss raidThread = new WolrdBoss();
+            FafnirBoss raidThread = new FafnirBoss();
             Observable.Timer(TimeSpan.FromMinutes(0)).Subscribe(X => raidThread.Run());
         }
 
         #endregion
     }
 
-    public class WolrdBoss
+    public class FafnirBoss
     {
         #region Methods
 
@@ -57,45 +57,45 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
                 DestinationCharacterId = null,
                 SourceCharacterId = 0,
                 SourceWorldId = ServerManager.Instance.WorldId,
-                Message = "The fearsome boss Fafnir has appeared in Nosville, get his precious treasure!",
+                Message = "The Dark Dragon [Fafnir] has stormed into Nosville, let’s protect this beautiful city together!",
                 Type = MessageType.Shout
             });
 
-            WorldBoss.RemainingTime = 3600;
+            FafnirRad.RemainingTime = 3600;
             const int interval = 1;
 
-            WorldBoss.WorldMapinstance = ServerManager.GenerateMapInstance(2610, MapInstanceType.WorldBossInstance, new InstanceBag());
-            WorldBoss.UnknownLandMapInstance = ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(1));
+            FafnirRad.WorldMapinstance = ServerManager.GenerateMapInstance(2610, MapInstanceType.FafnirBossInstance, new InstanceBag());
+            FafnirRad.UnknownLandMapInstance = ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(1));
 
 
 
-            WorldBoss.WorldMapinstance.CreatePortal(new Portal
+            FafnirRad.WorldMapinstance.CreatePortal(new Portal
             {
-                SourceMapInstanceId = WorldBoss.WorldMapinstance.MapInstanceId,
+                SourceMapInstanceId = FafnirRad.WorldMapinstance.MapInstanceId,
                 SourceX = 103,
                 SourceY = 82,
                 DestinationMapId = 0,
                 DestinationX = 79,
-                DestinationY = 104,
-                DestinationMapInstanceId = WorldBoss.UnknownLandMapInstance.MapInstanceId,
+                DestinationY = 125,
+                DestinationMapInstanceId = FafnirRad.UnknownLandMapInstance.MapInstanceId,
                 Type = 6
             });
 
-            WorldBoss.UnknownLandMapInstance.CreatePortal(new Portal
+            FafnirRad.UnknownLandMapInstance.CreatePortal(new Portal
             {
                 SourceMapId = 1,
                 SourceX = 79,
-                SourceY = 104,
+                SourceY = 125,
                 DestinationMapId = 0,
                 DestinationX = 103,
                 DestinationY = 82,
-                DestinationMapInstanceId = WorldBoss.WorldMapinstance.MapInstanceId,
+                DestinationMapInstanceId = FafnirRad.WorldMapinstance.MapInstanceId,
                 Type = 6
             });
 
             List<EventContainer> onDeathEvents = new List<EventContainer>
             {
-               new EventContainer(WorldBoss.WorldMapinstance, EventActionType.SCRIPTEND, (byte)1)
+               new EventContainer(FafnirRad.WorldMapinstance, EventActionType.SCRIPTEND, (byte)1)
             };
 
             #region Fafnir
@@ -105,15 +105,15 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
                 MonsterVNum = 2619,
                 MapY = 71,
                 MapX = 87,
-                MapId = WorldBoss.WorldMapinstance.Map.MapId,
+                MapId = FafnirRad.WorldMapinstance.Map.MapId,
                 Position = 2,
                 IsMoving = true,
-                MapMonsterId = WorldBoss.WorldMapinstance.GetNextMonsterId(),
+                MapMonsterId = FafnirRad.WorldMapinstance.GetNextMonsterId(),
                 ShouldRespawn = false
             };
-            FafnirMonster.Initialize(WorldBoss.WorldMapinstance);
-            WorldBoss.WorldMapinstance.AddMonster(FafnirMonster);
-            MapMonster Fafnir = WorldBoss.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 2619);
+            FafnirMonster.Initialize(FafnirRad.WorldMapinstance);
+            FafnirRad.WorldMapinstance.AddMonster(FafnirMonster);
+            MapMonster Fafnir = FafnirRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 2619);
             if (Fafnir != null)
             {
                 Fafnir.BattleEntity.OnDeathEvents = onDeathEvents;
@@ -140,15 +140,15 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
             {
                 ServerManager.Shout(Language.Instance.GetMessageFromKey("WORDLBOSS_END"), true);
 
-                foreach (ClientSession sess in WorldBoss.WorldMapinstance.Sessions.ToList())
+                foreach (ClientSession sess in FafnirRad.WorldMapinstance.Sessions.ToList())
                 {
-                    ServerManager.Instance.ChangeMapInstance(sess.Character.CharacterId, WorldBoss.UnknownLandMapInstance.MapInstanceId, sess.Character.MapX, sess.Character.MapY);
+                    ServerManager.Instance.ChangeMapInstance(sess.Character.CharacterId, FafnirRad.UnknownLandMapInstance.MapInstanceId, sess.Character.MapX, sess.Character.MapY);
                     Thread.Sleep(100);
                 }
-                WorldBoss.IsRunning = false;
-                WorldBoss.AngelDamage = 0;
-                WorldBoss.DemonDamage = 0;
-                ServerManager.Instance.StartedEvents.Remove(EventType.WORLDBOSS);
+                FafnirRad.IsRunning = false;
+                FafnirRad.AngelDamage = 0;
+                FafnirRad.DemonDamage = 0;
+                ServerManager.Instance.StartedEvents.Remove(EventType.FAFNIRBOSS);
             }
             catch (Exception ex)
             {
@@ -159,13 +159,13 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
 
         private void LockRaid()
         {
-            foreach (Portal p in WorldBoss.UnknownLandMapInstance.Portals.Where(s => s.DestinationMapInstanceId == WorldBoss.WorldMapinstance.MapInstanceId).ToList())
+            foreach (Portal p in FafnirRad.UnknownLandMapInstance.Portals.Where(s => s.DestinationMapInstanceId == FafnirRad.WorldMapinstance.MapInstanceId).ToList())
             {
-                WorldBoss.UnknownLandMapInstance.Portals.Remove(p);
-                WorldBoss.UnknownLandMapInstance.Broadcast(p.GenerateGp());
+                FafnirRad.UnknownLandMapInstance.Portals.Remove(p);
+                FafnirRad.UnknownLandMapInstance.Broadcast(p.GenerateGp());
             }
-            ServerManager.Shout(Language.Instance.GetMessageFromKey("WORLDBOSS_LOCKED"), true);
-            WorldBoss.IsLocked = true;
+            ServerManager.Shout("Fafnir Boss actually is closed.", true);
+            FafnirRad.IsLocked = true;
         }
 
         #endregion

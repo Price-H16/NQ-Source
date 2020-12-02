@@ -812,13 +812,13 @@
     <value>You joined {0}'s group!</value>
   </data>
   <data name="BN7" xml:space="preserve">
-    <value>Visit^our^website:^</value>
+    <value>It^is^necessary^to^report^any^errors^to^correct^them.</value>
   </data>
   <data name="BN8" xml:space="preserve">
-    <value>Join^in^our^discord:^https://discord.gg/MVAac6</value>
+    <value>Our^server^is^committed^to^making^a^nice^and^stable^server.</value>
   </data>
   <data name="BN9" xml:space="preserve">
-    <value>BN9</value>
+    <value>Donations^are^used^to^improve^the^server^every^day,^thanks^for^your^input.</value>
   </data>
   <data name="NO_WIG" xml:space="preserve">
     <value>You aren't wearing the afro wig.</value>
@@ -980,7 +980,7 @@
     <value>Packet with Header {0} is corrupt or PacketDefinition is invalid. Content: {1}</value>
   </data>
   <data name="BOT_MESSAGE_0" xml:space="preserve">
-    <value>BOT_MESSAGE_0</value>
+    <value>Recommend NosQuest for your friends, let’s always be more!</value>
   </data>
   <data name="BOT_MESSAGE_1" xml:space="preserve">
     <value>If you like NosQuest you may consider to support us!</value>
@@ -2481,5 +2481,11 @@
   </data>
   <data name="YOUR_LOCK_CODE_IS" xml:space="preserve">
     <value>Your lock code is</value>
+  </data>
+  <data name="WORDLBOSS_END" xml:space="preserve">
+    <value>Worldboss actually is closed.</value>
+  </data>
+  <data name="WORLDBOSS_LOCKED" xml:space="preserve">
+    <value>Boss Fafnir has vanished, still making you stronger for possible attacks on Nosville.</value>
   </data>
 </root>

@@ -1006,7 +1006,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Visit^our^website:^.
+        ///   Looks up a localized string similar to It^is^necessary^to^report^any^errors^to^correct^them..
         /// </summary>
         internal static string BN7 {
             get {
@@ -1015,7 +1015,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join^in^our^discord:^https://discord.gg/MVAac6.
+        ///   Looks up a localized string similar to Our^server^is^committed^to^making^a^nice^and^stable^server..
         /// </summary>
         internal static string BN8 {
             get {
@@ -1024,7 +1024,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BN9.
+        ///   Looks up a localized string similar to Donations^are^used^to^improve^the^server^every^day,^thanks^for^your^input..
         /// </summary>
         internal static string BN9 {
             get {
@@ -1051,7 +1051,7 @@ namespace OpenNos.World.Resource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BOT_MESSAGE_0.
+        ///   Looks up a localized string similar to Recommend NosQuest for your friends, let’s always be more!.
         /// </summary>
         internal static string BOT_MESSAGE_0 {
             get {
@@ -7050,6 +7050,24 @@ namespace OpenNos.World.Resource {
         internal static string WITHDRAW_BANK {
             get {
                 return ResourceManager.GetString("WITHDRAW_BANK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Worldboss actually is closed..
+        /// </summary>
+        internal static string WORDLBOSS_END {
+            get {
+                return ResourceManager.GetString("WORDLBOSS_END", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Boss Fafnir has vanished, still making you stronger for possible attacks on Nosville..
+        /// </summary>
+        internal static string WORLDBOSS_LOCKED {
+            get {
+                return ResourceManager.GetString("WORLDBOSS_LOCKED", resourceCulture);
             }
         }
         

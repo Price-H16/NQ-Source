@@ -3219,8 +3219,6 @@ namespace OpenNos.GameObject
 
         public string GenerateFtPtPacket() => $"ftpt {UltimatePoints} 3000";
 
-        public string GenerateGb(byte type) => $"gb {type} {Session.Account.GoldBank / 1000} {Gold} 0 0";
-
         public string GenerateGender() => $"p_sex {(byte) Gender}";
 
         public string GenerateGExp()
@@ -3275,9 +3273,7 @@ namespace OpenNos.GameObject
             return "";
         }
 
-        //public string GenerateAscr() => $"ascr {ArenaKill} {ArenaDeath} 0 {CurrentArenaKill} {CurrentArenaDeath} 0 0 0 0 0";
-
-        public string GenerateGold() => $"gold {Gold} {Session.Account.GoldBank / 1000}";
+        public string GenerateGold() => $"gold {Gold} 0";
 
         public string GenerateIcon(int type, int value, short itemVNum) => $"icon {type} {CharacterId} {value} {itemVNum}";
 
@@ -3351,6 +3347,10 @@ namespace OpenNos.GameObject
         }
 
         public string GenerateInvisible() => $"cl {CharacterId} {(Invisible ? 1 : 0)} {(InvisibleGm ? 1 : 0)}";
+
+        public string GenerateSmemo(string message, byte type) => $"s_memo {type} {message}";
+
+        public string GenerateGB(byte type) => $"gb {type} {Session.Character.GoldBank / 1000} {Gold} 0 0";
 
         public void GenerateKillBonus(MapMonster monsterToAttack, BattleEntity Killer)
         {

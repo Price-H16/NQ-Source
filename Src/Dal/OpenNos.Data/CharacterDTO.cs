@@ -157,6 +157,8 @@ namespace OpenNos.Data
         public int BattleTowerExp { get; set; }
 
         public byte BattleTowerStage { get; set; }
+
+        public long GoldBank { get; set; }
         #endregion
     }
 }

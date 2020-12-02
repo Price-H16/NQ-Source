@@ -28,6 +28,7 @@
         Act7Ship = 32,
         SealedVesselsMap = 33,
         TowerInstanceType,
-        WorldBossInstance
+        WorldBossInstance,
+        YertirandBossInstance
     }
 }

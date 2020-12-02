@@ -206,14 +206,25 @@ namespace OpenNos.GameObject.Helpers
                             TowerGame.GenerateTowerGame();
                             break;
 
-                        case EventType.WORLDBOSS:
-                            WorldBoss.Run();
+                        case EventType.FAFNIRBOSS: 
+                            if (ServerManager.Instance.ChannelId == 1)
+                            {
+                                FafnirRad.Run();
+                            }
                             break;
 
-                        case EventType.AUTOREBOOT:
-                            ServerManager.Instance.IsReboot = true;
-                            ServerManager.Instance.RebootTask = new Task(ServerManager.Instance.AutoReboot);
-                            ServerManager.Instance.RebootTask.Start();
+                        case EventType.YERTIRANDBOSS: 
+                            if (ServerManager.Instance.ChannelId == 1)
+                            {
+                                YertirandRad.Run();
+                            }
+                            break;
+
+                        case EventType.GRASSLINBOSS:
+                            if (ServerManager.Instance.ChannelId == 1)
+                            {
+                                GrasslinRad.Run();
+                            }
                             break;
                     }
                 });
@@ -520,6 +531,119 @@ namespace OpenNos.GameObject.Helpers
                         case EventActionType.SCRIPTEND:
                             switch (evt.MapInstance.MapInstanceType)
                             {
+                                case MapInstanceType.FafnirBossInstance:
+                                    foreach (ClientSession sess in evt.MapInstance.Sessions)
+                                    {
+                                        if (sess?.Character != null)
+                                        {
+                                            if (FafnirRad.RemainingTime > 0)
+                                            {
+                                                sess.Character.GetReputation(5000, false); 
+                                                sess.Character.GenerateFamilyXp(1000);
+                                                sess.Character.GiftAdd(5724, 1);
+                                                sess.Character.Gold += 200000;
+                                                sess.SendPacket(sess.Character.GenerateGold());
+                                                try
+                                                {
+                                                    Observable.Timer(TimeSpan.FromSeconds(15))
+                                                    .Subscribe(observer =>
+                                                    {
+                                                        //SomeTime
+                                                        ServerManager.Instance.ChangeMap(sess.Character.CharacterId, 1, 80, 116);
+                                                        ServerManager.Instance.StartedEvents.Remove(EventType.FAFNIRBOSS);
+
+                                                    });
+                                                    foreach (Portal p in FafnirRad.UnknownLandMapInstance.Portals.Where(s => s.DestinationMapInstanceId == FafnirRad.WorldMapinstance.MapInstanceId).ToList())
+                                                    {
+                                                        FafnirRad.UnknownLandMapInstance.Portals.Remove(p);
+                                                        FafnirRad.UnknownLandMapInstance.Broadcast(p.GenerateGp());
+                                                    }
+                                                }
+                                                catch
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                        sess.Character.GenerateFamilyXp(100);
+                                    }
+                                    break;
+
+                                case MapInstanceType.YertirandBossInstance:
+                                    foreach (ClientSession sess in evt.MapInstance.Sessions)
+                                    {
+                                        if (sess?.Character != null)
+                                        {
+                                            if (YertirandRad.RemainingTime > 0)
+                                            {
+                                                sess.Character.GetReputation(8000, false);
+                                                sess.Character.GenerateFamilyXp(2000);
+                                                sess.Character.GiftAdd(5723, 1);
+                                                sess.Character.Gold += 400000;
+                                                sess.SendPacket(sess.Character.GenerateGold());
+                                                try
+                                                {
+                                                    Observable.Timer(TimeSpan.FromSeconds(15))
+                                                    .Subscribe(observer =>
+                                                    {
+                                                        //SomeTime
+                                                        ServerManager.Instance.ChangeMap(sess.Character.CharacterId, 1, 80, 116);
+                                                        ServerManager.Instance.StartedEvents.Remove(EventType.YERTIRANDBOSS);
+
+                                                    });
+                                                    foreach (Portal p in YertirandRad.UnknownLandMapInstance.Portals.Where(s => s.DestinationMapInstanceId == YertirandRad.WorldMapinstance.MapInstanceId).ToList())
+                                                    {
+                                                        YertirandRad.UnknownLandMapInstance.Portals.Remove(p);
+                                                        YertirandRad.UnknownLandMapInstance.Broadcast(p.GenerateGp());
+                                                    }
+                                                }
+                                                catch
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                        sess.Character.GenerateFamilyXp(100);
+                                    }
+                                    break;
+
+                                case MapInstanceType.GrasslinBossInstance:
+                                    foreach (ClientSession sess in evt.MapInstance.Sessions)
+                                    {
+                                        if (sess?.Character != null)
+                                        {
+                                            if (GrasslinRad.RemainingTime > 0)
+                                            {
+                                                sess.Character.GetReputation(10000, false);
+                                                sess.Character.GenerateFamilyXp(2000);
+                                                sess.Character.GiftAdd(5722, 1);
+                                                sess.Character.Gold += 500000;
+                                                sess.SendPacket(sess.Character.GenerateGold());
+                                                try
+                                                {
+                                                    Observable.Timer(TimeSpan.FromSeconds(15))
+                                                    .Subscribe(observer =>
+                                                    {
+                                                        //SomeTime
+                                                        ServerManager.Instance.ChangeMap(sess.Character.CharacterId, 1, 80, 116);
+                                                        ServerManager.Instance.StartedEvents.Remove(EventType.GRASSLINBOSS);
+
+                                                    });
+                                                    foreach (Portal p in YertirandRad.UnknownLandMapInstance.Portals.Where(s => s.DestinationMapInstanceId == GrasslinRad.WorldMapinstance.MapInstanceId).ToList())
+                                                    {
+                                                        GrasslinRad.UnknownLandMapInstance.Portals.Remove(p);
+                                                        GrasslinRad.UnknownLandMapInstance.Broadcast(p.GenerateGp());
+                                                    }
+                                                }
+                                                catch
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                        sess.Character.GenerateFamilyXp(100);
+                                    }
+                                    break;
                                 case MapInstanceType.TimeSpaceInstance:
                                     evt.MapInstance.InstanceBag.Clock.StopClock();
                                     evt.MapInstance.Clock.StopClock();

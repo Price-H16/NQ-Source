@@ -521,7 +521,7 @@ namespace OpenNos.GameObject.Helpers
                                                 sess.Character.GetReputation(5000, false); 
                                                 sess.Character.GenerateFamilyXp(1000);
                                                 sess.Character.GiftAdd(5724, 1);
-                                                sess.Character.Gold += 200000;
+                                                sess.Character.Gold += 500000;
                                                 sess.SendPacket(sess.Character.GenerateGold());
                                                 try
                                                 {
@@ -556,10 +556,10 @@ namespace OpenNos.GameObject.Helpers
                                         {
                                             if (YertirandRad.RemainingTime > 0)
                                             {
-                                                sess.Character.GetReputation(8000, false);
+                                                sess.Character.GetReputation(5000, false);
                                                 sess.Character.GenerateFamilyXp(2000);
-                                                sess.Character.GiftAdd(5723, 1);
-                                                sess.Character.Gold += 400000;
+                                                sess.Character.GiftAdd(5974, 1);
+                                                sess.Character.Gold += 500000;
                                                 sess.SendPacket(sess.Character.GenerateGold());
                                                 try
                                                 {
@@ -594,7 +594,7 @@ namespace OpenNos.GameObject.Helpers
                                         {
                                             if (GrasslinRad.RemainingTime > 0)
                                             {
-                                                sess.Character.GetReputation(10000, false);
+                                                sess.Character.GetReputation(5000, false);
                                                 sess.Character.GenerateFamilyXp(2000);
                                                 sess.Character.GiftAdd(5722, 1);
                                                 sess.Character.Gold += 500000;

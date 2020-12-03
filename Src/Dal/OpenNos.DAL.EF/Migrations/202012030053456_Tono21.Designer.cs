@@ -6,14 +6,14 @@ namespace OpenNos.DAL.EF.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.4.0")]
-    public sealed partial class FastTravel1 : IMigrationMetadata
+    [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
+    public sealed partial class Tono21 : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(FastTravel1));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Tono21));
         
         string IMigrationMetadata.Id
         {
-            get { return "202007271409232_FastTravel1"; }
+            get { return "202012030053456_Tono21"; }
         }
         
         string IMigrationMetadata.Source

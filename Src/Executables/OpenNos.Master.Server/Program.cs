@@ -125,8 +125,7 @@ namespace OpenNos.Master.Server
                     _server.AddService<IConfigurationService, ConfigurationService>(new ConfigurationService());
                     _server.AddService<IMailService, MailService>(new MailService());
                     _server.AddService<IMallService, MallService>(new MallService());
-                    _server.AddService<IAuthentificationService, AuthentificationService>(
-                        new AuthentificationService());
+                    _server.AddService<IAuthentificationService, AuthentificationService>(new AuthentificationService());
                     _server.ClientConnected += OnClientConnected;
                     _server.ClientDisconnected += OnClientDisconnected;
 

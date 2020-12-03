@@ -232,6 +232,10 @@
     <Compile Include="Migrations\202012030032462_Tono2.designer.cs">
       <DependentUpon>202012030032462_Tono2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012030053456_Tono21.cs" />
+    <Compile Include="Migrations\202012030053456_Tono21.designer.cs">
+      <DependentUpon>202012030053456_Tono21.cs</DependentUpon>
+    </Compile>
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="Quest.cs" />
     <Compile Include="QuestLog.cs" />
@@ -419,6 +423,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202012030032462_Tono2.resx">
       <DependentUpon>202012030032462_Tono2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012030053456_Tono21.resx">
+      <DependentUpon>202012030053456_Tono21.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

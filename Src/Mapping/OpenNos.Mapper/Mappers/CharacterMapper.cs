@@ -87,6 +87,8 @@ namespace OpenNos.Mapper.Mappers
             output.LastFactionChange = input.LastFactionChange;
             output.BattleTowerExp = input.BattleTowerExp;
             output.BattleTowerStage = input.BattleTowerStage;
+            output.GoldBank = input.GoldBank;
+
 
 
             return true;
@@ -170,6 +172,8 @@ namespace OpenNos.Mapper.Mappers
             output.LastFactionChange = input.LastFactionChange;
             output.BattleTowerExp = input.BattleTowerExp;
             output.BattleTowerStage = input.BattleTowerStage;
+            output.GoldBank = input.GoldBank;
+
 
 
             return true;

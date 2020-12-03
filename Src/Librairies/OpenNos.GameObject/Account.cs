@@ -21,7 +21,7 @@ namespace OpenNos.GameObject
             ReferrerId = input.ReferrerId;
             RegistrationIP = input.RegistrationIP;
             VerificationToken = input.VerificationToken;
-            GoldBank = input.GoldBank;
+            BankMoney = input.BankMoney;
         }
 
         #endregion

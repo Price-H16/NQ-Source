@@ -43,7 +43,7 @@ namespace OpenNos.DAL.EF
 
         [MaxLength(32)] public string VerificationToken { get; set; }
 
-        public long GoldBank { get; set; }
+        public long BankMoney { get; set; }
 
         #endregion
     }

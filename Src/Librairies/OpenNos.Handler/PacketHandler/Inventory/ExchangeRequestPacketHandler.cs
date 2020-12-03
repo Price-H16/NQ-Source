@@ -204,7 +204,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
                                 if (Session.IsDisposing || targetSession.IsDisposing || targetSession != null && targetSession.Character.HasShopOpened)
                                 {
-                                    CloseExchange(Session, targetSession);
+                                    InvExt.CloseExchange(Session, targetSession);
                                     return;
                                 }
 
@@ -213,7 +213,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                     lock (Session.Character.Inventory)
                                     {
                                         ExchangeInfo targetExchange = targetSession.Character.ExchangeInfo;
-                                        Inventory inventory = targetSession.Character.Inventory;
+                                        GameObject.Inventory inventory = targetSession.Character.Inventory;
 
                                         long gold = targetSession.Character.Gold;
                                         var backpack = targetSession.Character.HaveBackpack() ? 1 : 0;
@@ -239,7 +239,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
                                                 var @continue = true;
                                                 var goldmax = false;
-                                                if (!Session.Character.Inventory.EnoughPlace(targetExchange.ExchangeList, ((Session.Character.HaveBackpack() ? 1 : 0) * 12) + ((Session.Character.HaveNewBackpack() ? 1 : 0) * 60)))
+                                                if (!Session.Character.Inventory.EnoughPlaceV2(targetExchange.ExchangeList, ((Session.Character.HaveBackpack() ? 1 : 0) * 12) + ((Session.Character.HaveExtension() ? 1 : 0) * 60)))
                                                 {
                                                     @continue = false;
                                                 }
@@ -278,24 +278,24 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                         : UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("MAX_GOLD"), 0);
                                                     Session.SendPacket(message);
                                                     targetSession.SendPacket(message);
-                                                    CloseExchange(Session, targetSession);
+                                                    InvExt.CloseExchange(Session, targetSession);
                                                 }
                                                 else
                                                 {
                                                     if (Session.Character.ExchangeInfo.ExchangeList.Any(ei => !(ei.Item.IsTradable || ei.IsBound)))
                                                     {
                                                         Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ITEM_NOT_TRADABLE"), 0));
-                                                        CloseExchange(Session, targetSession);
+                                                        InvExt.CloseExchange(Session, targetSession);
                                                     }
                                                     else // all items can be traded
                                                     {
                                                         Session.Character.IsExchanging = targetSession.Character.IsExchanging = true;
 
                                                         // exchange all items from target to source
-                                                        Exchange(targetSession, Session);
+                                                        InvExt.Exchange(targetSession, Session);
 
                                                         // exchange all items from source to target
-                                                        Exchange(Session, targetSession);
+                                                        InvExt.Exchange(Session, targetSession);
 
                                                         Session.Character.IsExchanging = targetSession.Character.IsExchanging = false;
                                                     }
@@ -351,7 +351,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                                 Language.Instance.GetMessageFromKey("MAX_GOLD"), 0);
                                                         Session.SendPacket(message);
                                                         targetSession.SendPacket(message);
-                                                        CloseExchange(Session, targetSession);
+                                                        InvExt.CloseExchange(Session, targetSession);
                                                     }
                                                     else if (Session.Character.Gold < Session.Character.ExchangeInfo.Gold || targetSession.Character.Gold < targetExchange.Gold
                                                         || Session.Character.GoldBank < Session.Character.ExchangeInfo.BankGold || targetSession.Character.GoldBank < targetExchange.BankGold)
@@ -359,7 +359,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                         string message = UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ERROR_ON_EXANGE"), 0);
                                                         Session.SendPacket(message);
                                                         targetSession.SendPacket(message);
-                                                        CloseExchange(Session, targetSession);
+                                                        InvExt.CloseExchange(Session, targetSession);
                                                     }
                                                     else
                                                     {
@@ -370,7 +370,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                                 UserInterfaceHelper.GenerateMsg(
                                                                     Language.Instance.GetMessageFromKey(
                                                                         "ITEM_NOT_TRADABLE"), 0));
-                                                            CloseExchange(Session, targetSession);
+                                                            InvExt.CloseExchange(Session, targetSession);
                                                         }
                                                         if (targetSession.Character.ExchangeInfo.ExchangeList.Any(ei =>
                                                             !(ei.Item.IsTradable || ei.IsBound)))
@@ -379,7 +379,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                                 UserInterfaceHelper.GenerateMsg(
                                                                     Language.Instance.GetMessageFromKey(
                                                                         "ITEM_NOT_TRADABLE"), 0));
-                                                            CloseExchange(targetSession, Session);
+                                                            InvExt.CloseExchange(targetSession, Session);
                                                         }
                                                         else // all items can be traded
                                                         {
@@ -387,10 +387,10 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                                                 targetSession.Character.IsExchanging = true;
 
                                                             // exchange all items from target to source
-                                                            Exchange(targetSession, Session);
+                                                            InvExt.Exchange(targetSession, Session);
 
                                                             // exchange all items from source to target
-                                                            Exchange(Session, targetSession);
+                                                            InvExt.Exchange(Session, targetSession);
 
                                                             Session.Character.IsExchanging =
                                                                 targetSession.Character.IsExchanging = false;
@@ -422,7 +422,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                                 targetSession =
                                     Session.CurrentMapInstance.GetSessionByCharacterId(Session.Character.ExchangeInfo
                                         .TargetCharacterId);
-                                CloseExchange(Session, targetSession);
+                                InvExt.CloseExchange(Session, targetSession);
                             }
 
                             break;

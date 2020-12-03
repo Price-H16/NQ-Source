@@ -82,6 +82,32 @@ namespace OpenNos.GameObject
             return newItem;
         }
 
+        public bool EnoughPlaceV2(List<ItemInstance> itemInstances, int backPack)
+        {
+            Dictionary<InventoryType, int> place = new Dictionary<InventoryType, int>();
+            foreach (IGrouping<short, ItemInstance> itemgroup in itemInstances.GroupBy(s => s.ItemVNum))
+            {
+                var type = itemgroup.FirstOrDefault().Type;
+                List<ItemInstance> listitem = Where(i => i.Type == type);
+                if (!place.ContainsKey(type))
+                {
+                    place.Add(type, (type != InventoryType.Miniland ? DEFAULT_BACKPACK_SIZE + backPack * 12 : 50) - listitem.Count);
+                }
+
+                var amount = itemgroup.Sum(s => s.Amount);
+                var rest = amount % (type == InventoryType.Equipment ? 1 : 99);
+                var needanotherslot = listitem.Where(s => s.ItemVNum == itemgroup.Key).Sum(s => MAX_ITEM_AMOUNT - s.Amount) <= rest;
+                place[itemgroup.FirstOrDefault().Type] -= amount / (type == InventoryType.Equipment ? 1 : 99) + (needanotherslot ? 1 : 0);
+
+                if (place[itemgroup.FirstOrDefault().Type] < 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public ItemInstance AddIntoBazaarInventory(InventoryType inventory, byte slot, short amount)
         {
             var inv = LoadBySlotAndType(slot, inventory);
@@ -293,8 +319,7 @@ namespace OpenNos.GameObject
                 }
                 else
                 {
-                    Logger.Error(
-                        new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!"));
+                    Logger.Error(new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!"));
                     return null;
                 }
 
@@ -318,8 +343,7 @@ namespace OpenNos.GameObject
                 }
                 else
                 {
-                    Logger.Error(
-                        new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!"));
+                    Logger.Error(new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!"));
                 }
             }
         }
@@ -336,10 +360,7 @@ namespace OpenNos.GameObject
 
                     var amount = itemgroup.Sum(s => s.Amount);
                     var rest = amount % (type == InventoryType.Equipment ? 1 : MAX_ITEM_AMOUNT);
-                    var needanotherslot =
-                        listitem.Where(s => s.ItemVNum == itemgroup.Key).Sum(s => MAX_ITEM_AMOUNT - s.Amount) <= rest;
-                    place[type] -= amount / (type == InventoryType.Equipment ? 1 : MAX_ITEM_AMOUNT) +
-                                   (needanotherslot ? 1 : 0);
+                    var needanotherslot = listitem.Where(s => s.ItemVNum == itemgroup.Key).Sum(s => MAX_ITEM_AMOUNT - s.Amount) <= rest; place[type] -= amount / (type == InventoryType.Equipment ? 1 : MAX_ITEM_AMOUNT) + (needanotherslot ? 1 : 0);
 
                     if (place[type] < 0) return false;
                 }

@@ -19,7 +19,7 @@ namespace OpenNos.Mapper.Mappers
             //output.ReferrerId = input.ReferrerId;
             output.RegistrationIP = input.RegistrationIP;
             output.VerificationToken = input.VerificationToken;
-            output.GoldBank = input.GoldBank;
+            output.BankMoney = input.BankMoney;
 
             return true;
         }
@@ -36,7 +36,7 @@ namespace OpenNos.Mapper.Mappers
             //output.ReferrerId = input.ReferrerId;
             output.RegistrationIP = input.RegistrationIP;
             output.VerificationToken = input.VerificationToken;
-            output.GoldBank = input.GoldBank;
+            output.BankMoney = input.BankMoney;
 
             return true;
         }

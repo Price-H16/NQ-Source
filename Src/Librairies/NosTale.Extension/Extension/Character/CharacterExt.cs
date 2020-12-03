@@ -17,7 +17,7 @@ namespace NosTale.Extension.GameExtension.Character
 
         public static void OpenBank(this ClientSession Session)
         {
-            Session.SendPacket(Session.Character.GenerateGb((byte) GoldBankPacketType.OpenBank));
+            Session.SendPacket(Session.Character.GenerateGB((byte) GoldBankPacketType.OpenBank));
             Session.SendPacket(UserInterfaceHelper.GenerateShopMemo((byte) SmemoType.Information, Language.Instance.GetMessageFromKey("OPEN_BANK")));
 
         }

@@ -40,27 +40,7 @@ namespace OpenNos.GameObject.Helpers
         public static EventHelper Instance => _instance ?? (_instance = new EventHelper());
 
         #endregion
-        private static IContainer BuildCoreContainer()
-        {
-            var pluginBuilder = new ContainerBuilder();
-            pluginBuilder.RegisterType<DiscordWebhookPlugin>().AsImplementedInterfaces().AsSelf();
-            var container = pluginBuilder.Build();
 
-            var coreBuilder = new ContainerBuilder();
-            foreach (var plugin in container.Resolve<IEnumerable<ICorePlugin>>())
-            {
-                try
-                {
-                    plugin.OnLoad(coreBuilder);
-                }
-                catch (PluginException e)
-                {
-                }
-            }
-
-
-            return coreBuilder.Build();
-        }
         #region Methods
 
         public static int CalculateComboPoint(int n)
@@ -812,11 +792,7 @@ namespace OpenNos.GameObject.Helpers
                                             }
 
                                             Logger.LogUserEvent("RAID_SUCCESS", owner.Name, $"RaidId: {@group.GroupId}");
-                                            var pluginBuilder = new ContainerBuilder();
-                                            IContainer container = pluginBuilder.Build();
-                                            using var coreContainer = BuildCoreContainer();
-                                            //var ss = coreContainer.Resolve<DiscordWebHookNotifier>();
-                                            //ss.NotifyAllAsync(NotifiableEventType.X_TEAM_WON_THE_RAID_Y, owner.Name, @group.Raid.Label);
+                                            DiscordWebhookHelper.DiscordEventRaidEnd($"Team {owner.Name} Just Won Raid {@group.Raid.Label}");
                                             ServerManager.Instance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAID_SUCCEED"),@group.Raid.Label, owner.Name), 0));
 
                                             foreach (var s in @group.Sessions.GetAllItems())

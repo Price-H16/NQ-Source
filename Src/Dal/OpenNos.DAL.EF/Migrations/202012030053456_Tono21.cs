@@ -3,16 +3,16 @@
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class EvolvePet : DbMigration
+    public partial class Tono21 : DbMigration
     {
         public override void Up()
         {
-            AddColumn("dbo.NpcMonster", "EvolvePet", c => c.Short(nullable: false));
+            AddColumn("dbo.Character", "GoldBank", c => c.Long(nullable: false));
         }
         
         public override void Down()
         {
-            DropColumn("dbo.NpcMonster", "EvolvePet");
+            DropColumn("dbo.Character", "GoldBank");
         }
     }
 }

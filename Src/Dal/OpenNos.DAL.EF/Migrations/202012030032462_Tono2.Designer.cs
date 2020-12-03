@@ -6,14 +6,14 @@ namespace OpenNos.DAL.EF.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.4.0")]
-    public sealed partial class EvolvePet : IMigrationMetadata
+    [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
+    public sealed partial class Tono2 : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(EvolvePet));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Tono2));
         
         string IMigrationMetadata.Id
         {
-            get { return "202007251814116_EvolvePet"; }
+            get { return "202012030032462_Tono2"; }
         }
         
         string IMigrationMetadata.Source

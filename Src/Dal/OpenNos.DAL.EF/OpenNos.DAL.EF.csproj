@@ -224,6 +224,14 @@
     <Compile Include="Migrations\202011272004483_UPDT.designer.cs">
       <DependentUpon>202011272004483_UPDT.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202012030029361_Tono1.cs" />
+    <Compile Include="Migrations\202012030029361_Tono1.designer.cs">
+      <DependentUpon>202012030029361_Tono1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202012030032462_Tono2.cs" />
+    <Compile Include="Migrations\202012030032462_Tono2.designer.cs">
+      <DependentUpon>202012030032462_Tono2.cs</DependentUpon>
+    </Compile>
     <Compile Include="PartnerSkill.cs" />
     <Compile Include="Quest.cs" />
     <Compile Include="QuestLog.cs" />
@@ -405,6 +413,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011272004483_UPDT.resx">
       <DependentUpon>202011272004483_UPDT.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012030029361_Tono1.resx">
+      <DependentUpon>202012030029361_Tono1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202012030032462_Tono2.resx">
+      <DependentUpon>202012030032462_Tono2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

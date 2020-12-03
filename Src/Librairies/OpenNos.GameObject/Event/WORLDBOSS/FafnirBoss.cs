@@ -102,7 +102,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
 
             MapMonster FafnirMonster = new MapMonster
             {
-                MonsterVNum = 2619,
+                MonsterVNum = 3127,
                 MapY = 71,
                 MapX = 87,
                 MapId = FafnirRad.WorldMapinstance.Map.MapId,
@@ -113,7 +113,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
             };
             FafnirMonster.Initialize(FafnirRad.WorldMapinstance);
             FafnirRad.WorldMapinstance.AddMonster(FafnirMonster);
-            MapMonster Fafnir = FafnirRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 2619);
+            MapMonster Fafnir = FafnirRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 3127);
             if (Fafnir != null)
             {
                 Fafnir.BattleEntity.OnDeathEvents = onDeathEvents;

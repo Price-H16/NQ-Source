@@ -102,7 +102,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
 
             MapMonster YertirandMonster = new MapMonster
             {
-                MonsterVNum = 2639,
+                MonsterVNum = 3126,
                 MapY = 106,
                 MapX = 120,
                 MapId = YertirandRad.WorldMapinstance.Map.MapId,
@@ -113,7 +113,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
             };
             YertirandMonster.Initialize(YertirandRad.WorldMapinstance);
             YertirandRad.WorldMapinstance.AddMonster(YertirandMonster);
-            MapMonster Yertirand = YertirandRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 2639);
+            MapMonster Yertirand = YertirandRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 3126);
             if (Yertirand != null)
             {
                 Yertirand.BattleEntity.OnDeathEvents = onDeathEvents;

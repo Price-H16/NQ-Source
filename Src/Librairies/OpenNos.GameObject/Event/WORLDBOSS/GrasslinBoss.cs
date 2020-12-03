@@ -64,7 +64,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
             GrasslinRad.RemainingTime = 3600;
             const int interval = 1;
 
-            GrasslinRad.WorldMapinstance = ServerManager.GenerateMapInstance(2552, MapInstanceType.YertirandBossInstance, new InstanceBag());
+            GrasslinRad.WorldMapinstance = ServerManager.GenerateMapInstance(2552, MapInstanceType.GrasslinBossInstance, new InstanceBag());
             GrasslinRad.UnknownLandMapInstance = ServerManager.GetMapInstance(ServerManager.GetBaseMapInstanceIdByMapId(1));
 
 
@@ -100,9 +100,9 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
 
             #region Grasslin
 
-            MapMonster YertirandMonster = new MapMonster
+            MapMonster GrasslinMonster = new MapMonster
             {
-                MonsterVNum = 450,
+                MonsterVNum = 3128,
                 MapY = 18,
                 MapX = 21,
                 MapId = GrasslinRad.WorldMapinstance.Map.MapId,
@@ -111,13 +111,13 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
                 MapMonsterId = GrasslinRad.WorldMapinstance.GetNextMonsterId(),
                 ShouldRespawn = false
             };
-            YertirandMonster.Initialize(GrasslinRad.WorldMapinstance);
-            GrasslinRad.WorldMapinstance.AddMonster(YertirandMonster);
-            MapMonster Yertirand = GrasslinRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 450);
-            if (Yertirand != null)
+            GrasslinMonster.Initialize(GrasslinRad.WorldMapinstance);
+            GrasslinRad.WorldMapinstance.AddMonster(GrasslinMonster);
+            MapMonster Grasslin = GrasslinRad.WorldMapinstance.Monsters.Find(s => s.Monster.NpcMonsterVNum == 3128);
+            if (Grasslin != null)
             {
-                Yertirand.BattleEntity.OnDeathEvents = onDeathEvents;
-                Yertirand.IsBoss = true;
+                Grasslin.BattleEntity.OnDeathEvents = onDeathEvents;
+                Grasslin.IsBoss = true;
             }
             #endregion
             try
@@ -148,7 +148,7 @@ namespace OpenNos.GameObject.Event.WORLDBOSS
                 GrasslinRad.IsRunning = false;
                 GrasslinRad.AngelDamage = 0;
                 GrasslinRad.DemonDamage = 0;
-                ServerManager.Instance.StartedEvents.Remove(EventType.YERTIRANDBOSS);
+                ServerManager.Instance.StartedEvents.Remove(EventType.GRASSLINBOSS);
             }
             catch (Exception ex)
             {

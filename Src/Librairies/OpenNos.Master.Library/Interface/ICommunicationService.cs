@@ -51,7 +51,7 @@ namespace OpenNos.Master.Library.Interface
         int? GetChannelIdByWorldId(Guid worldId);
         void Shutdown(string worldGroup);
         void UnregisterWorldServer(Guid worldId);
-        string RetrieveRegisteredWorldServers(string username, int sessionId, bool ignoreUserName);
+        string RetrieveRegisteredWorldServers(string username, byte regionType, int sessionId, bool ignoreUserName);
         long[][] RetrieveOnlineCharacters(long characterId);
         void Restart(string worldGroup, int time = 5);
         string RetrieveOriginWorld(long accountId);

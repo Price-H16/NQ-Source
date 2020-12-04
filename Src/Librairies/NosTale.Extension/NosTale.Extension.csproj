@@ -43,7 +43,6 @@
     <Compile Include="Extension\Command\CommandExt.cs" />
     <Compile Include="Extension\Packet\BattleExt.cs" />
     <Compile Include="Extension\Packet\InvExt.cs" />
-    <Compile Include="Extension\Packet\LoginExt.cs" />
     <Compile Include="Extension\Packet\MateExt.cs" />
     <Compile Include="Extension\Packet\MinilandExt.cs" />
     <Compile Include="Extension\Packet\ShopExt.cs" />

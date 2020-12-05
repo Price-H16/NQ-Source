@@ -6606,6 +6606,7 @@ namespace OpenNos.GameObject
                 EquipmentBCards.RemoveAll(s => s.ItemVNum.Equals(vnum));
 
                 UseSp = false;
+                CharacterHelper.RemoveSpecialistWingsBuff(Session);
                 LoadSpeed();
                 Session.SendPacket(GenerateCond());
                 Session.SendPacket(GenerateLev());

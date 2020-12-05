@@ -6257,11 +6257,11 @@ namespace OpenNos.GameObject
                 // only load speed if you dont use custom speed
                 if (!IsVehicled && !IsCustomSpeed)
                 {
-                    Speed = CharacterHelper.SpeedData[(byte) Class];
+                    Speed = CharacterHelper.SpeedData[(byte)Class];
 
                     if (UseSp)
                     {
-                        ItemInstance specialist = Inventory?.LoadBySlotAndType((byte) EquipmentType.Sp, InventoryType.Wear);
+                        ItemInstance specialist = Inventory?.LoadBySlotAndType((byte)EquipmentType.Sp, InventoryType.Wear);
 
                         if (specialist?.Item != null)
                         {
@@ -6269,18 +6269,17 @@ namespace OpenNos.GameObject
                         }
                     }
 
-                    byte fixSpeed = (byte) GetBuff(CardType.Move, (byte) AdditionalTypes.Move.SetMovement)[0];
+                    byte fixSpeed = (byte)GetBuff(CardType.Move, (byte)AdditionalTypes.Move.SetMovement)[0];
 
                     if (fixSpeed != 0)
                     {
-                        Speed = fixSpeed;
+                        //Speed = fixSpeed;
+                        Speed += fixSpeed;
                     }
                     else
                     {
-                        Speed += (byte) GetBuff(CardType.Move, (byte) AdditionalTypes.Move.MovementSpeedIncreased)[0];
-                        Speed -= (byte) GetBuff(CardType.Move, (byte) AdditionalTypes.Move.MovementSpeedDecreased)[0];
-                        Speed = (byte) (Speed + ((Speed / 100D) * (GetBuff(CardType.Move, (byte) AdditionalTypes.Move.MoveSpeedIncreased)[0])));
-                        Speed = (byte) (Speed - ((Speed / 100D) * (GetBuff(CardType.Move, (byte) AdditionalTypes.Move.MoveSpeedDecreased)[0])));
+                        Speed += (byte)GetBuff(CardType.Move, (byte)AdditionalTypes.Move.MovementSpeedIncreased)[0];
+                        Speed = (byte)(Speed * (1 + (GetBuff(CardType.Move, (byte)AdditionalTypes.Move.MoveSpeedIncreased)[0] / 100D)));
                     }
                 }
 
@@ -6301,39 +6300,33 @@ namespace OpenNos.GameObject
                         if (MapInstance?.Map?.MapTypes != null && VehicleItem.MapSpeedBoost != null && VehicleItem.ActSpeedBoost != null)
                         {
                             Speed += VehicleItem.MapSpeedBoost[MapInstance.Map.MapId];
-                            if (MapInstance.Map.MapTypes.Any(s => new[]
-                            {
-                                (short) MapTypeEnum.Act1, (short) MapTypeEnum.CometPlain, (short) MapTypeEnum.Mine1,
-                                (short) MapTypeEnum.Mine2, (short) MapTypeEnum.MeadowOfMine,
-                                (short) MapTypeEnum.SunnyPlain, (short) MapTypeEnum.Fernon, (short) MapTypeEnum.FernonF,
-                                (short) MapTypeEnum.Cliff
-                            }.Contains(s.MapTypeId)))
+                            if (MapInstance.Map.MapTypes.Any(s => new short[] { (short)MapTypeEnum.Act1, (short)MapTypeEnum.CometPlain, (short)MapTypeEnum.Mine1, (short)MapTypeEnum.Mine2, (short)MapTypeEnum.MeadowOfMine, (short)MapTypeEnum.SunnyPlain, (short)MapTypeEnum.Fernon, (short)MapTypeEnum.FernonF, (short)MapTypeEnum.Cliff }.Contains(s.MapTypeId)))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[1];
                             }
-                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act2))
+                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act2))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[2];
                             }
-                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act3))
+                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act3))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[3];
                             }
-                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act4))
+                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[4];
                             }
-                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act51))
+                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act51))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[51];
                             }
-                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short) MapTypeEnum.Act52))
+                            else if (MapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act52))
                             {
                                 Speed += VehicleItem.ActSpeedBoost[52];
                             }
                         }
 
-                        if (HasBuff(CardType.Move, (byte) AdditionalTypes.Move.TempMaximized))
+                        if (HasBuff(CardType.Move, (byte)AdditionalTypes.Move.TempMaximized))
                         {
                             Speed += VehicleItem.SpeedBoost;
                         }

@@ -90,7 +90,7 @@
     <Compile Include="PacketHandler\Basic\GroupSayPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\GuriPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\HeroPacketHandler.cs" />
-    <Compile Include="PacketHandler\Basic\isortpackethandler.cs" />
+    <Compile Include="PacketHandler\Basic\ISortPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\NcifPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\NpinfoPacketHandler.cs" />
     <Compile Include="PacketHandler\Basic\PinvPacketHandler.cs" />

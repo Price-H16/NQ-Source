@@ -24,7 +24,7 @@ namespace NosTale.Configuration
             // Config Srv
             ServerGroupS1 = "NosQuest",
             Language = "uk",
-            SessionLimit = 150,
+            SessionLimit = 400,
             LagMode = false,
             SceneOnCreate = false,
             UseOldCrypto = false,

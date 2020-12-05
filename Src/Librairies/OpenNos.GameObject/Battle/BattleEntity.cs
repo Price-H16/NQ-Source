@@ -569,51 +569,43 @@ namespace OpenNos.GameObject.Battle
                             Hitrate = character.SecondWeaponHitRate;
                             CritChance = character.SecondWeaponCriticalChance;
                             CritRate = character.SecondWeaponCriticalRate;
-                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon,
-                                InventoryType.Wear);
+                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon, InventoryType.Wear);
                         }
                         else
                         {
-                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon,
-                                InventoryType.Wear);
+                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
                         }
-
                         break;
 
                     case 1:
                         AttackType = AttackType.Range;
-                        if (character.Class == ClassType.Adventurer || character.Class == ClassType.Swordsman ||
-                            character.Class == ClassType.Magician)
+                        if (character.Class == ClassType.Adventurer || character.Class == ClassType.Swordsman || character.Class == ClassType.Magician)
                         {
                             DamageMinimum = character.SecondWeaponMinHit;
                             DamageMaximum = character.SecondWeaponMaxHit;
                             Hitrate = character.SecondWeaponHitRate;
                             CritChance = character.SecondWeaponCriticalChance;
                             CritRate = character.SecondWeaponCriticalRate;
-                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon,
-                                InventoryType.Wear);
+                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon, InventoryType.Wear);
                         }
                         else
                         {
-                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon,
-                                InventoryType.Wear);
+                            weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
                         }
-
                         break;
 
                     case 2:
                         AttackType = AttackType.Magical;
-                        weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon,
-                            InventoryType.Wear);
+                        weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
                         break;
 
                     case 3:
-                        weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon,
-                            InventoryType.Wear);
+                        weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
                         switch (character.Class)
                         {
                             case ClassType.Adventurer:
                             case ClassType.Swordsman:
+                            case ClassType.MartialArtist:
                                 AttackType = AttackType.Melee;
                                 break;
 
@@ -625,7 +617,6 @@ namespace OpenNos.GameObject.Battle
                                 AttackType = AttackType.Magical;
                                 break;
                         }
-
                         break;
 
                     case 5:
@@ -635,8 +626,8 @@ namespace OpenNos.GameObject.Battle
                             case ClassType.Adventurer:
                             case ClassType.Swordsman:
                             case ClassType.Magician:
-                                weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon,
-                                    InventoryType.Wear);
+                            case ClassType.MartialArtist:
+                                weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
                                 break;
 
                             case ClassType.Archer:
@@ -645,22 +636,20 @@ namespace OpenNos.GameObject.Battle
                                 Hitrate = character.SecondWeaponHitRate;
                                 CritChance = character.SecondWeaponCriticalChance;
                                 CritRate = character.SecondWeaponCriticalRate;
-                                weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon,
-                                    InventoryType.Wear);
+                                weapon = character.Inventory.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon, InventoryType.Wear);
                                 break;
                         }
-
                         break;
                 }
             }
             else
             {
-                weapon = character.Inventory?.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon,
-                    InventoryType.Wear);
+                weapon = character.Inventory?.LoadBySlotAndType((byte)EquipmentType.SecondaryWeapon, InventoryType.Wear);
                 switch (character.Class)
                 {
                     case ClassType.Adventurer:
                     case ClassType.Swordsman:
+                    case ClassType.MartialArtist:
                         AttackType = AttackType.Melee;
                         break;
 
@@ -680,11 +669,9 @@ namespace OpenNos.GameObject.Battle
                 WeaponDamageMinimum = weapon.DamageMinimum + weapon.Item.DamageMinimum;
                 WeaponDamageMaximum = weapon.DamageMaximum + weapon.Item.DamageMaximum;
 
-                if (weapon == character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear)
-                )
+                if (weapon == character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear))
                 {
                     ShellWeaponEffects = character.ShellEffectMain.ToList();
-                    RuneWeaponEffects = character.RuneEffectMain.ToList();
                 }
                 else
                 {
@@ -700,7 +687,7 @@ namespace OpenNos.GameObject.Battle
                 DamageMaximum = DamageMinimum + 1;
             }
 
-            var armor = character.Inventory?.LoadBySlotAndType((byte)EquipmentType.Armor, InventoryType.Wear);
+            ItemInstance armor = character.Inventory?.LoadBySlotAndType((byte)EquipmentType.Armor, InventoryType.Wear);
             if (armor != null)
             {
                 DefenseUpgrade = armor.Upgrade;
@@ -829,7 +816,6 @@ namespace OpenNos.GameObject.Battle
                 DamageMinimum = monster.Monster.DamageMinimum;
                 DamageMaximum = monster.Monster.DamageMaximum;
             }
-
             WeaponDamageMinimum = 0;
             WeaponDamageMaximum = 0;
             Hitrate = monster.Monster.Concentrate;
@@ -1010,10 +996,16 @@ namespace OpenNos.GameObject.Battle
 
         public ThreadSafeSortedList<short, Buff> Buffs { get; set; }
 
-        public bool CanBeTargetted =>
-            MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance ||
-            TargettedByMonstersList(false).Count < MaxTargetedByMonstersCount(false) &&
-            TargettedByMonstersList(true).Count < MaxTargetedByMonstersCount(true);
+        public bool CanBeTargetted
+        {
+            get
+            {
+                return
+                    MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance ||
+                    TargettedByMonstersList(false).Count < MaxTargetedByMonstersCount(false) &&
+                    TargettedByMonstersList(true).Count < MaxTargetedByMonstersCount(true);
+            }
+        }
 
         public ThreadSafeGenericList<CellonOptionDTO> CellonOptions { get; set; }
 
@@ -2732,32 +2724,23 @@ namespace OpenNos.GameObject.Battle
 
         public int GetDamage(int damage, BattleEntity damager, bool dontKill = false, bool fromDebuff = false)
         {
-            if (Character?.HasGodMode == true || Mate?.Owner.HasGodMode == true || HasBuff(CardType.HideBarrelSkill,
-                    (byte)AdditionalTypes.HideBarrelSkill.NoHPConsumption))
+            if (Character?.HasGodMode == true || Mate?.Owner.HasGodMode == true || HasBuff(CardType.HideBarrelSkill, (byte)AdditionalTypes.HideBarrelSkill.NoHPConsumption))
             {
                 return 0;
             }
 
-            if (fromDebuff) 
-                // If it comes from attack percent defense, dismin damage percent with chance, and static damages are already applied
+            if (fromDebuff) // If it comes from attack percent defense, dismin damage percent with chance, and static damages are already applied
             {
-                var percentDefense = GetBuff(CardType.RecoveryAndDamagePercent,
-                    (byte)AdditionalTypes.RecoveryAndDamagePercent.DecreaseSelfHP);
+                int[] percentDefense = GetBuff(BCardType.CardType.RecoveryAndDamagePercent, (byte)AdditionalTypes.RecoveryAndDamagePercent.DecreaseSelfHP);
                 if (percentDefense[0] != 0)
                 {
-                    var percentDefenseDamage = HpMax / 100 * Math.Abs(percentDefense[0]);
-                    if (percentDefenseDamage < damage)
-                    {
-                        damage = percentDefenseDamage;
-                    }
+                    int percentDefenseDamage = HpMax / 100 * Math.Abs(percentDefense[0]);
+                    if (percentDefenseDamage < damage) damage = percentDefenseDamage;
                 }
 
                 if (MapMonster?.MonsterVNum == 533)
                 {
-                    if (63 < damage)
-                    {
-                        damage = 63;
-                    }
+                    if (63 < damage) damage = 63;
                 }
             }
 
@@ -2797,8 +2780,7 @@ namespace OpenNos.GameObject.Battle
 
             if (MapMonster != null)
             {
-                if (damager.Mate != null && damager.MapInstance == damager.Mate.Owner.Miniland &&
-                    damager.Mate.MateType == MateType.Pet)
+                if (damager.Mate != null && damager.MapInstance == damager.Mate.Owner.Miniland && damager.Mate.MateType == MateType.Pet)
                 {
                     if (IsMateTrainer(MapMonster.MonsterVNum))
                     {
@@ -2851,17 +2833,16 @@ namespace OpenNos.GameObject.Battle
 
                 ClearEnemyFalcon();
             }
-
             return damage;
         }
 
-        public int GetDistance(BattleEntity other) => (int)Math.Sqrt(Math.Pow(other.PositionX - PositionX, 2) + Math.Pow(other.PositionY - PositionY, 2));
-
+        public int GetDistance(BattleEntity other)
+        {
+            return (int)Math.Sqrt(Math.Pow(other.PositionX - PositionX, 2) + Math.Pow(other.PositionY - PositionY, 2));
+        }
         public List<MapMonster> GetOwnedMonsters()
         {
-            var ownedMonsters = MapInstance?.Monsters.Where(m =>
-                m.Owner?.MapEntityId == MapEntityId || Character != null &&
-                Character.Mates.Any(mate => m.Owner?.MapEntityId == mate.MateTransportId)).ToList();
+            List<MapMonster> ownedMonsters = MapInstance?.Monsters.Where(m => m.Owner?.MapEntityId == MapEntityId || Character != null && Character.Mates.Any(mate => m.Owner?.MapEntityId == mate.MateTransportId)).ToList();
             return ownedMonsters;
         }
 
@@ -2882,26 +2863,28 @@ namespace OpenNos.GameObject.Battle
                 return null;
             }
 
-            var walkableCellsInRange = new List<MapCell>();
+            List<MapCell> walkableCellsInRange = new List<MapCell>();
 
             while (numberOfCells > 0)
             {
-                for (var dX = -1; dX <= 1; dX++)
-                    for (var dY = -1; dY <= 1; dY++)
+                for (int dX = -1; dX <= 1; dX++)
+                {
+                    for (int dY = -1; dY <= 1; dY++)
                     {
                         if (dX == 0 && dY == 0)
                         {
                             continue;
                         }
 
-                        var x = (short)(PositionX + dX * numberOfCells);
-                        var y = (short)(PositionY + dY * numberOfCells);
+                        short x = (short)(PositionX + (dX * numberOfCells));
+                        short y = (short)(PositionY + (dY * numberOfCells));
 
                         if (!MapInstance.Map.IsBlockedZone(x, y) && MapInstance.Map.CanWalkAround(x, y))
                         {
                             walkableCellsInRange.Add(new MapCell { X = x, Y = y });
                         }
                     }
+                }
 
                 numberOfCells--;
             }
@@ -3016,8 +2999,10 @@ namespace OpenNos.GameObject.Battle
 
         public bool IsInRange(int xCoordinate, int yCoordinate, int range = 50) => Math.Abs(PositionX - xCoordinate) <= range && Math.Abs(PositionY - yCoordinate) <= range;
 
-        public bool IsMateTrainer(int vnum) => vnum == 160 || vnum == 900 || vnum == 636 || vnum == 971;
-
+        public bool IsMateTrainer(int vnum)
+        {
+            return vnum == 160 || vnum == 900 || vnum == 636 || vnum == 971;
+        }
         public bool IsSignpost(int vnum)
         {
             return new[] { 920, 921, 1385, 1428, 1499, 1519 }.Contains(vnum);
@@ -3032,15 +3017,15 @@ namespace OpenNos.GameObject.Battle
                     switch (EntityType)
                     {
                         case EntityType.Player:
-                            return (1 + Character.Mates.Count(m => m.IsTeamMember || m.IsTemporalMate)) * 15;
+                            return (1 + Character.Mates.Count(m => m.IsTeamMember || m.IsTemporalMate)) * 20;
 
                         case EntityType.Mate:
-                            return (1 + Mate.Owner.Mates.Count(m => m.IsTeamMember || m.IsTemporalMate)) * 15;
+                            return (1 + Mate.Owner.Mates.Count(m => m.IsTeamMember || m.IsTemporalMate)) * 20;
                     }
                 }
                 else
                 {
-                    return 15;
+                    return 20;
                 }
             }
             return int.MaxValue;
@@ -3382,8 +3367,7 @@ namespace OpenNos.GameObject.Battle
 
         public void RemoveOwnedMonsters(bool OnlyFirst = false, int MonsterVNum = -1)
         {
-            var ownedMonsters = GetOwnedMonsters()?.Where(m =>
-                MonsterVNum == -1 && !IsMateTrainer(m.MonsterVNum) || m.MonsterVNum == MonsterVNum);
+            IEnumerable<MapMonster> ownedMonsters = GetOwnedMonsters()?.Where(m => (MonsterVNum == -1 && !IsMateTrainer(m.MonsterVNum)) || m.MonsterVNum == MonsterVNum);
             if (ownedMonsters != null)
             {
                 if (OnlyFirst)
@@ -3396,8 +3380,7 @@ namespace OpenNos.GameObject.Battle
                 }
                 else
                 {
-                    ownedMonsters.ToList().ForEach(m =>
-                    {
+                    ownedMonsters.ToList().ForEach(m => {
                         m.MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, m.MapMonsterId));
                         m.MapInstance.RemoveMonster(m);
                     });
@@ -3433,49 +3416,50 @@ namespace OpenNos.GameObject.Battle
         {
             if (Character != null)
             {
-                foreach (var indicator in Buffs.GetAllItems())
+                foreach (Buff indicator in Buffs.GetAllItems())
                 {
-                    if (!indicator.StaticBuff)
+                    if (indicator.StaticBuff)
                     {
-                        Character.Session.SendPacket(
-                                $"bf 1 {MapEntityId} {(indicator.Card.CardId == 0 ? Character.ChargeValue > 7000 ? 7000 : Character.ChargeValue : 0)}.{indicator.Card.CardId}.{indicator.RemainingTime} {indicator.Level}");
+                        Character.Session.SendPacket($"vb {indicator.Card.CardId} 1 {indicator.RemainingTime * 10}");
+                    }
+                    else
+                    {
+                        Character.Session.SendPacket($"bf 1 {MapEntityId} {(indicator.Card.CardId == 0 ? Character.ChargeValue > 7000 ? 7000 : Character.ChargeValue : 0)}.{indicator.Card.CardId}.{indicator.RemainingTime} {indicator.Level}");
                     }
                 }
             }
-
-            //Character.Session.SendPacket($"vb {indicator.Card.CardId} 1 {indicator.RemainingTime * 10}");
         }
 
         public List<BattleEntity> TargettedByMonstersList(bool teamCheck)
         {
-            if (!teamCheck)
+            try
             {
-                return MapInstance?.Monsters
-                                  .Where(s => s?.Target?.MapEntityId == MapEntityId && s.Target.EntityType == EntityType)
-                                  .Select(s => s.BattleEntity).ToList();
-            }
-
-            var targettedByMonsters = new List<BattleEntity>();
-            if (Mate?.Owner != null)
-            {
-                targettedByMonsters = Mate.Owner.BattleEntity.TargettedByMonstersList(true);
-            }
-            else
-            {
-                targettedByMonsters = MapInstance?.Monsters
-                    .Where(s => s?.Target?.MapEntityId == MapEntityId && s?.Target?.EntityType == EntityType)
-                    .Select(s => s.BattleEntity).ToList();
-                if (Character != null)
+                if (!teamCheck)
                 {
-                    Character.Mates.Where(s => s.IsTeamMember).ToList().ForEach(m =>
-                            targettedByMonsters.AddRange(MapInstance?.Monsters
-                                                                    .Where(s => s?.Target?.MapEntityId == m.BattleEntity.MapEntityId &&
-                                                                                s.Target.EntityType == m.BattleEntity.EntityType).Select(s => s.BattleEntity)
-                                                                    .ToList()));
+                    return MapInstance?.Monsters?.Where(s => s?.Target?.MapEntityId == MapEntityId && s?.Target?.EntityType == EntityType).Select(s => s.BattleEntity).ToList() ?? new List<BattleEntity>();
+                }
+                else
+                {
+                    List<BattleEntity> targettedByMonsters = new List<BattleEntity>();
+                    if (Mate?.Owner != null)
+                    {
+                        targettedByMonsters = Mate.Owner.BattleEntity.TargettedByMonstersList(true);
+                    }
+                    else if (targettedByMonsters != null)
+                    {
+                        targettedByMonsters = MapInstance?.Monsters?.Where(s => s?.Target?.MapEntityId == MapEntityId && s.Target.EntityType == EntityType).Select(s => s.BattleEntity).ToList();
+                        if (Character != null)
+                        {
+                            Character.Mates?.Where(s => s.IsTeamMember).ToList().ForEach(m => targettedByMonsters.AddRange(MapInstance?.Monsters?.Where(s => s?.Target?.MapEntityId == m.BattleEntity.MapEntityId && s.Target.EntityType == m.BattleEntity.EntityType).Select(s => s.BattleEntity).ToList()));
+                        }
+                    }
+                    return targettedByMonsters;
                 }
             }
-
-            return targettedByMonsters;
+            catch (Exception e)
+            {
+                return new List<BattleEntity>();
+            }
         }
 
         public void TeleportTo(MapCell mapCell, short distance = 0)

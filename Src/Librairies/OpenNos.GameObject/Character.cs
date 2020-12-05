@@ -1431,9 +1431,9 @@ namespace OpenNos.GameObject
 
         public bool CanAddMate(Mate mate) => mate.MateType == MateType.Pet   ? MaxMateCount > Mates.Count(s => s.MateType == MateType.Pet) : MaxPartnerCount > Mates.Count(s => s.MateType == MateType.Partner);
 
-        public bool CanAttack() => !NoAttack && !HasBuff(CardType.SpecialAttack, (byte) AdditionalTypes.SpecialAttack.NoAttack) &&  !HasBuff(CardType.FrozenDebuff, (byte) AdditionalTypes.FrozenDebuff.EternalIce);
+        public bool CanAttack() => !NoAttack && !HasBuff(CardType.SpecialAttack, (byte)AdditionalTypes.SpecialAttack.NoAttack) && !HasBuff(CardType.FrozenDebuff, (byte)AdditionalTypes.FrozenDebuff.EternalIce);
 
-        public bool CanMove() => !NoMove && !HasBuff(CardType.Move, (byte) AdditionalTypes.Move.MovementImpossible) &&!HasBuff(CardType.FrozenDebuff, (byte) AdditionalTypes.FrozenDebuff.EternalIce);
+        public bool CanMove() => !NoMove && !HasBuff(CardType.Move, (byte)AdditionalTypes.Move.MovementImpossible) && !HasBuff(CardType.FrozenDebuff, (byte)AdditionalTypes.FrozenDebuff.EternalIce);
 
         public bool CanUseNosBazaar()
         {
@@ -1622,40 +1622,68 @@ namespace OpenNos.GameObject
                 }
                 #endregion
 
-                if (Session.Character.lasteffectid > DateTime.Now)
-                {
-                    // nothing
-                }
-                else
-                {
+                #region Family Buffs
 
-                    if (Session.Character.Family != null)
+                if (Session.Character.Family != null)
+                {
+                    if (FamilyBuff.AddSeconds(60) <= DateTime.Now)
                     {
-                        int effectid10 = 3039;
-                        int effectid20 = 3040;
+                        FamilyBuff = DateTime.Now;
 
-
-                        if (Session.Character.Family.FamilyLevel == 10)
+                        switch (Session.Character.Family.FamilyLevel)
                         {
-                            Session.CurrentMapInstance?.Broadcast(
-            StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId,
-                effectid10), Session.Character.PositionX, Session.Character.PositionY);
-                            Session.Character.lasteffectid = DateTime.Now.AddSeconds(15);
+                            case 2:
+                            case 3:
+                                Session.Character.AddBuff(new Buff(4051, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
 
-                        }
+                            case 4:
+                            case 5:
+                                Session.Character.AddBuff(new Buff(4052, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
 
-                        if (Session.Character.Family.FamilyLevel == 20)
-                        {
-                            Session.CurrentMapInstance?.Broadcast(
-            StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId,
-                effectid20), Session.Character.PositionX, Session.Character.PositionY);
-                            Session.Character.lasteffectid = DateTime.Now.AddSeconds(15);
+                            case 6:
+                            case 7:
+                                Session.Character.AddBuff(new Buff(4053, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
 
+                            case 8:
+                            case 9:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
 
+                            case 10:
+                            case 11:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
 
+                            case 12:
+                            case 13:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
+
+                            case 14:
+                            case 15:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
+
+                            case 16:
+                            case 17:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
+
+                            case 18:
+                            case 19:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
+
+                            case 20:
+                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
+                                break;
                         }
                     }
                 }
+                #endregion
                 #endregion
 
                 #region AntiHacks-Gold
@@ -1831,8 +1859,8 @@ namespace OpenNos.GameObject
                         }
                         else
                         {
-                            change |= Hp != (int) HPLoad();
-                            Hp = (int) HPLoad();
+                            change |= Hp != (int)HPLoad();
+                            Hp = (int)HPLoad();
                         }
 
                         if (Mp + HealthMPLoad() < MPLoad())
@@ -1842,8 +1870,8 @@ namespace OpenNos.GameObject
                         }
                         else
                         {
-                            change |= Mp != (int) MPLoad();
-                            Mp = (int) MPLoad();
+                            change |= Mp != (int)MPLoad();
+                            Mp = (int)MPLoad();
                         }
 
                         if (change)
@@ -2557,15 +2585,15 @@ namespace OpenNos.GameObject
             var morph = (UseSp && !IsVehicled && SpInstance.HasSkin ? SpInstance.Item.VNum == 903 ? 102 : SpInstance.Item.VNum == 913 ? 101 : SpInstance.Item.VNum == 902 ? 100 : UseSp || IsVehicled || IsMorphed ? Morph : 0 : UseSp || IsVehicled || IsMorphed ? Morph : 0);
 
             var name = (Authority > AuthorityType.User && !Undercover ? Authority == AuthorityType.Supporter ? $"[{Authority}]" + Name : Name : Name);
-            return
-                $"c_info {name} - -1 {(Family != null && FamilyCharacter != null && !Undercover ?$"{Family.FamilyId}.{this.GetFamilyNameType()} {Family.Name}" : "-1 -")} " +
-                $"{CharacterId} {(Invisible && Authority >= AuthorityType.MOD ? 6 : 0)} " +
-                $"{(byte) Gender} {(byte) HairStyle} " +
-                $"{(byte) HairColor} {(byte) Class} " +
-                $"{(GetDignityIco() == 1 ? GetReputationIco() : -GetDignityIco())} {( Authority > AuthorityType.User && !Undercover ? CharacterHelper.AuthorityColor(Authority) : Compliment)} " +
-                $"{(morph)} {(Invisible ? 1 : 0)} " +
-                $"{Family?.FamilyLevel ?? 0} {(UseSp ? MorphUpgrade : 0)} " +
-                $"{ArenaWinner} 0 0";
+            return 
+                $"c_info {(Authority >= AuthorityType.User ? $"[{Authority}]{Name}" : Name)} - -1 {(Family != null && FamilyCharacter != null && !Undercover ? $"{Family.FamilyId}.{this.GetFamilyNameType()} {Family.Name}" : "-1 -")} " +
+                   $"{CharacterId} {(Invisible && Authority >= AuthorityType.Supporter ? 6 : 0)} " +
+                   $"{(byte)Gender} {(byte)HairStyle} " +
+                   $"{(byte)HairColor} {(byte)Class} " +
+                   $"{(GetDignityIco() == 1 ? GetReputationIco() : -GetDignityIco())} {(Authority != AuthorityType.User ? CharacterHelper.AuthorityColor(Authority) : Compliment)} " +
+                   $"{(UseSp || IsVehicled ? Morph : 0)} {(Invisible ? 1 : 0)} " +
+                   $"{Family?.FamilyLevel ?? 0} {(UseSp ? MorphUpgrade : 0)} " +
+                   $"{ArenaWinner} 0 0";
         }
 
         public string GenerateCMap() => $"c_map 0 {MapInstance.Map.MapId} {(MapInstance.MapInstanceType != MapInstanceType.BaseMapInstance ? 1 : 0)}";
@@ -2576,7 +2604,7 @@ namespace OpenNos.GameObject
 
             ItemInstance item = Inventory.LoadBySlotAndType((byte) EquipmentType.Wings, InventoryType.Wear);
 
-            return !IsSeal ? $"c_mode 1 {CharacterId} {morph} {(!IsLaurenaMorph() && UseSp ? MorphUpgrade : 0)} {(!IsLaurenaMorph() && UseSp ? MorphUpgrade2 : 0)} {ArenaWinner} {Size} {item?.Item.Morph ?? 0}" : "";
+            return !IsSeal ? $"c_mode 1 {CharacterId} {(UseSp || IsVehicled || IsMorphed ? Morph : 0)} {(!IsLaurenaMorph() && UseSp ? MorphUpgrade : 0)} {(!IsLaurenaMorph() && UseSp ? MorphUpgrade2 : 0)} {ArenaWinner} {Size} {item?.Item.Morph ?? 0}" : "";
         }
 
         public string GenerateCond() => $"cond 1 {CharacterId} {(!IsLaurenaMorph() && !CanAttack() ? 1 : 0)} {(!CanMove() ? 1 : 0)} {Speed}";
@@ -3162,22 +3190,23 @@ namespace OpenNos.GameObject
 
         public string GenerateGidx() //Left Faction
         {
+            string temp = string.Empty;
+
             if (Family == null || FamilyCharacter == null || Family.FamilySkillMissions == null)
             {
                 return $"gidx 1 {CharacterId} -1 - 0 0|0|0";
             }
 
             return
-                    $"gidx 1 " +
-                    $"{CharacterId} " +
-                    $"{Family.FamilyId} " +
-                    $"{Family.Name}" +
-                    $"({Language.Instance.GetMessageFromKey(FamilyCharacter.Authority.ToString().ToUpper())}) " +
-                    $"{Family.FamilyLevel} " +
-                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
-                    $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
-                    $"{(Family.FamilyFaction)}";
-        }     
+                $"gidx 1 " +
+                $"{CharacterId} " +
+                $"{Family.FamilyId}.{this.GetFamilyNameType()} " +
+                $"{Family.Name} " +
+                $"{Family.FamilyLevel} " +
+                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9600) ? 1 : 0)}|" +
+                $"{(Family.FamilySkillMissions.Any(s => s.ItemVNum == 9601) ? 1 : 0)}|" +
+                $"{(Family.FamilyFaction)}";
+        }
 
         public string GenerateGInfo()
         {
@@ -3188,8 +3217,7 @@ namespace OpenNos.GameObject
                     FamilyCharacter familyCharacter = Family.FamilyCharacters.Find(s => s.Authority == FamilyAuthority.Head);
                     if (familyCharacter != null)
                     {
-                        return
-                            $"ginfo {Family.Name} {familyCharacter.Character.Name} {(byte) Family.FamilyHeadGender} {Family.FamilyLevel} {Family.FamilyExperience} {CharacterHelper.LoadFamilyXPData(Family.FamilyLevel)} {Family.FamilyCharacters.Count} {Family.MaxSize} {(byte) FamilyCharacter.Authority} {(Family.ManagerCanInvite ? 1 : 0)} {(Family.ManagerCanNotice ? 1 : 0)} {(Family.ManagerCanShout ? 1 : 0)} {(Family.ManagerCanGetHistory ? 1 : 0)} {(byte) Family.ManagerAuthorityType} {(Family.MemberCanGetHistory ? 1 : 0)} {(byte) Family.MemberAuthorityType} {Family.FamilyMessage.Replace(' ', '^')}";
+                        return $"ginfo {Family.Name} {familyCharacter.Character.Name} {(byte)Family.FamilyHeadGender} {Family.FamilyLevel} {Family.FamilyExperience} {CharacterHelper.LoadFamilyXPData(Family.FamilyLevel)} {Family.FamilyCharacters.Count} {Family.MaxSize} {(byte)FamilyCharacter.Authority} {(Family.ManagerCanInvite ? 1 : 0)} {(Family.ManagerCanNotice ? 1 : 0)} {(Family.ManagerCanShout ? 1 : 0)} {(Family.ManagerCanGetHistory ? 1 : 0)} {(byte)Family.ManagerAuthorityType} {(Family.MemberCanGetHistory ? 1 : 0)} {(byte)Family.MemberAuthorityType} {Family.FamilyMessage.Replace(' ', '^')}";
                     }
                 }
                 catch (Exception)
@@ -3197,9 +3225,9 @@ namespace OpenNos.GameObject
                     return "";
                 }
             }
-
             return "";
         }
+
 
         public string GenerateGold() => $"gold {Gold} 0";
 
@@ -7352,15 +7380,15 @@ namespace OpenNos.GameObject
             MapInstance.Broadcast(Session, $"c_mode 1 {CharacterId} 1564 0 0 0");
             IsSeal = true;
             SealDisposable?.Dispose();
-            SealDisposable = Observable.Timer(TimeSpan.FromMilliseconds(5000)).Subscribe(o =>
+            SealDisposable = Observable.Timer(TimeSpan.FromMilliseconds(30000)).Subscribe(o =>
             {
-                short x = (short) (39 + ServerManager.RandomNumber(-2, 3));
-                short y = (short) (42 + ServerManager.RandomNumber(-2, 3));
+                short x = (short)(39 + ServerManager.RandomNumber(-2, 3));
+                short y = (short)(42 + ServerManager.RandomNumber(-2, 3));
 
                 IsSeal = false;
 
-                Hp = (int) HPLoad();
-                Mp = (int) MPLoad();
+                Hp = (int)HPLoad();
+                Mp = (int)MPLoad();
                 if (Faction == FactionType.Angel)
                 {
                     ServerManager.Instance.ChangeMap(CharacterId, 130, x, y);
@@ -7374,7 +7402,8 @@ namespace OpenNos.GameObject
                     MapId = 145;
                     MapX = 51;
                     MapY = 41;
-                    string connection = CommunicationServiceClient.Instance.RetrieveOriginWorld(Session.Account.AccountId);
+                    string connection =
+                        CommunicationServiceClient.Instance.RetrieveOriginWorld(Session.Account.AccountId);
                     if (string.IsNullOrWhiteSpace(connection))
                     {
                         return;

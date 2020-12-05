@@ -2337,11 +2337,10 @@ namespace NosTale.Extension.Extension.Packet
 
         public static void ZoneHit(this ClientSession Session, int castingId, short x, short y)
         {
-            var characterSkill = Session.Character.GetSkills()?.Find(s => s.Skill?.CastId == castingId);
+            CharacterSkill characterSkill = Session.Character.GetSkills()?.Find(s => s.Skill?.CastId == castingId);
             if (characterSkill == null || !Session.Character.WeaponLoaded(characterSkill)
                                        || !Session.HasCurrentMapInstance
-                                       || (x != 0 || y != 0) &&
-                                       !Session.Character.IsInRange(x, y, characterSkill.GetSkillRange() + 1))
+                                       || ((x != 0 || y != 0) && !Session.Character.IsInRange(x, y, characterSkill.GetSkillRange() + 1)))
             {
                 Session.SendPacket(StaticPacketHelper.Cancel(2));
                 return;
@@ -2349,20 +2348,16 @@ namespace NosTale.Extension.Extension.Packet
 
             if (characterSkill.CanBeUsed())
             {
-                var mpCost = characterSkill.MpCost();
+                short mpCost = characterSkill.MpCost();
                 short hpCost = 0;
 
-                mpCost = (short)(mpCost * ((100 - Session.Character.CellonOptions
-                                                 .Where(s => s.Type == CellonOptionType.MPUsage).Sum(s => s.Value)) /
-                                            100D));
+                mpCost = (short)(mpCost * ((100 - Session.Character.CellonOptions.Where(s => s.Type == CellonOptionType.MPUsage).Sum(s => s.Value)) / 100D));
 
-                if (Session.Character.GetBuff(BCardType.CardType.HealingBurningAndCasting,
-                        (byte)AdditionalTypes.HealingBurningAndCasting.HPDecreasedByConsumingMP)[0] is int
-                    HPDecreasedByConsumingMP)
+                if (Session.Character.GetBuff(CardType.HealingBurningAndCasting, (byte)AdditionalTypes.HealingBurningAndCasting.HPDecreasedByConsumingMP)[0] is int HPDecreasedByConsumingMP)
                 {
                     if (HPDecreasedByConsumingMP < 0)
                     {
-                        var amountDecreased = characterSkill.MpCost() * HPDecreasedByConsumingMP / 100;
+                        int amountDecreased = -(characterSkill.MpCost() * HPDecreasedByConsumingMP / 100);
                         hpCost = (short)amountDecreased;
                         mpCost -= (short)amountDecreased;
                     }
@@ -2372,14 +2367,9 @@ namespace NosTale.Extension.Extension.Packet
                 {
                     Session.Character.LastSkillUse = DateTime.Now;
 
-                    double cooldownReduction =
-                        Session.Character.GetBuff(BCardType.CardType.Morale,
-                            (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0] +
-                        Session.Character.GetBuff(BCardType.CardType.Casting,
-                            (byte)AdditionalTypes.Casting.EffectDurationIncreased)[0];
+                    double cooldownReduction = Session.Character.GetBuff(CardType.Morale, (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0];
 
-                    var increaseEnemyCooldownChance = Session.Character.GetBuff(BCardType.CardType.DarkCloneSummon,
-                        (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
+                    int[] increaseEnemyCooldownChance = Session.Character.GetBuff(CardType.DarkCloneSummon, (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
 
                     if (ServerManager.RandomNumber() < increaseEnemyCooldownChance[0])
                     {
@@ -2387,76 +2377,56 @@ namespace NosTale.Extension.Extension.Packet
                     }
 
                     Session.CurrentMapInstance.Broadcast(
-                                    $"ct_n 1 {Session.Character.CharacterId} 3 -1 {characterSkill.Skill.CastAnimation}" +
-                                    $" {characterSkill.Skill.CastEffect} {characterSkill.Skill.SkillVNum}");
-
+                        $"ct_n 1 {Session.Character.CharacterId} 3 -1 {characterSkill.Skill.CastAnimation}" +
+                        $" {characterSkill.Skill.CastEffect} {characterSkill.Skill.SkillVNum}");
                     characterSkill.LastUse = DateTime.Now;
-
-                    // We save the reduced cooldown amount for using it later
-                    var reducedCooldown = (characterSkill.Skill.Cooldown * (cooldownReduction / 100D));
-
-                    // We will check if there's a cooldown reduction in queue
-                    if (cooldownReduction != 0)
-                    {
-                        characterSkill.LastUse = characterSkill.LastUse.AddMilliseconds((reducedCooldown) * -1 * 100);
-                    }
                     if (!Session.Character.HasGodMode)
                     {
                         Session.Character.DecreaseMp(characterSkill.MpCost());
                     }
 
+                    characterSkill.LastUse = DateTime.Now;
                     Observable.Timer(TimeSpan.FromMilliseconds(characterSkill.Skill.CastTime * 100)).Subscribe(o =>
                     {
                         Session.CurrentMapInstance.Broadcast(
                             $"bs 1 {Session.Character.CharacterId} {x} {y} {characterSkill.Skill.SkillVNum}" +
-                            $" {(short)(characterSkill.Skill.Cooldown - reducedCooldown)} {characterSkill.Skill.AttackAnimation}" +
+                            $" {(short)(characterSkill.Skill.Cooldown + characterSkill.Skill.Cooldown * cooldownReduction / 100D)} {characterSkill.Skill.AttackAnimation}" +
                             $" {characterSkill.Skill.Effect} 0 0 1 1 0 0 0");
 
-                        var Range = characterSkill.TargetRange();
-                        if (characterSkill.GetSkillBCards().Any(s =>
-                            s.Type == (byte)BCardType.CardType.FalconSkill &&
-                            s.SubType == (byte)AdditionalTypes.FalconSkill.FalconFocusLowestHP))
+                        byte Range = characterSkill.TargetRange();
+                        if (characterSkill.GetSkillBCards().Any(s => s.Type == (byte)CardType.FalconSkill && s.SubType == (byte)AdditionalTypes.FalconSkill.FalconFocusLowestHP / 10))
                         {
                             if (Session.CurrentMapInstance.BattleEntities.Where(s => s.IsInRange(x, y, Range)
-                                                                                     && Session.Character.BattleEntity
-                                                                                         .CanAttackEntity(s))
-                                .OrderBy(s => s.Hp).FirstOrDefault() is BattleEntity lowestHPEntity)
+                                && Session.Character.BattleEntity.CanAttackEntity(s)).OrderBy(s => s.Hp).FirstOrDefault() is BattleEntity lowestHPEntity)
                             {
-                                Session.Character.MTListTargetQueue.Push(new MTListHitTarget(lowestHPEntity.UserType,
-                                        lowestHPEntity.MapEntityId, (TargetHitType)characterSkill.Skill.HitType));
+                                Session.Character.MTListTargetQueue.Push(new MTListHitTarget(lowestHPEntity.UserType, lowestHPEntity.MapEntityId, (TargetHitType)characterSkill.Skill.HitType));
                             }
                         }
                         else if (Session.Character.MTListTargetQueue.Count == 0)
                         {
                             Session.CurrentMapInstance.BattleEntities
-                                .Where(s => s.IsInRange(x, y, Range) &&
-                                            Session.Character.BattleEntity.CanAttackEntity(s))
-                                .ToList().ForEach(s =>
-                                    Session.Character.MTListTargetQueue.Push(new MTListHitTarget(s.UserType,
-                                        s.MapEntityId, (TargetHitType)characterSkill.Skill.HitType)));
+                            .Where(s => s.IsInRange(x, y, Range) && Session.Character.BattleEntity.CanAttackEntity(s))
+                            .ToList().ForEach(s => Session.Character.MTListTargetQueue.Push(new MTListHitTarget(s.UserType, s.MapEntityId, (TargetHitType)characterSkill.Skill.HitType)));
                         }
 
-                        var count = 0;
+                        int count = 0;
 
-                //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Monster).Select(s => s.TargetId))
-                foreach (var id in Session.Character.GetMTListTargetQueue_QuickFix(characterSkill,
-            UserType.Monster))
+                        //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Monster).Select(s => s.TargetId))
+                        foreach (long id in Session.Character.GetMTListTargetQueue_QuickFix(characterSkill, UserType.Monster))
                         {
-                            var mon = Session.CurrentMapInstance.GetMonsterById(id);
+                            MapMonster mon = Session.CurrentMapInstance.GetMonsterById(id);
                             if (mon?.CurrentHp > 0 && mon?.Owner?.MapEntityId != Session.Character.CharacterId)
                             {
                                 count++;
                                 mon.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, Session,
-                                    characterSkill.Skill, characterSkill.Skill.Effect, x, y,
-                                    showTargetAnimation: count == 0, skillBCards: characterSkill.GetSkillBCards()));
+                                    characterSkill.Skill, characterSkill.Skill.Effect, x, y, showTargetAnimation: count == 0, skillBCards: characterSkill.GetSkillBCards()));
                             }
                         }
 
-                //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Player).Select(s => s.TargetId))
-                foreach (var id in Session.Character.GetMTListTargetQueue_QuickFix(characterSkill,
-            UserType.Player))
+                        //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Player).Select(s => s.TargetId))
+                        foreach (long id in Session.Character.GetMTListTargetQueue_QuickFix(characterSkill, UserType.Player))
                         {
-                            var character = ServerManager.Instance.GetSessionByCharacterId(id);
+                            ClientSession character = ServerManager.Instance.GetSessionByCharacterId(id);
                             if (character != null && character.CurrentMapInstance == Session.CurrentMapInstance
                                                   && character.Character.CharacterId != Session.Character.CharacterId)
                             {
@@ -2464,43 +2434,35 @@ namespace NosTale.Extension.Extension.Packet
                                 {
                                     count++;
                                     Session.PvpHit(
-                                            new HitRequest(TargetHitType.SingleAOETargetHit, Session, characterSkill.Skill,
-                                                    characterSkill.Skill.Effect, x, y, showTargetAnimation: count == 0,
-                                                    skillBCards: characterSkill.GetSkillBCards()),
-                                            character);
+                                        new HitRequest(TargetHitType.SingleAOETargetHit, Session, characterSkill.Skill, characterSkill.Skill.Effect, x, y, showTargetAnimation: count == 0, skillBCards: characterSkill.GetSkillBCards()),
+                                        character);
                                 }
                             }
                         }
 
                         characterSkill.GetSkillBCards().ToList().Where(s =>
-                                s.Type.Equals((byte)BCardType.CardType.Buff) &&
-                                new Buff((short)s.SecondData, Session.Character.Level).Card.BuffType.Equals(
-                                    BuffType.Good)
-                                || s.Type.Equals((byte)BCardType.CardType.FalconSkill) &&
-                                s.SubType.Equals((byte)AdditionalTypes.FalconSkill.CausingChanceLocation)
-                                || s.Type.Equals((byte)BCardType.CardType.FearSkill) &&
-                                s.SubType.Equals((byte)AdditionalTypes.FearSkill.ProduceWhenAmbushe)).ToList()
-                            .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity,
-                                x, y, characterSkill.TattooLevel));
+                           (s.Type.Equals((byte)CardType.Buff) && new Buff((short)s.SecondData, Session.Character.Level).Card.BuffType.Equals(BuffType.Good))
+                        || (s.Type.Equals((byte)CardType.FalconSkill) && s.SubType.Equals((byte)AdditionalTypes.FalconSkill.CausingChanceLocation / 10))
+                        || (s.Type.Equals((byte)CardType.FearSkill) && s.SubType.Equals((byte)AdditionalTypes.FearSkill.ProduceWhenAmbushe / 10))).ToList()
+                        .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, x, y, characterSkill.TattooLevel));
 
                         Session.Character.MTListTargetQueue.Clear();
                     });
 
-                    Observable.Timer(TimeSpan.FromMilliseconds(
-                            (short)(characterSkill.Skill.Cooldown - reducedCooldown) * 100))
+                    Observable.Timer(TimeSpan.FromMilliseconds((short)(characterSkill.Skill.Cooldown + characterSkill.Skill.Cooldown * cooldownReduction / 100D) * 100))
                         .Subscribe(o =>
                         {
-                            var
+                            CharacterSkill
                                 skill = Session.Character.GetSkills().Find(s =>
                                     s.Skill?.CastId
-                                    == castingId &&
-                                    (s.Skill?.UpgradeSkill == 0 ||
-                                     s.Skill?.SkillType == (byte)SkillType.CharacterSKill));
-                            if (skill != null &&
-                                skill.LastUse.AddMilliseconds(
-                                    (short)(characterSkill.Skill.Cooldown - reducedCooldown) * 100 - 100) <=
-                                DateTime.Now)
+                                    == castingId && (s.Skill?.UpgradeSkill == 0 || s.Skill?.SkillType == 1));
+                            if (skill != null && skill.LastUse.AddMilliseconds((short)(characterSkill.Skill.Cooldown + characterSkill.Skill.Cooldown * cooldownReduction / 100D) * 100 - 100) <= DateTime.Now)
                             {
+                                if (cooldownReduction < 0)
+                                {
+                                    skill.LastUse = DateTime.Now.AddMilliseconds(skill.Skill.Cooldown * 100 * -1);
+                                    skill.LastUse.AddSeconds(cooldownReduction);
+                                }
 
                                 Session.SendPacket(StaticPacketHelper.SkillReset(castingId));
                             }
@@ -2511,6 +2473,7 @@ namespace NosTale.Extension.Extension.Packet
                     Session.SendPacket(
                         Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("NOT_ENOUGH_MP"), 10));
                     Session.SendPacket(StaticPacketHelper.Cancel(2));
+                    Session.SendPacket($"guri 19 {(short)UserType.Player} {Session.Character.CharacterId} 1323");
                 }
             }
             else

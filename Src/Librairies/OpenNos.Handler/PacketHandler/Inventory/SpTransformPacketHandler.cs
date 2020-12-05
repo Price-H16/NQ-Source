@@ -32,8 +32,8 @@ namespace OpenNos.Handler.PacketHandler.Inventory
         {
             if (spTransformPacket != null && !Session.Character.IsSeal && !Session.Character.IsMorphed)
             {
-                var specialistInstance =
-                    Session.Character.Inventory.LoadBySlotAndType((byte) EquipmentType.Sp, InventoryType.Wear);
+                ItemInstance specialistInstance =
+                    Session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.Sp, InventoryType.Wear);
 
                 if (spTransformPacket.Type == 10)
                 {
@@ -41,9 +41,9 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                         specialistDefense = spTransformPacket.SpecialistDefense,
                         specialistElement = spTransformPacket.SpecialistElement,
                         specialistHealpoints = spTransformPacket.SpecialistHP;
-                    var transportId = spTransformPacket.TransportId;
+                    int transportId = spTransformPacket.TransportId;
                     if (!Session.Character.UseSp || specialistInstance == null
-                                                 || transportId != specialistInstance.TransportId)
+                        || transportId != specialistInstance.TransportId)
                     {
                         Session.SendPacket(
                             UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SPUSE_NEEDED"), 0));
@@ -59,7 +59,7 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                     }
 
                     if (specialistDamage < 0 || specialistDefense < 0 || specialistElement < 0
-                     || specialistHealpoints < 0)
+                        || specialistHealpoints < 0)
                     {
                         return;
                     }
@@ -68,13 +68,36 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                     specialistInstance.SlDefence += specialistDefense;
                     specialistInstance.SlElement += specialistElement;
                     specialistInstance.SlHP += specialistHealpoints;
+                    ItemInstance mainWeapon = Session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
+                    ItemInstance secondaryWeapon = Session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.MainWeapon, InventoryType.Wear);
+                    List<ShellEffectDTO> effects = new List<ShellEffectDTO>();
+                    if (mainWeapon?.ShellEffects != null)
+                    {
+                        effects.AddRange(mainWeapon.ShellEffects);
+                    }
+
+                    if (secondaryWeapon?.ShellEffects != null)
+                    {
+                        effects.AddRange(secondaryWeapon.ShellEffects);
+                    }
+
+                    int GetShellWeaponEffectValue(ShellWeaponEffectType effectType)
+                    {
+                        return effects.Where(s => s.Effect == (byte)effectType).OrderByDescending(s => s.Value)
+                                   .FirstOrDefault()?.Value ?? 0;
+                    }
+
+                    int slElement = CharacterHelper.SlPoint(specialistInstance.SlElement, 2) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLElement) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLGlobal);
+                    int slHp = CharacterHelper.SlPoint(specialistInstance.SlHP, 3) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLHP) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLGlobal);
+                    int slDefence = CharacterHelper.SlPoint(specialistInstance.SlDefence, 1) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLDefence) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLGlobal);
+                    int slHit = CharacterHelper.SlPoint(specialistInstance.SlDamage, 0) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLDamage) + GetShellWeaponEffectValue(ShellWeaponEffectType.SLGlobal);
 
                     CharacterHelper.UpdateSPPoints(ref specialistInstance, Session);
 
+                    Session.SendPackets(Session.Character.GenerateStatChar());
+                    Session.SendPacket(Session.Character.GenerateStat());
                     Session.SendPacket(specialistInstance.GenerateSlInfo(Session));
-
-                    Session.SendPacket(
-                        UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("POINTS_SET"), 0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("POINTS_SET"), 0));
                 }
                 else if (!Session.Character.IsSitting)
                 {

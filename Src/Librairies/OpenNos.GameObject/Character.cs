@@ -2585,8 +2585,8 @@ namespace OpenNos.GameObject
             var morph = (UseSp && !IsVehicled && SpInstance.HasSkin ? SpInstance.Item.VNum == 903 ? 102 : SpInstance.Item.VNum == 913 ? 101 : SpInstance.Item.VNum == 902 ? 100 : UseSp || IsVehicled || IsMorphed ? Morph : 0 : UseSp || IsVehicled || IsMorphed ? Morph : 0);
 
             var name = (Authority > AuthorityType.User && !Undercover ? Authority == AuthorityType.Supporter ? $"[{Authority}]" + Name : Name : Name);
-            return 
-                $"c_info {(Authority >= AuthorityType.User ? $"[{Authority}]{Name}" : Name)} - -1 {(Family != null && FamilyCharacter != null && !Undercover ? $"{Family.FamilyId}.{this.GetFamilyNameType()} {Family.Name}" : "-1 -")} " +
+            return
+                $"c_info {name} - -1 {(Family != null && FamilyCharacter != null && !Undercover ? $"{Family.FamilyId}.{this.GetFamilyNameType()} {Family.Name}" : "-1 -")} " +
                    $"{CharacterId} {(Invisible && Authority >= AuthorityType.Supporter ? 6 : 0)} " +
                    $"{(byte)Gender} {(byte)HairStyle} " +
                    $"{(byte)HairColor} {(byte)Class} " +

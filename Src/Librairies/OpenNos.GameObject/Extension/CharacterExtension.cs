@@ -106,6 +106,19 @@ namespace OpenNos.GameObject.Extension
                 thisRank == FamilyAuthority.Head ? "915" : "-1 -";
         }
 
+        public static string GetClassType(this Character e)
+        {
+            var thisClass = e.Class;
+
+            return thisClass == ClassType.Adventurer ? "35" :
+                thisClass == ClassType.Swordsman ? "36" :
+                thisClass == ClassType.Archer ? "37" :
+                thisClass == ClassType.Magician ? "38" :
+                thisClass == ClassType.MartialArtist ? "39" : "0";
+
+
+        }
+
         public static void SendShopEnd(this ClientSession s)
         {
             s.SendPacket("shop_end 2");

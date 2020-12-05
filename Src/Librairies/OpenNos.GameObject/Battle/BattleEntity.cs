@@ -543,6 +543,7 @@ namespace OpenNos.GameObject.Battle
 
             EntityType = EntityType.Player;
             UserType = UserType.Player;
+
             DamageMinimum = character.MinHit;
             DamageMaximum = character.MaxHit;
             Hitrate = character.HitRate;
@@ -949,46 +950,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.BrushFireJagged;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.BrushFireJagged;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.BrushFireJagged;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.BrushFireJagged;
-                }
-
-                return null;
+                if (Character != null) return Character.BrushFireJagged;
+                else if (Mate != null) return Mate.BrushFireJagged;
+                else if (MapMonster != null) return MapMonster.BrushFireJagged;
+                else if (MapNpc != null) return MapNpc.BrushFireJagged;
+                else return null;
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.BrushFireJagged = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.BrushFireJagged = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.BrushFireJagged = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.BrushFireJagged = value;
-                }
+                if (Character != null) Character.BrushFireJagged = value;
+                else if (Mate != null) Mate.BrushFireJagged = value;
+                else if (MapMonster != null) MapMonster.BrushFireJagged = value;
+                else if (MapNpc != null) MapNpc.BrushFireJagged = value;
             }
         }
 
@@ -1045,46 +1018,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.Hp;
-                }
-
-                if (Mate != null)
-                {
-                    return (int)Mate.Hp;
-                }
-
-                if (MapMonster != null)
-                {
-                    return (int)MapMonster.CurrentHp;
-                }
-
-                if (MapNpc != null)
-                {
-                    return (int)MapNpc.CurrentHp;
-                }
-
-                return 0;
+                if (Character != null) return Character.Hp;
+                else if (Mate != null) return (int)Mate.Hp;
+                else if (MapMonster != null) return (int)MapMonster.CurrentHp;
+                else if (MapNpc != null) return (int)MapNpc.CurrentHp;
+                else return 0;
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.Hp = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.Hp = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.CurrentHp = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.CurrentHp = value;
-                }
+                if (Character != null) Character.Hp = value;
+                else if (Mate != null) Mate.Hp = value;
+                else if (MapMonster != null) MapMonster.CurrentHp = value;
+                else if (MapNpc != null) MapNpc.CurrentHp = value;
             }
         }
 
@@ -1092,27 +1037,11 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return (int)Character.HPLoad();
-                }
-
-                if (Mate != null)
-                {
-                    return (int)Mate.MaxHp;
-                }
-
-                if (MapMonster != null)
-                {
-                    return (int)MapMonster.MaxHp;
-                }
-
-                if (MapNpc != null)
-                {
-                    return (int)MapNpc.MaxHp;
-                }
-
-                return 0;
+                if (Character != null) return (int)Character.HPLoad();
+                else if (Mate != null) return (int)Mate.MaxHp;
+                else if (MapMonster != null) return (int)MapMonster.MaxHp;
+                else if (MapNpc != null) return (int)MapNpc.MaxHp;
+                else return 0;
             }
         }
 
@@ -1122,46 +1051,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.LastDefence;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.LastDefence;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.LastDefence;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.LastDefence;
-                }
-
-                return new DateTime();
+                if (Character != null) return Character.LastDefence;
+                else if (Mate != null) return Mate.LastDefence;
+                else if (MapMonster != null) return MapMonster.LastDefence;
+                else if (MapNpc != null) return MapNpc.LastDefence;
+                else return new DateTime();
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.LastDefence = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.LastDefence = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.LastDefence = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.LastDefence = value;
-                }
+                if (Character != null) Character.LastDefence = value;
+                else if (Mate != null) Mate.LastDefence = value;
+                else if (MapMonster != null) MapMonster.LastDefence = value;
+                else if (MapNpc != null) MapNpc.LastDefence = value;
             }
         }
 
@@ -1169,46 +1070,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.LastMonsterAggro;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.LastMonsterAggro;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.LastMonsterAggro;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.LastMonsterAggro;
-                }
-
-                return new DateTime();
+                if (Character != null) return Character.LastMonsterAggro;
+                else if (Mate != null) return Mate.LastMonsterAggro;
+                else if (MapMonster != null) return MapMonster.LastMonsterAggro;
+                else if (MapNpc != null) return MapNpc.LastMonsterAggro;
+                else return new DateTime();
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.LastMonsterAggro = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.LastMonsterAggro = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.LastMonsterAggro = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.LastMonsterAggro = value;
-                }
+                if (Character != null) Character.LastMonsterAggro = value;
+                else if (Mate != null) Mate.LastMonsterAggro = value;
+                else if (MapMonster != null) MapMonster.LastMonsterAggro = value;
+                else if (MapNpc != null) MapNpc.LastMonsterAggro = value;
             }
         }
 
@@ -1222,32 +1095,16 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.CharacterId;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.MateTransportId;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.MapMonsterId;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.MapNpcId;
-                }
-
-                return 0;
+                if (Character != null) return Character.CharacterId;
+                else if (Mate != null) return Mate.MateTransportId;
+                else if (MapMonster != null) return MapMonster.MapMonsterId;
+                else if (MapNpc != null) return MapNpc.MapNpcId;
+                else return 0;
             }
         }
 
-        public MapInstance MapInstance => Character?.MapInstance ??
-                                          Mate?.Owner?.MapInstance ?? MapMonster?.MapInstance ?? MapNpc?.MapInstance;
+        public MapInstance MapInstance => Character?.MapInstance ?? Mate?.Owner?.MapInstance ?? MapMonster?.MapInstance ?? MapNpc?.MapInstance;
+
 
         public MapMonster MapMonster { get; set; }
 
@@ -1342,46 +1199,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.PositionX;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.PositionX;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.MapX;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.MapX;
-                }
-
-                return 0;
+                if (Character != null) return Character.PositionX;
+                else if (Mate != null) return Mate.PositionX;
+                else if (MapMonster != null) return MapMonster.MapX;
+                else if (MapNpc != null) return MapNpc.MapX;
+                else return 0;
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.PositionX = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.PositionX = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.MapX = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.MapX = value;
-                }
+                if (Character != null) Character.PositionX = value;
+                else if (Mate != null) Mate.PositionX = value;
+                else if (MapMonster != null) MapMonster.MapX = value;
+                else if (MapNpc != null) MapNpc.MapX = value;
             }
         }
 
@@ -1389,46 +1218,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.PositionY;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.PositionY;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.MapY;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.MapY;
-                }
-
-                return 0;
+                if (Character != null) return Character.PositionY;
+                else if (Mate != null) return Mate.PositionY;
+                else if (MapMonster != null) return MapMonster.MapY;
+                else if (MapNpc != null) return MapNpc.MapY;
+                else return 0;
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.PositionY = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.PositionY = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.MapY = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.MapY = value;
-                }
+                if (Character != null) Character.PositionY = value;
+                else if (Mate != null) Mate.PositionY = value;
+                else if (MapMonster != null) MapMonster.MapY = value;
+                else if (MapNpc != null) MapNpc.MapY = value;
             }
         }
 
@@ -1436,46 +1237,18 @@ namespace OpenNos.GameObject.Battle
         {
             get
             {
-                if (Character != null)
-                {
-                    return Character.PVELockObject;
-                }
-
-                if (Mate != null)
-                {
-                    return Mate.PVELockObject;
-                }
-
-                if (MapMonster != null)
-                {
-                    return MapMonster.PVELockObject;
-                }
-
-                if (MapNpc != null)
-                {
-                    return MapNpc.PVELockObject;
-                }
-
-                return 0;
+                if (Character != null) return Character.PVELockObject;
+                else if (Mate != null) return Mate.PVELockObject;
+                else if (MapMonster != null) return MapMonster.PVELockObject;
+                else if (MapNpc != null) return MapNpc.PVELockObject;
+                else return 0;
             }
             set
             {
-                if (Character != null)
-                {
-                    Character.PVELockObject = value;
-                }
-                else if (Mate != null)
-                {
-                    Mate.PVELockObject = value;
-                }
-                else if (MapMonster != null)
-                {
-                    MapMonster.PVELockObject = value;
-                }
-                else if (MapNpc != null)
-                {
-                    MapNpc.PVELockObject = value;
-                }
+                if (Character != null) Character.PVELockObject = value;
+                else if (Mate != null) Mate.PVELockObject = value;
+                else if (MapMonster != null) MapMonster.PVELockObject = value;
+                else if (MapNpc != null) MapNpc.PVELockObject = value;
             }
         }
 
@@ -1485,8 +1258,8 @@ namespace OpenNos.GameObject.Battle
 
         public int Resistance { get; set; }
 
-        public int ResistForcedMovement => GetBuff(CardType.AbsorbedSpirit,
-            (byte)AdditionalTypes.AbsorbedSpirit.ResistForcedMovement)[0];
+        public int ResistForcedMovement => GetBuff(CardType.AbsorbedSpirit, (byte)AdditionalTypes.AbsorbedSpirit.ResistForcedMovement)[0];
+
 
         public List<RuneEffectDTO> RuneWeaponEffects { get; }
 

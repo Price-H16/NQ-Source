@@ -806,6 +806,10 @@ namespace OpenNos.GameObject.Helpers
                     session.Character.AddBuff(new Buff(4040, session.Character.Level, true),
                         session.Character.BattleEntity, true);
                     break;
+                case 5: //Blade Wings
+                    session.Character.AddBuff(new Buff(838, session.Character.Level, true),
+                        session.Character.BattleEntity, true);
+                    break;
             }
         }
 

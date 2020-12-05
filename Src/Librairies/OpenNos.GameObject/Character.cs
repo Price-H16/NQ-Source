@@ -390,6 +390,8 @@ namespace OpenNos.GameObject
 
         public DateTime LastSpeedChange { get; set; }
 
+        public DateTime lasteffectid { get; set; }
+
         public DateTime LastSpGaugeRemove { get; set; }
 
         public DateTime LastTransform { get; set; }
@@ -1619,111 +1621,38 @@ namespace OpenNos.GameObject
                     RemoveBuff(4035);
                 }
                 #endregion
-                #region Battle Tower Level Up
 
-                switch (BattleTowerExp)
+                if (Session.Character.lasteffectid > DateTime.Now)
                 {
-                    case 20:
-                        if (Session.Character.BattleTowerStage == 0)
-                        {
-                            Session.Character.BattleTowerStage += 1;
-                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 1!");
-                        }
-                        break;
-
-                    case 100:
-                        if (Session.Character.BattleTowerStage == 0)
-                        {
-                            Session.Character.BattleTowerStage += 1;
-                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 2!");
-                        }
-                        break;
-
-                    case 200:
-                        if (Session.Character.BattleTowerStage == 0)
-                        {
-                            Session.Character.BattleTowerStage += 1;
-                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 3!");
-                        }
-                        break;
-
-                    case 350:
-                        if (Session.Character.BattleTowerStage == 0)
-                        {
-                            Session.Character.BattleTowerStage += 1;
-                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 4!");
-                        }
-                        break;
-
-                    case 500:
-                        if (Session.Character.BattleTowerStage == 0)
-                        {
-                            Session.Character.BattleTowerStage += 1;
-                            Session.SendPacket("msg 4 You are now at Battle Tower Stage 5!");
-                        }
-                        break;
-
-#warning TODO: Add Rewards
+                    // nothing
                 }
-                #endregion
-                #region Family Buffs
-
-                if (Session.Character.Family != null)
+                else
                 {
-                    if (FamilyBuff.AddSeconds(60) <= DateTime.Now)
+
+                    if (Session.Character.Family != null)
                     {
-                        FamilyBuff = DateTime.Now;
+                        int effectid10 = 3039;
+                        int effectid20 = 3040;
 
-                        switch (Session.Character.Family.FamilyLevel)
+
+                        if (Session.Character.Family.FamilyLevel == 10)
                         {
-                            case 2:
-                            case 3:
-                                Session.Character.AddBuff(new Buff(4051, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
+                            Session.CurrentMapInstance?.Broadcast(
+            StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId,
+                effectid10), Session.Character.PositionX, Session.Character.PositionY);
+                            Session.Character.lasteffectid = DateTime.Now.AddSeconds(15);
 
-                            case 4:
-                            case 5:
-                                Session.Character.AddBuff(new Buff(4052, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
+                        }
 
-                            case 6:
-                            case 7:
-                                Session.Character.AddBuff(new Buff(4053, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
+                        if (Session.Character.Family.FamilyLevel == 20)
+                        {
+                            Session.CurrentMapInstance?.Broadcast(
+            StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId,
+                effectid20), Session.Character.PositionX, Session.Character.PositionY);
+                            Session.Character.lasteffectid = DateTime.Now.AddSeconds(15);
 
-                            case 8:
-                            case 9:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
 
-                            case 10:
-                            case 11:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
 
-                            case 12:
-                            case 13:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
-
-                            case 14:
-                            case 15:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
-
-                            case 16:
-                            case 17:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
-
-                            case 18:
-                            case 19:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
-
-                            case 20:
-                                Session.Character.AddBuff(new Buff(729, Session.Character.Level), Session.Character.BattleEntity);
-                                break;
                         }
                     }
                 }
@@ -8406,7 +8335,6 @@ namespace OpenNos.GameObject
 
         private double XpLoad() => CharacterHelper.XPData[Level - 1];
 
-        #endregion
 
         #region Runes
 

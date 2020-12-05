@@ -10,15 +10,20 @@ namespace NosTale.Packets.Packets.ServerPackets
     {
         #region Properties
 
-        [PacketIndex(0)] public UserType MoveType { get; set; }
+        [PacketIndex(0)]
+        public UserType MoveType { get; set; }
 
-        [PacketIndex(1)] public long CallerId { get; set; }
+        [PacketIndex(1)]
+        public long CallerId { get; set; }
 
-        [PacketIndex(2)] public short PositionX { get; set; }
+        [PacketIndex(2)]
+        public short PositionX { get; set; }
 
-        [PacketIndex(3)] public short PositionY { get; set; }
+        [PacketIndex(3)]
+        public short PositionY { get; set; }
 
-        [PacketIndex(4)] public byte Speed { get; set; }
+        [PacketIndex(4)]
+        public byte Speed { get; set; }
 
         #endregion
     }

@@ -273,14 +273,14 @@ namespace OpenNos.GameObject
                             break;
 
                         case BCardType.CardType.Move:
-                        {
-                            if (session.Character != null)
                             {
-                                session.Character.LastSpeedChange = DateTime.Now;
-                                session.Character.LoadSpeed();
-                                session.Character.Session?.SendPacket(session.Character.GenerateCond());
+                                if (session.Character != null)
+                                {
+                                    session.Character.LastSpeedChange = DateTime.Now;
+                                    session.Character.LoadSpeed();
+                                    session.Character.Session?.SendPacket(session.Character.GenerateCond());
+                                }
                             }
-                        }
                             break;
 
                         case BCardType.CardType.Summons:

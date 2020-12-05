@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenNos.Core;
+using OpenNos.Data;
 using OpenNos.Domain;
 using OpenNos.GameObject;
 using OpenNos.GameObject.Battle;
@@ -31,43 +32,39 @@ namespace NosTale.Extension.Extension.Packet
                     target.Character.Rest();
                 }
 
-                double cooldownReduction = Session.Character.GetBuff(BCardType.CardType.Morale,
-                                                   (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0] +
-                                           Session.Character.GetBuff(BCardType.CardType.Casting,
-                                                   (byte)AdditionalTypes.Casting.EffectDurationIncreased)[0];
+                double cooldownReduction = Session.Character.GetBuff(CardType.Morale, (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0];
 
-                var increaseEnemyCooldownChance = Session.Character.GetBuff(BCardType.CardType.DarkCloneSummon,
-                    (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
+                int[] increaseEnemyCooldownChance = Session.Character.GetBuff(CardType.DarkCloneSummon, (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
 
                 if (ServerManager.RandomNumber() < increaseEnemyCooldownChance[0])
                 {
                     cooldownReduction -= increaseEnemyCooldownChance[1];
                 }
 
-                var hitmode = 0;
-                var onyxWings = false;
+                int hitmode = 0;
+                bool onyxWings = false;
                 var zephyrWings = false;
-                var battleEntity = new BattleEntity(hitRequest.Session.Character, hitRequest.Skill);
-                var battleEntityDefense = new BattleEntity(target.Character, null);
-                var damage = DamageHelper.Instance.CalculateDamage(battleEntity, battleEntityDefense, hitRequest.Skill,
+                BattleEntity battleEntity = new BattleEntity(hitRequest.Session.Character, hitRequest.Skill);
+                BattleEntity battleEntityDefense = new BattleEntity(target.Character, null);
+                int damage = DamageHelper.Instance.CalculateDamage(battleEntity, battleEntityDefense, hitRequest.Skill,
                     ref hitmode, ref onyxWings, ref zephyrWings);
-
                 if (target.Character.HasGodMode || target.Character.isFreezed)
                 {
                     damage = 0;
                     hitmode = 4;
                 }
-
-                else if (target.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10) || hitRequest.Session.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10))
+                else if (target.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10)
+                         || hitRequest.Session.Character.LastPVPRevive > DateTime.Now.AddSeconds(-10))
                 {
                     damage = 0;
                     hitmode = 4;
                 }
 
-                if (ServerManager.RandomNumber() < target.Character.GetBuff(BCardType.CardType.DarkCloneSummon,
-                        (byte)AdditionalTypes.DarkCloneSummon.ConvertDamageToHPChance)[0])
+
+                if (ServerManager.RandomNumber() < target.Character.GetBuff(CardType.DarkCloneSummon,
+                    (byte)AdditionalTypes.DarkCloneSummon.ConvertDamageToHPChance)[0])
                 {
-                    var amount = damage / 2;
+                    int amount = damage / 2;
 
                     target.Character.ConvertedDamageToHP += amount;
                     target.Character.MapInstance?.Broadcast(target.Character.GenerateRc(amount));
@@ -83,35 +80,31 @@ namespace NosTale.Extension.Extension.Packet
                     damage = 0;
                 }
 
-                if (hitmode != 4 && hitmode != 2)
+                if (hitmode != 4 && hitmode != 2 && damage > 0)
                 {
                     Session.Character.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
                     {
-                        new KeyValuePair<byte, byte>((byte) BCardType.CardType.SpecialActions,
-                            (byte) AdditionalTypes.SpecialActions.Hide)
+                        new KeyValuePair<byte, byte>((byte)CardType.SpecialActions, (byte)AdditionalTypes.SpecialActions.Hide)
                     });
                     target.Character.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
                     {
-                        new KeyValuePair<byte, byte>((byte) BCardType.CardType.SpecialActions,
-                            (byte) AdditionalTypes.SpecialActions.Hide)
+                        new KeyValuePair<byte, byte>((byte)CardType.SpecialActions, (byte)AdditionalTypes.SpecialActions.Hide)
                     });
                     target.Character.RemoveBuff(36);
                     target.Character.RemoveBuff(548);
                 }
 
-                if (Session.Character.Buff.FirstOrDefault(s => s.Card.BCards.Any(b =>
-                    b.Type == (byte)BCardType.CardType.FalconSkill &&
-                    b.SubType.Equals((byte)AdditionalTypes.FalconSkill.Hide))) is Buff FalconHideBuff)
+                if (Session.Character.Buff.FirstOrDefault(s => s.Card.BCards.Any(b => b.Type == (byte)BCardType.CardType.FalconSkill && b.SubType.Equals((byte)AdditionalTypes.FalconSkill.Hide / 10))) is Buff FalconHideBuff)
                 {
                     Session.Character.RemoveBuff(FalconHideBuff.Card.CardId);
                     Session.Character.AddBuff(new Buff(560, Session.Character.Level), Session.Character.BattleEntity);
                 }
 
-                var manaShield = target.Character.GetBuff(BCardType.CardType.LightAndShadow,
+                int[] manaShield = target.Character.GetBuff(CardType.LightAndShadow,
                     (byte)AdditionalTypes.LightAndShadow.InflictDamageToMP);
                 if (manaShield[0] != 0 && hitmode != 4)
                 {
-                    var reduce = damage / 100 * manaShield[0];
+                    int reduce = damage / 100 * manaShield[0];
                     if (target.Character.Mp < reduce)
                     {
                         reduce = target.Character.Mp;
@@ -121,16 +114,15 @@ namespace NosTale.Extension.Extension.Packet
                     {
                         target.Character.DecreaseMp(reduce);
                     }
-
                     damage -= reduce;
                 }
 
                 if (onyxWings && hitmode != 4 && hitmode != 2)
                 {
-                    var onyxX = (short)(hitRequest.Session.Character.PositionX + 2);
-                    var onyxY = (short)(hitRequest.Session.Character.PositionY + 2);
-                    var onyxId = target.CurrentMapInstance.GetNextMonsterId();
-                    var onyx = new MapMonster
+                    short onyxX = (short)(hitRequest.Session.Character.PositionX + 2);
+                    short onyxY = (short)(hitRequest.Session.Character.PositionY + 2);
+                    int onyxId = target.CurrentMapInstance.GetNextMonsterId();
+                    MapMonster onyx = new MapMonster
                     {
                         MonsterVNum = 2371,
                         MapX = onyxX,
@@ -148,36 +140,119 @@ namespace NosTale.Extension.Extension.Packet
                     target.Character.GetDamage((int)(damage / 2D), battleEntity);
                     Observable.Timer(TimeSpan.FromMilliseconds(350)).Subscribe(o =>
                     {
-                        target?.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, onyxId, 1,
+                        target.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, onyxId, 1,
                             target.Character.CharacterId, -1, 0, -1, hitRequest.Skill.Effect, -1, -1, true, 92,
                             (int)(damage / 2D), 0, 0));
-                        target?.CurrentMapInstance.RemoveMonster(onyx);
-                        target?.CurrentMapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster,
+                        target.CurrentMapInstance.RemoveMonster(onyx);
+                        target.CurrentMapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster,
                             onyx.MapMonsterId));
                     });
                 }
 
-                if (zephyrWings && hitmode != 1)
+                #region C45 equipe buffs
+
+                ItemInstance itemInUse = null;
+
+                //A bit hardcoded but works properly
+                if (Session.Character.Buff.ContainsKey(413) || Session.Character.Buff.ContainsKey(416) || Session.Character.Buff.ContainsKey(414))
                 {
-                    target.Character.GetDamage(damage / 2, battleEntity);
-                    var damage1 = damage;
-                    target.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                        hitRequest.Session.Character.CharacterId, 1,
-                        target.Character.CharacterId, -1, 0, -1, 4211, -1, -1, true, 92, damage1 / 2, 0, 1));
+                    if (Session.Character.Buff.ContainsKey(413) || Session.Character.Buff.ContainsKey(414))
+                        Session.Character.ConvertedDamageToHP = (int)(damage * 8 / 100D);
+                    else
+                    {
+                        Session.Character.ConvertedDamageToHP = (int)(damage * 15 / 100D);
+                        Session.Character.Mp += Session.Character.ConvertedDamageToHP;
+                    }
+                    Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateRc(Session.Character.ConvertedDamageToHP));
+                    Session.Character.Hp += Session.Character.ConvertedDamageToHP;
+                    Session.Character.Session.SendPacket(Session.Character.GenerateStat());
                 }
 
-                if (target.Character.GetBuff(BCardType.CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectsMaximumDamageFromNegated)[0] > 0)
+                //Main weapons
+                itemInUse = Session.Character.Inventory.LoadBySlotAndType(0, InventoryType.Wear);
+
+                //Sword
+                if (itemInUse != null && itemInUse.Item.VNum == 4981 && ServerManager.RandomNumber() <= 8)
                 {
-                    hitRequest.Session.Character.GetDamage(damage / 2, new BattleEntity(target.Character, null), true);
-                    hitRequest.Session.SendPacket($"bf 1 {hitRequest.Session.Character.CharacterId} 0.0.0 {hitRequest.Session.Character.Level}");
-                    hitRequest.Session.Character.LastDefence = DateTime.Now;
-                    target.Character.LastDefence = DateTime.Now;
-                    target.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player, target.Character.CharacterId, 1,
-                        hitRequest.Session.Character.CharacterId, -1, 0, -1, hitRequest.Skill.Effect, -1, -1, true, 92,
-                        damage, 0, 0));
-                    hitRequest.Session.SendPacket(target.Character.GenerateStat());
-                    damage = 0;
+                    Session.Character.ConvertedDamageToHP = (int)(damage * 8 / 100D);
+                    Session.Character.AddBuff(new Buff(413, Session.Character.Level), Session.Character.BattleEntity);
                 }
+
+                //Staff
+                if (itemInUse != null && itemInUse.Item.VNum == 4982 && ServerManager.RandomNumber() <= 10)
+                {
+                    Session.Character.ConvertedDamageToHP = (int)(damage * 15 / 100D);
+                    Session.Character.AddBuff(new Buff(416, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Bow
+                if (itemInUse != null && itemInUse.Item.VNum == 4983 && ServerManager.RandomNumber() <= 4)
+                {
+                    target.Character.AddBuff(new Buff(415, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                if (target.Character.Buff.ContainsKey(415) && ServerManager.RandomNumber() <= 50)
+                    foreach (Buff b in target.Character.Buff.Where(b => b.Card.BuffType == BuffType.Good && b.Card.Level < 4))
+                        target.Character.RemoveBuff(b.Card.CardId);
+
+                //Punch
+                if (itemInUse != null && itemInUse.Item.VNum == 4736 && ServerManager.RandomNumber() <= 7)
+                {
+                    target.Character.AddBuff(new Buff(672, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Secondary weapons
+                itemInUse = Session.Character.Inventory.LoadBySlotAndType(5, InventoryType.Wear);
+
+                //Crossbow
+                if (itemInUse != null && itemInUse.Item.VNum == 4978 && ServerManager.RandomNumber() <= 5)
+                {
+                    target.Character.AddBuff(new Buff(417, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Dagger
+                if (itemInUse != null && itemInUse.Item.VNum == 4980 && ServerManager.RandomNumber() <= 8)
+                {
+                    Session.Character.ConvertedDamageToHP = (int)(damage * 8 / 100D);
+                    Session.Character.AddBuff(new Buff(414, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Gun
+                if (itemInUse != null && itemInUse.Item.VNum == 4979 && ServerManager.RandomNumber() <= 5)
+                {
+                    target.Character.AddBuff(new Buff(418, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //NO c45 secondary weap for MA
+
+                //Armors
+                itemInUse = Session.Character.Inventory.LoadBySlotAndType(1, InventoryType.Wear);
+
+                //Swordsman
+                if (itemInUse != null && itemInUse.Item.VNum == 4984 && ServerManager.RandomNumber() <= 2)
+                {
+                    Session.Character.AddBuff(new Buff(419, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Mage
+                if (itemInUse != null && itemInUse.Item.VNum == 4985 && ServerManager.RandomNumber() <= 2)
+                {
+                    Session.Character.AddBuff(new Buff(421, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Archer
+                if (itemInUse != null && itemInUse.Item.VNum == 4986 && ServerManager.RandomNumber() <= 2)
+                {
+                    Session.Character.AddBuff(new Buff(420, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                //Martial Artist
+                if (itemInUse != null && itemInUse.Item.VNum == 4754 && ServerManager.RandomNumber() <= 2)
+                {
+                    Session.Character.AddBuff(new Buff(673, Session.Character.Level), Session.Character.BattleEntity);
+                }
+
+                #endregion C45 equipe buffs
 
                 target.Character.GetDamage(damage / 2, battleEntity);
                 target.SendPacket(target.Character.GenerateStat());
@@ -192,7 +267,7 @@ namespace NosTale.Extension.Extension.Packet
 
                         target.Character.AddBuff(new Buff(617, target.Character.Level), target.Character.BattleEntity);
 
-                        var castId = 10 + Session.Character.Element;
+                        int castId = 10 + Session.Character.Element;
 
                         if (castId == 10)
                         {
@@ -204,17 +279,7 @@ namespace NosTale.Extension.Extension.Packet
                     }
                 }
 
-                var isAlive = target.Character.Hp > 0;
-
-                if (target.Character.DamageList.ContainsKey(hitRequest.Session.Character.CharacterId))
-                {
-                    target.Character.DamageList[hitRequest.Session.Character.CharacterId] += damage;
-                }
-                else
-                {
-                    target.Character.DamageList.Add(hitRequest.Session.Character.CharacterId, damage);
-                }
-
+                bool isAlive = target.Character.Hp > 0;
                 if (!isAlive && target.HasCurrentMapInstance)
                 {
                     if (target.Character.IsVehicled)
@@ -222,9 +287,7 @@ namespace NosTale.Extension.Extension.Packet
                         target.Character.RemoveVehicle();
                     }
 
-                    if (hitRequest.Session.Character != null && hitRequest.SkillBCards.FirstOrDefault(s =>
-                                                                                   s.Type == (byte)BCardType.CardType.TauntSkill &&
-                                                                                   s.SubType == (byte)AdditionalTypes.TauntSkill.EffectOnKill) is BCard EffectOnKill)
+                    if (hitRequest.Session.Character != null && hitRequest.SkillBCards.FirstOrDefault(s => s.Type == (byte)CardType.TauntSkill && s.SubType == (byte)AdditionalTypes.TauntSkill.EffectOnKill / 10) is BCard EffectOnKill)
                     {
                         if (ServerManager.RandomNumber() < EffectOnKill.FirstData)
                         {
@@ -232,168 +295,111 @@ namespace NosTale.Extension.Extension.Packet
                         }
                     }
 
-
                     target.Character.LastPvPKiller = Session;
-                    if (target.CurrentMapInstance.Map?.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4) == true)
+                    if (target.CurrentMapInstance.Map?.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4)
+                        == true)
                     {
-                        if (ServerManager.Instance.ChannelId == 51 && ServerManager.Instance.Act4DemonStat.Mode == 0 && ServerManager.Instance.Act4AngelStat.Mode == 0)
+                        if (ServerManager.Instance.ChannelId == 51 && ServerManager.Instance.Act4DemonStat.Mode == 0
+                                                                   && ServerManager.Instance.Act4AngelStat.Mode == 0)
                         {
                             switch (Session.Character.Faction)
                             {
                                 case FactionType.Angel:
-                                    ServerManager.Instance.Act4AngelStat.Percentage += 10000 / (ServerManager.Instance.Configuration.GlacernonPercentRatePvp * 20);
-
+                                    ServerManager.Instance.Act4AngelStat.Percentage += 200;
                                     break;
 
                                 case FactionType.Demon:
-                                    ServerManager.Instance.Act4DemonStat.Percentage += 10000 / (ServerManager.Instance.Configuration.GlacernonPercentRatePvp * 20);
-
+                                    ServerManager.Instance.Act4DemonStat.Percentage += 200;
                                     break;
                             }
                         }
 
                         hitRequest.Session.Character.Act4Kill++;
-                        hitRequest.Session.Character.IncrementQuests(QuestType.GlacernonQuest, 1);
                         target.Character.Act4Dead++;
                         target.Character.GetAct4Points(-1);
-                        if (target.Character.Level + 15 >= hitRequest.Session.Character.Level && hitRequest.Session.Character.Level <= target.Character.Level - 15)
+                        if (target.Character.Level + 10 >= hitRequest.Session.Character.Level
+                            && hitRequest.Session.Character.Level <= target.Character.Level - 10)
                         {
                             hitRequest.Session.Character.GetAct4Points(2);
                         }
 
-                        var repRemoved = 0;
-                        var ReputationValue = 0;
-
-                        if (target.CleanIpAddress != hitRequest.Session.CleanIpAddress)
+                        if (target.Character.Session.CleanIpAddress != hitRequest.Session.CleanIpAddress)
                         {
+                            int levelDifference = target.Character.Level - hitRequest.Session.Character.Level;
 
-                            // check if meets requirements to give items
-                            if (target.Character.Level >= 60 && hitRequest.Session.Character.Level >= 60 && target.Character.Reputation >= 100000)
+                            if (levelDifference < 30)
                             {
-                                if (target.IpAddress != hitRequest.Session.IpAddress)
-                                {
-                                    if (ServerManager.RandomProbabilityCheck(100))
-                                    {
-                                        // get item when killing demons
-                                        if (hitRequest.Session.Character.Faction == FactionType.Angel)
-                                        {
-                                            hitRequest.Session.Character.GiftAdd(11128, 1);
-                                        }
-                                        // get item when killing angels
-                                        if (hitRequest.Session.Character.Faction == FactionType.Demon)
-                                        {
-                                            hitRequest.Session.Character.GiftAdd(11127, 1);
-                                        }
-                                    }
-                                    hitRequest.Session.Character.GenerateFamilyXp(target.Character.Level * 2); // get fxp from kills
-                                }
-
-                                target.Character.GetReputation(-3000);
-                                target.GoldLess(50000);
-                            }                 
-
-                            var alreadyHaveRep = new List<long>();
-                            var amount = target.Character.DamageList.Keys.Count();
-                            foreach (var charId in target.Character.DamageList.Keys)
-                            {
-                                var session = ServerManager.Instance.GetSessionByCharacterId(charId);
-
-                                if (session == null)
-                                {
-                                    continue;
-                                }
-
-                                if (!session.CurrentMapInstance.Map.MapTypes.Any(s => s.MapTypeId == (short)MapTypeEnum.Act4))
-                                {
-                                    continue;
-                                }
-
-                                var levelDifference = target.Character.Level - session.Character.Level;
-
-                                if (levelDifference >= 40)
-                                {
-                                    hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("TOO_LEVEL_DIFFERENCE"), 11));
-                                    continue;
-                                }
+                                int ReputationValue = 0;
 
                                 if (levelDifference >= 0)
                                 {
-                                    ReputationValue = 3000 + levelDifference * 10;
+                                    ReputationValue = 500 + (levelDifference * 100);
                                 }
-                                else if (levelDifference > -40)
+                                else if (levelDifference > -20)
                                 {
-                                    ReputationValue = 1500 - levelDifference * 10;
+                                    ReputationValue = 500 - (levelDifference * 25);
                                 }
                                 else
                                 {
-                                    ReputationValue -= 500 + -levelDifference * 10;
+                                    ReputationValue -= 150 + (-levelDifference * 10);
                                 }
 
                                 ReputationValue *= ServerManager.Instance.Configuration.RateReputation;
-                                repRemoved = repRemoved == 0 ? ReputationValue : repRemoved;
 
-                                if (target.Character.ReputationHeroPosition() != 0 && target.Character.ReputationHeroPosition() <= 3) //test it
+                                if (ReputationValue > 0)
                                 {
-                                    ReputationValue *= 3;
-                                }
+                                    hitRequest.Session.Character.Reputation += ReputationValue;
+                                    hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateSay(
+                                        string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"),
+                                            (short)ReputationValue), 12));
 
-                                if (target.Character.ReputationHeroPosition() > 3)
+                                    int act4RaidPenalty =
+                                        ((target.Character.Faction == FactionType.Angel && ServerManager.Instance.Act4DemonStat.Mode == 3)
+                                        || (target.Character.Faction == FactionType.Demon && ServerManager.Instance.Act4AngelStat.Mode == 3))
+                                        ? 2 : 1;
+
+                                    target.Character.Reputation -= ReputationValue/* * act4RaidPenalty*/;
+                                    target.SendPacket(target.Character.GenerateSay(
+                                        string.Format(Language.Instance.GetMessageFromKey("LOSE_REP"),
+                                            (short)ReputationValue/* * act4RaidPenalty*/), 11));
+                                }
+                                else
                                 {
-                                    ReputationValue *= 2;
+                                    hitRequest.Session.Character.Reputation -= ReputationValue;
+                                    hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateSay(
+                                        string.Format(Language.Instance.GetMessageFromKey("LOSE_REP"),
+                                            (short)ReputationValue), 11));
                                 }
-
-                                if (ReputationValue < 0)
-                                {
-                                    continue;
-                                }
-
-                                if (alreadyHaveRep.Contains(charId))
-                                {
-                                    continue;
-                                }
-
-                                session.Character.Reputation += ReputationValue / amount;
-                                session.SendPacket(hitRequest.Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("WIN_REPUT"), (short)ReputationValue), 12));
-                                session.SendPacket(session.Character.GenerateFd());
+                                hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateLev());
                             }
-
-                            var act4RaidPenalty = target.Character.Faction == FactionType.Angel && ServerManager.Instance.Act4DemonStat.Mode == 3 || target.Character.Faction == FactionType.Demon && ServerManager.Instance.Act4AngelStat.Mode == 3 ? 5 : 5;
-                            target.Character.DamageList = new Dictionary<long, long>();
-                            target.Character.Reputation -= repRemoved /* * act4RaidPenalty*/;
-                            target.SendPacket(target.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("LOSE_REP"), (short)repRemoved /* * act4RaidPenalty*/), 11));
-                            target.SendPacket(target.Character.GenerateFd());
-                            hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateLev());
+                            else
+                            {
+                                hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("TOO_LEVEL_DIFFERENCE"), 11));
+                            }
                         }
                         else
                         {
-                            //penalties for the pvpkiller
                             hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("TARGET_SAME_IP"), 11));
-                            hitRequest.Session.Character.GetAct4Points(-1);
-                            hitRequest.Session.Character.Act4Kill--;
-                            hitRequest.Session.Character.Reputation -= 10000;
-
-                            if (hitRequest.Session.Character.Reputation < 1) // prevent rep points going negative
-                            {
-                                hitRequest.Session.Character.Reputation = 1;
-                            }
-
-                            // revert the stats as they were before after the kill
-                            target.Character.Act4Dead--;
-                            target.Character.GetAct4Points(1);
-
                         }
 
-                        foreach (var sess in ServerManager.Instance.Sessions.Where(s => s.HasSelectedCharacter))
+                        foreach (ClientSession sess in ServerManager.Instance.Sessions.Where(
+                            s => s.HasSelectedCharacter))
                         {
                             if (sess.Character.Faction == Session.Character.Faction)
                             {
-                                sess.SendPacket(sess.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey($"ACT4_PVP_KILL{(int)target.Character.Faction}"), Session.Character.Name), 12));
-
+                                sess.SendPacket(sess.Character.GenerateSay(
+                                    string.Format(
+                                        Language.Instance.GetMessageFromKey(
+                                            $"ACT4_PVP_KILL{(int)target.Character.Faction}"), Session.Character.Name),
+                                    12));
                             }
                             else if (sess.Character.Faction == target.Character.Faction)
                             {
-                                sess.SendPacket(sess.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey($"ACT4_PVP_DEATH{(int)target.Character.Faction}"), target.Character.Name), 11));
-
+                                sess.SendPacket(sess.Character.GenerateSay(
+                                    string.Format(
+                                        Language.Instance.GetMessageFromKey(
+                                            $"ACT4_PVP_DEATH{(int)target.Character.Faction}"), target.Character.Name),
+                                    11));
                             }
                         }
 
@@ -411,10 +417,12 @@ namespace NosTale.Extension.Extension.Packet
                         }
                         else
                         {
-                            target.SendPacket(target.Character.GenerateSay(Language.Instance.GetMessageFromKey("ACT4_PVP_DIE"), 11));
-                            target.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ACT4_PVP_DIE"), 0));
-                            Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(o => target.Character.SetSeal());
+                            target.SendPacket(
+                                target.Character.GenerateSay(Language.Instance.GetMessageFromKey("ACT4_PVP_DIE"), 11));
+                            target.SendPacket(
+                                UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("ACT4_PVP_DIE"), 0));
 
+                            Observable.Timer(TimeSpan.FromMilliseconds(2000)).Subscribe(o => target.Character.SetSeal());
                         }
                     }
                     else if (target.CurrentMapInstance.MapInstanceType == MapInstanceType.IceBreakerInstance)
@@ -422,9 +430,7 @@ namespace NosTale.Extension.Extension.Packet
                         if (IceBreaker.AlreadyFrozenPlayers.Contains(target))
                         {
                             IceBreaker.AlreadyFrozenPlayers.Remove(target);
-                            target.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateMsg(
-                                string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_PLAYER_OUT"),
-                                    target?.Character?.Name), 0));
+                            target.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_PLAYER_OUT"), target?.Character?.Name), 0));
                             target.Character.Hp = 1;
                             target.Character.Mp = 1;
                             var respawn = target?.Character?.Respawn;
@@ -435,9 +441,7 @@ namespace NosTale.Extension.Extension.Packet
                         {
                             isAlive = true;
                             IceBreaker.FrozenPlayers.Add(target);
-                            target.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateMsg(
-                                string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_PLAYER_FROZEN"),
-                                    target?.Character?.Name), 0));
+                            target.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("ICEBREAKER_PLAYER_FROZEN"), target?.Character?.Name), 0));
                             Task.Run(() =>
                             {
                                 target.Character.Hp = (int)target.Character.HPLoad();
@@ -467,9 +471,9 @@ namespace NosTale.Extension.Extension.Packet
                         RainbowBattleManager.SendFbs(target.CurrentMapInstance);
 
                         isAlive = true;
-                        hitRequest.Session.CurrentMapInstance?.Broadcast((UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_KILL"), //Add Resource
+                        hitRequest.Session.CurrentMapInstance?.Broadcast((UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("RAINBOW_KILL"),
                         hitRequest.Session.Character.Name, target.Character.Name), 0)));
-                        target.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("RESP_RBB"), target.Character.Name), 10)); //Add Resource
+                        target.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("RESP_RBB"), target.Character.Name), 10));
 
                         target.Character.Hp = (int)target.Character.HPLoad();
                         target.Character.Mp = (int)target.Character.MPLoad();
@@ -478,7 +482,6 @@ namespace NosTale.Extension.Extension.Packet
                         target.Character.NoAttack = true;
                         target.Character.isFreezed = true;
                         target.SendPacket(target?.Character?.GenerateCond());
-
 
                         Observable.Timer(TimeSpan.FromSeconds(20)).Subscribe(o =>
                         {
@@ -497,12 +500,12 @@ namespace NosTale.Extension.Extension.Packet
                     }
                     else
                     {
-                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay( $"[{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]", 10));
-#pragma warning disable 4014
-                        DiscordWebhookHelper.DiscordEventlogPVP($"ScoreArena: {target.Character.Name}  was killed by { hitRequest.Session.Character.Name} Record");
-                        hitRequest.Session.Character.BattleEntity.ApplyScoreArena(target.Character.BattleEntity);
+                        hitRequest.Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateSay(
+                            $"[{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]", 10));
+
                         hitRequest.Session.SendPacket($"msg 4 [{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]");
                         target.SendPacket($"msg 4 [{target.Character.Name}] has been slain by [{hitRequest.Session.Character.Name}]");
+
                         if (target.Character.IsVehicled)
                         {
                             target.Character.RemoveVehicle();
@@ -513,37 +516,32 @@ namespace NosTale.Extension.Extension.Packet
                             hitRequest.Session.Character.ArenaKill++;
                             target.Character.CurrentArenaDeath++;
                             hitRequest.Session.Character.CurrentArenaKill++;
-                            hitRequest.Session.SendPacket(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_SCORE"), hitRequest.Session.Character.CurrentArenaKill, hitRequest.Session.Character.CurrentArenaDeath), 10));
-                            target.SendPacket(Session.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_SCORE"), target.Character.CurrentArenaKill, target.Character.CurrentArenaDeath), 10));
                             hitRequest.Session.SendPacket(hitRequest.Session.Character.GenerateAscr());
                             target.SendPacket(target.Character.GenerateAscr());
-
                         }
-                        Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o => ServerManager.Instance.AskPvpRevive(target.Character.CharacterId));
-
+                        Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
+                            ServerManager.Instance.AskPvpRevive(target.Character.CharacterId));
                     }
                 }
 
                 battleEntity.BCards.Where(s => s.CastType == 1).ForEach(s =>
                 {
-                    if (s.Type != (byte)BCardType.CardType.Buff)
+                    if (s.Type != (byte)CardType.Buff)
                     {
                         s.ApplyBCards(target.Character.BattleEntity, Session.Character.BattleEntity);
                     }
                 });
 
-                hitRequest.SkillBCards.Where(s =>
-                        !s.Type.Equals((byte)BCardType.CardType.Buff) &&
-                        !s.Type.Equals((byte)BCardType.CardType.Capture) && s.CardId == null).ToList()
+                hitRequest.SkillBCards.Where(s => !s.Type.Equals((byte)CardType.Buff) && !s.Type.Equals((byte)CardType.Capture) && s.CardId == null).ToList()
                     .ForEach(s => s.ApplyBCards(target.Character.BattleEntity, Session.Character.BattleEntity));
 
                 if (hitmode != 4 && hitmode != 2)
                 {
                     battleEntity.BCards.Where(s => s.CastType == 1).ForEach(s =>
                     {
-                        if (s.Type == (byte)BCardType.CardType.Buff)
+                        if (s.Type == (byte)CardType.Buff)
                         {
-                            var b = new Buff((short)s.SecondData, battleEntity.Level);
+                            Buff b = new Buff((short)s.SecondData, battleEntity.Level);
                             if (b.Card != null)
                             {
                                 switch (b.Card?.BuffType)
@@ -561,59 +559,11 @@ namespace NosTale.Extension.Extension.Packet
                         }
                     });
 
-                    foreach (var card in battleEntityDefense.BCards.Where(b => b.CastType == 2))
-                    {
-                        if (card.Type != (byte)BCardType.CardType.Buff)
-                        {
-                            continue;
-                        }
-
-                        var b = new Buff((short)card.SecondData, battleEntityDefense.Level);
-                        if (b.Card == null)
-                        {
-                            continue;
-                        }
-
-                        switch (b.Card?.BuffType)
-                        {
-                            case BuffType.Bad:
-                                card.ApplyBCards(Session.Character.BattleEntity, target.Character.BattleEntity);
-                                break;
-
-                            case BuffType.Good:
-                            case BuffType.Neutral:
-                                card.ApplyBCards(target.Character.BattleEntity, target.Character.BattleEntity);
-                                break;
-                        }
-                    }
-
-                    battleEntityDefense.BCards.Where(s => s.CastType == 1).ForEach(s =>
+                    battleEntityDefense.BCards.Where(s => s.CastType == 0).ForEach(s =>
                     {
                         if (s.Type == (byte)CardType.Buff)
                         {
-                            var b = new Buff((short)s.SecondData, battleEntityDefense.Level);
-                            if (b.Card != null)
-                            {
-                                switch (b.Card?.BuffType)
-                                {
-                                    case BuffType.Bad:
-                                        s.ApplyBCards(battleEntity, battleEntityDefense);
-                                        break;
-
-                                    case BuffType.Good:
-                                    case BuffType.Neutral:
-                                        s.ApplyBCards(battleEntityDefense, battleEntityDefense);
-                                        break;
-                                }
-                            }
-                        }
-                    });
-
-                    battleEntityDefense.BCards.Where(s => s.CastType == 0).ForEach(s =>
-                    {
-                        if (s.Type == (byte)BCardType.CardType.Buff)
-                        {
-                            var b = new Buff((short)s.SecondData, battleEntityDefense.Level);
+                            Buff b = new Buff((short)s.SecondData, battleEntityDefense.Level);
                             if (b.Card != null)
                             {
                                 switch (b.Card?.BuffType)
@@ -631,131 +581,80 @@ namespace NosTale.Extension.Extension.Packet
                         }
                     });
 
-                    hitRequest.SkillBCards.Where(s =>
-                            s.Type.Equals((byte)BCardType.CardType.Buff) &&
-                            new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType == BuffType.Bad)
-                        .ToList()
+                    hitRequest.SkillBCards.Where(s => s.Type.Equals((byte)CardType.Buff) && new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType == BuffType.Bad).ToList()
                         .ForEach(s => s.ApplyBCards(target.Character.BattleEntity, Session.Character.BattleEntity));
 
-                    hitRequest.SkillBCards.Where(s => s.Type.Equals((byte)BCardType.CardType.SniperAttack)).ToList()
+                    hitRequest.SkillBCards.Where(s => s.Type.Equals((byte)CardType.SniperAttack)).ToList()
                         .ForEach(s => s.ApplyBCards(target.Character.BattleEntity, Session.Character.BattleEntity));
 
-                    #region Useless. But ?
                     if (battleEntity?.ShellWeaponEffects != null)
                     {
-                        foreach (var shell in battleEntity.ShellWeaponEffects)
+                        foreach (ShellEffectDTO shell in battleEntity.ShellWeaponEffects)
                         {
-                            Buff buff = null;
-                            var chance = (short)(shell.Value >= 100 ? 100 : shell.Value);
                             switch (shell.Effect)
                             {
                                 case (byte)ShellWeaponEffectType.Blackout:
                                     {
-                                        buff = new Buff(7, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense.ShellArmorEffects
-                                                                               ?.Find(s =>
-                                                                                       s.Effect == (byte)ShellArmorEffectType.ReducedStun)
-                                                                               ?.Value
-                                                          + battleEntityDefense.ShellArmorEffects?.Find(s =>
-                                                                                       s.Effect == (byte)ShellArmorEffectType.ReducedAllStun)
-                                                                               ?.Value
-                                                          + battleEntityDefense.ShellArmorEffects?.Find(s =>
-                                                                    s.Effect == (byte)ShellArmorEffectType
-                                                                            .ReducedAllNegativeEffect)?.Value) / 100D);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(196, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() <= shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.DeadlyBlackout:
                                     {
-                                        buff = new Buff(66, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense.ShellArmorEffects
-                                                                               ?.Find(s =>
-                                                                                       s.Effect == (byte)ShellArmorEffectType.ReducedAllStun)
-                                                                               ?.Value ?? 0
-                                              + battleEntityDefense.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllNegativeEffect)?.Value ?? 0) / 100D);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(197, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() <= shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.MinorBleeding:
                                     {
-                                        buff = new Buff(1, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                       s.Effect == (byte)ShellArmorEffectType
-                                                               .ReducedMinorBleeding)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedBleedingAndMinorBleeding)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllBleedingType)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllNegativeEffect)?.Value ?? 0) / 100D);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(1, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() <= shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.Bleeding:
                                     {
-                                        buff = new Buff(21, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                       s.Effect == (byte)ShellArmorEffectType
-                                                               .ReducedBleedingAndMinorBleeding)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllBleedingType)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllNegativeEffect)?.Value ?? 0) / 100D);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(21, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.HeavyBleeding:
                                     {
-                                        buff = new Buff(42, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                       s.Effect == (byte)ShellArmorEffectType
-                                                               .ReducedAllBleedingType)?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllNegativeEffect)?.Value ?? 0) / 100D);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(42, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() <= shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.Freeze:
                                     {
-                                        buff = new Buff(27, battleEntity.Level);
-                                        chance -= (short)((battleEntityDefense?.ShellArmorEffects
-                                                                               ?.Find(s =>
-                                                                                       s.Effect == (byte)ShellArmorEffectType.ReducedFreeze)
-                                                                               ?.Value ?? 0
-                                              + battleEntityDefense?.ShellArmorEffects?.Find(s =>
-                                                        s.Effect == (byte)ShellArmorEffectType
-                                                                .ReducedAllNegativeEffect)?.Value ?? 0) / 100D);
+                                        Buff buff = new Buff(27, battleEntity.Level);
+                                        if (ServerManager.RandomNumber() <= shell.Value)
+                                        {
+                                            target.Character.AddBuff(buff, battleEntity);
+                                        }
+
+                                        break;
                                     }
-                                    break;
-                            }
-
-                            if (buff == null)
-                            {
-                                break;
-                            }
-
-                            if (ServerManager.RandomNumber() < chance || chance == 100)
-                            {
-                                target.Character.AddBuff(buff, battleEntity);
                             }
                         }
-                    }
-                    #endregion
-                }
-
-                if (hitmode != 1)
-                {
-                    if (target != null)
-                    {
-                        battleEntity.TryToApplyBeachBuff(target.Character.BattleEntity);
                     }
                 }
 
@@ -764,12 +663,9 @@ namespace NosTale.Extension.Extension.Packet
                     switch (hitRequest.TargetHitType)
                     {
                         case TargetHitType.SingleTargetHit:
-                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                UserType.Player,
+                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
                                 hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
-                                hitRequest.Skill.SkillVNum,
-                                (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
-                                hitRequest.Skill.AttackAnimation,
+                                hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D), hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
                                 hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
@@ -777,12 +673,9 @@ namespace NosTale.Extension.Extension.Packet
                             break;
 
                         case TargetHitType.SingleTargetHitCombo:
-                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                UserType.Player,
+                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
                                 hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
-                                hitRequest.Skill.SkillVNum,
-                                (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
-                                hitRequest.SkillCombo.Animation,
+                                hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D), hitRequest.SkillCombo.Animation,
                                 hitRequest.SkillCombo.Effect, hitRequest.Session.Character.PositionX,
                                 hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
@@ -792,24 +685,18 @@ namespace NosTale.Extension.Extension.Packet
                         case TargetHitType.SingleAOETargetHit:
                             if (hitRequest.ShowTargetHitAnimation)
                             {
-                                if (hitRequest.Skill.SkillVNum == 1085 || hitRequest.Skill.SkillVNum == 1091 ||
-                                    hitRequest.Skill.SkillVNum == 1060 || hitRequest.Skill.SkillVNum == 718 || hitRequest.Skill.SkillVNum == 1607)
+                                if (hitRequest.Skill.SkillVNum == 1085 || hitRequest.Skill.SkillVNum == 1091 || hitRequest.Skill.SkillVNum == 1060)
                                 {
                                     hitRequest.Session.Character.PositionX = target.Character.PositionX;
                                     hitRequest.Session.Character.PositionY = target.Character.PositionY;
-                                    hitRequest.Session.CurrentMapInstance.Broadcast(hitRequest.Session.Character
-                                        .GenerateTp());
+                                    hitRequest.Session.CurrentMapInstance.Broadcast(hitRequest.Session.Character.GenerateTp());
                                 }
-
                                 hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                    UserType.Player, hitRequest.Session.Character.CharacterId, 1,
-                                    target.Character.CharacterId,
-                                    hitRequest.Skill.SkillVNum,
-                                    (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
+                                    UserType.Player, hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
+                                    hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
                                     hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
                                     hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
-                                    (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage,
-                                    hitmode,
+                                    (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                     (byte)(hitRequest.Skill.SkillType - 1)));
                             }
                             else
@@ -835,17 +722,13 @@ namespace NosTale.Extension.Extension.Packet
                                 }
 
                                 hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                    UserType.Player, hitRequest.Session.Character.CharacterId, 1,
-                                    target.Character.CharacterId,
-                                    -1,
-                                    (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
+                                    UserType.Player, hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
+                                    -1, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
                                     hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
                                     hitRequest.Session.Character.PositionX, hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
-                                    (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage,
-                                    hitmode,
+                                    (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                     (byte)(hitRequest.Skill.SkillType - 1)));
                             }
-
                             break;
 
                         case TargetHitType.AOETargetHit:
@@ -869,12 +752,9 @@ namespace NosTale.Extension.Extension.Packet
                                     break;
                             }
 
-                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                UserType.Player,
+                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
                                 hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
-                                hitRequest.Skill.SkillVNum,
-                                (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
-                                hitRequest.Skill.AttackAnimation,
+                                hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D), hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
                                 hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
@@ -882,24 +762,18 @@ namespace NosTale.Extension.Extension.Packet
                             break;
 
                         case TargetHitType.ZoneHit:
-                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                UserType.Player,
+                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
                                 hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
-                                hitRequest.Skill.SkillVNum,
-                                (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
-                                hitRequest.Skill.AttackAnimation,
+                                hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D), hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.MapX, hitRequest.MapY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / (float)target.Character.HPLoad() * 100), damage, hitmode,
                                 (byte)(hitRequest.Skill.SkillType - 1)));
                             break;
 
                         case TargetHitType.SpecialZoneHit:
-                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                UserType.Player,
+                            hitRequest.Session.CurrentMapInstance?.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
                                 hitRequest.Session.Character.CharacterId, 1, target.Character.CharacterId,
-                                hitRequest.Skill.SkillVNum,
-                                (short)(hitRequest.Skill.Cooldown - (hitRequest.Skill.Cooldown * (cooldownReduction / 100D))),
-                                hitRequest.Skill.AttackAnimation,
+                                hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D), hitRequest.Skill.AttackAnimation,
                                 hitRequest.SkillEffect, hitRequest.Session.Character.PositionX,
                                 hitRequest.Session.Character.PositionY, Session.CurrentMapInstance.MapInstanceType == MapInstanceType.RainbowBattleInstance || isAlive,
                                 (int)(target.Character.Hp / target.Character.HPLoad() * 100), damage, hitmode,

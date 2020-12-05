@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using OpenNos.Core;
 using OpenNos.Data;
 using OpenNos.Domain;
@@ -251,10 +252,7 @@ namespace OpenNos.GameObject
         {
             lock (AggroList)
             {
-                if (AggroList.ToList().FirstOrDefault(s =>
-                        s.MapEntityId == aggroEntity.MapEntityId && s.EntityType == aggroEntity.EntityType) is
-                    BattleEntity
-                    existingEntity)
+                if (AggroList.ToList().FirstOrDefault(s => s.MapEntityId == aggroEntity.MapEntityId && s.EntityType == aggroEntity.EntityType) is BattleEntity existingEntity)
                 {
                     if (existingEntity != aggroEntity)
                     {
@@ -525,15 +523,18 @@ namespace OpenNos.GameObject
         /// <param name="mapY">The Y coordinate on the Map of the object to check.</param>
         /// <param name="distance">The maximum distance of the object to check.</param>
         /// <returns>True if the Monster is in range, False if not.</returns>
-        public bool IsInRange(short mapX, short mapY, byte distance) => Map.GetDistance(new MapCell
+        public bool IsInRange(short mapX, short mapY, byte distance)
         {
-            X = mapX,
-            Y = mapY
-        }, new MapCell
-        {
-            X = MapX,
-            Y = MapY
-        }) <= distance;
+            return Map.GetDistance(new MapCell
+            {
+                X = mapX,
+                Y = mapY
+            }, new MapCell
+            {
+                X = MapX,
+                Y = MapY
+            }) <= distance;
+        }
 
         public void LoadSpeed()
         {
@@ -600,56 +601,39 @@ namespace OpenNos.GameObject
 
         public void MoveTest()
         {
-            var walkWaitTime =
-                (Target == null && RunToX == 0 && RunToY == 0 ? ServerManager.RandomNumber(400, 3200) : 0) +
-                Speed / 1.5f * 100 - (DateTime.Now - LastMove).TotalMilliseconds;
+            double walkWaitTime = (Target == null && RunToX == 0 && RunToY == 0 ? ServerManager.RandomNumber(400, 3200) : 0) + (Speed / 1.5f) * 100 - (DateTime.Now - LastMove).TotalMilliseconds;
             double skillWaitTime = 0 /*800 - (DateTime.Now - LastSkill).TotalMilliseconds*/;
-            if (Monster != null && !IsDisabled && !IsJumping && IsAlive &&
-                !HasBuff(CardType.Move, (byte)AdditionalTypes.Move.MovementImpossible) && IsMoving &&
-                Monster.Speed > 0 && walkWaitTime <= 0 && skillWaitTime <= 0)
+            if (Monster != null && !IsDisabled && !IsJumping && IsAlive && !HasBuff(CardType.Move, (byte)AdditionalTypes.Move.MovementImpossible) && IsMoving && Monster.Speed > 0 && walkWaitTime <= 0 && skillWaitTime <= 0)
             {
                 LoadSpeed();
 
                 LastMove = DateTime.Now;
 
-                var moveToPosition = new MapCell { X = FirstX, Y = FirstY };
+                MapCell moveToPosition = new MapCell { X = FirstX, Y = FirstY };
 
                 if (RunToX != 0 || RunToY != 0)
                 {
                     moveToPosition = new MapCell { X = RunToX, Y = RunToY };
                 }
-
                 if (Target != null && (MonsterVNum != 2305 || RunToX == 0 && RunToY == 0))
                 {
                     moveToPosition = new MapCell { X = Target.PositionX, Y = Target.PositionY };
                 }
 
-                var nextStep = Map.GetNextStep(new MapCell { X = MapX, Y = MapY },
-                    new MapCell
-                    {
-                        X = (short)ServerManager.RandomNumber(moveToPosition.X - 3, moveToPosition.X + 3),
-                        Y = (short)ServerManager.RandomNumber(moveToPosition.Y - 3, moveToPosition.Y + 3)
-                    }, Speed / 2.5f);
+                MapCell nextStep = Map.GetNextStep(new MapCell { X = MapX, Y = MapY }, new MapCell { X = (short)ServerManager.RandomNumber(moveToPosition.X - 3, moveToPosition.X + 3), Y = (short)ServerManager.RandomNumber(moveToPosition.Y - 3, moveToPosition.Y + 3) }, (Speed / 2.5f));
 
                 short tries = 0;
                 short maxTries = 15;
 
                 while (MapInstance.Map.isBlockedZone(MapX, MapY, nextStep.X, nextStep.Y) && tries < maxTries)
                 {
-                    nextStep = Map.GetNextStep(new MapCell { X = MapX, Y = MapY },
-                        new MapCell
-                        {
-                            X = (short)ServerManager.RandomNumber(moveToPosition.X - 3, moveToPosition.X + 3),
-                            Y = (short)ServerManager.RandomNumber(moveToPosition.Y - 3, moveToPosition.Y + 3)
-                        }, Speed / 2.5f);
+                    nextStep = Map.GetNextStep(new MapCell { X = MapX, Y = MapY }, new MapCell { X = (short)ServerManager.RandomNumber(moveToPosition.X - 3, moveToPosition.X + 3), Y = (short)ServerManager.RandomNumber(moveToPosition.Y - 3, moveToPosition.Y + 3) }, (Speed / 2.5f));
                     tries++;
                 }
 
                 if (tries < maxTries)
                 {
-                    MapInstance.Broadcast(new BroadcastPacket(null,
-                        $"mv 3 {MapMonsterId} {nextStep.X} {nextStep.Y} {Math.Round(Speed * 1.5f)}", ReceiverType.All,
-                        xCoordinate: MapX, yCoordinate: MapY));
+                    MapInstance.Broadcast(new BroadcastPacket(null, $"mv 3 {MapMonsterId} {nextStep.X} {nextStep.Y} {Math.Round(Speed * 1.5f)}", ReceiverType.All, xCoordinate: MapX, yCoordinate: MapY));
                     Observable.Timer(TimeSpan.FromMilliseconds(Math.Round(Speed * 1.5f) * 10)).Subscribe(s =>
                     {
                         MapX = nextStep.X;
@@ -658,8 +642,8 @@ namespace OpenNos.GameObject
                 }
                 else
                 {
-                    //Generate Coords
-                    var notwalkable = false;
+                    //Generate Coords 
+                    bool notwalkable = false;
                     short gen_x, gen_y;
                     tries = 0;
                     do
@@ -667,26 +651,11 @@ namespace OpenNos.GameObject
                         gen_x = MapX;
                         gen_y = MapY;
 
-                        var x_min = ServerManager.RandomNumber(0, 10);
-                        var y_min = ServerManager.RandomNumber(0, 10);
+                        int x_min = ServerManager.RandomNumber(0, 10);
+                        int y_min = ServerManager.RandomNumber(0, 10);
 
-                        if (x_min > 6)
-                        {
-                            gen_x -= 3;
-                        }
-                        else if (x_min < 4)
-                        {
-                            gen_x += 3;
-                        }
-
-                        if (y_min > 6)
-                        {
-                            gen_y -= 3;
-                        }
-                        else if (y_min < 4)
-                        {
-                            gen_y += 3;
-                        }
+                        if (x_min > 6) { gen_x -= 3; } else if (x_min < 4) { gen_x += 3; }
+                        if (y_min > 6) { gen_y -= 3; } else if (y_min < 4) { gen_y += 3; }
 
                         notwalkable = MapInstance.Map.isBlockedZone(MapX, MapY, gen_x, gen_y);
 
@@ -694,20 +663,16 @@ namespace OpenNos.GameObject
                         {
                             notwalkable = true;
                         }
-
                         if (MapX == gen_x && MapY == gen_y)
                         {
                             notwalkable = true;
                         }
-
                         tries++;
                     } while (notwalkable && tries < maxTries);
 
                     if (!notwalkable)
                     {
-                        MapInstance.Broadcast(new BroadcastPacket(null,
-                            $"mv 3 {MapMonsterId} {gen_x} {gen_y} {Math.Round(Speed * 1.3f)}", ReceiverType.All,
-                            xCoordinate: MapX, yCoordinate: MapY));
+                        MapInstance.Broadcast(new BroadcastPacket(null, $"mv 3 {MapMonsterId} {gen_x} {gen_y} {Math.Round(Speed * 1.3f)}", ReceiverType.All, xCoordinate: MapX, yCoordinate: MapY));
                         Observable.Timer(TimeSpan.FromMilliseconds(Math.Round(Speed * 1.3f) * 10)).Subscribe(s =>
                         {
                             MapX = gen_x;
@@ -722,55 +687,47 @@ namespace OpenNos.GameObject
                     RunToY = 0;
                 }
 
-                if (Map.GetDistance(new MapCell { X = MapX, Y = MapY },
-                        new MapCell { X = moveToPosition.X, Y = moveToPosition.Y }) > _maxDistance &&
-                    LastSkill.AddMilliseconds(_timeAgroLoss) <= DateTime.Now
-                    || MapInstance.MapInstanceType == MapInstanceType.BaseMapInstance &&
-                    LastSkill.AddMilliseconds(20000) <= DateTime.Now &&
-                    LastMonsterAggro.AddMilliseconds(20000) <= DateTime.Now)
+                if ((Map.GetDistance(new MapCell { X = MapX, Y = MapY }, new MapCell { X = moveToPosition.X, Y = moveToPosition.Y }) > _maxDistance && LastSkill.AddMilliseconds(_timeAgroLoss) <= DateTime.Now)
+                    || (MapInstance.MapInstanceType == MapInstanceType.BaseMapInstance && LastSkill.AddMilliseconds(20000) <= DateTime.Now && LastMonsterAggro.AddMilliseconds(20000) <= DateTime.Now))
                 {
                     RemoveTarget();
                 }
             }
-
             HostilityTarget();
         }
 
         public int MpPercent() => BattleEntity.MpPercent();
-
         public void OnReceiveHit(HitRequest hitRequest)
         {
             if (IsAlive && hitRequest.Session.Character.Hp > 0 &&
-                (hitRequest.Mate == null || hitRequest.Mate.Hp > 0))
+                    (hitRequest.Mate == null || hitRequest.Mate.Hp > 0))
             {
-                double cooldownReduction = hitRequest.Session.Character.GetBuff(CardType.Morale,
-                    (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0];
+                double cooldownReduction = hitRequest.Session.Character.GetBuff(CardType.Morale, (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0];
 
-                var increaseEnemyCooldownChance = hitRequest.Session.Character.GetBuff(CardType.DarkCloneSummon,
-                    (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
+                int[] increaseEnemyCooldownChance = hitRequest.Session.Character.GetBuff(CardType.DarkCloneSummon, (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
 
                 if (ServerManager.RandomNumber() < increaseEnemyCooldownChance[0])
                 {
                     cooldownReduction -= increaseEnemyCooldownChance[1];
                 }
 
-                var hitmode = 0;
-                var isCaptureSkill = hitRequest.SkillBCards.Any(s => s.Type.Equals((byte)CardType.Capture));
+                int hitmode = 0;
+                bool isCaptureSkill = hitRequest.SkillBCards.Any(s => s.Type.Equals((byte)CardType.Capture));
 
                 // calculate damage
-                var onyxWings = false;
+                bool onyxWings = false;
                 var zephyrWings = false;
-                var attackerBattleEntity = hitRequest.Mate == null
+                BattleEntity attackerBattleEntity = hitRequest.Mate == null
                     ? new BattleEntity(hitRequest.Session.Character, hitRequest.Skill)
                     : new BattleEntity(hitRequest.Mate);
-                var damage = DamageHelper.Instance.CalculateDamage(attackerBattleEntity, new BattleEntity(this),
+                int damage = DamageHelper.Instance.CalculateDamage(attackerBattleEntity, new BattleEntity(this),
                     hitRequest.Skill, ref hitmode, ref onyxWings, ref zephyrWings);
 
                 if (Monster.BCards.Find(s =>
                     s.Type == (byte)CardType.LightAndShadow &&
                     s.SubType == (byte)AdditionalTypes.LightAndShadow.InflictDamageToMP) is BCard card)
                 {
-                    var reduce = damage / 100 * card.FirstData;
+                    int reduce = damage / 100 * card.FirstData;
                     if (CurrentMp < reduce)
                     {
                         reduce = (int)CurrentMp;
@@ -780,23 +737,20 @@ namespace OpenNos.GameObject
                     {
                         DecreaseMp(reduce);
                     }
-
                     damage -= reduce;
                 }
 
                 if (damage >= CurrentHp &&
-                    Monster.BCards.Any(s =>
-                        s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                        s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath && s.FirstData == 1))
+                    Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath / 10 && s.FirstData == -1))
                 {
                     damage = (int)CurrentHp - 1;
                 }
                 else if (onyxWings)
                 {
-                    var onyxX = (short)(hitRequest.Session.Character.PositionX + 2);
-                    var onyxY = (short)(hitRequest.Session.Character.PositionY + 2);
-                    var onyxId = MapInstance.GetNextMonsterId();
-                    var onyx = new MapMonster
+                    short onyxX = (short)(hitRequest.Session.Character.PositionX + 2);
+                    short onyxY = (short)(hitRequest.Session.Character.PositionY + 2);
+                    int onyxId = MapInstance.GetNextMonsterId();
+                    MapMonster onyx = new MapMonster
                     {
                         MonsterVNum = 2371,
                         MapX = onyxX,
@@ -817,8 +771,7 @@ namespace OpenNos.GameObject
                     Observable.Timer(TimeSpan.FromMilliseconds(350)).Subscribe(o =>
                     {
                         MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, onyxId, 3,
-                            MapMonsterId, -1, 0, -1, request.Skill?.Effect ?? 0, -1, -1, IsAlive,
-                            (int)(CurrentHp / MaxHp * 100), damage1 / 2, 0,
+                            MapMonsterId, -1, 0, -1, request.Skill?.Effect ?? 0, -1, -1, IsAlive, (int)(CurrentHp / MaxHp * 100), damage1 / 2, 0,
                             0));
                         MapInstance.RemoveMonster(onyx);
                         MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, onyx.MapMonsterId));
@@ -835,7 +788,7 @@ namespace OpenNos.GameObject
                         1));
                 }
 
-                var firstHit = false;
+                bool firstHit = false;
 
                 lock (DamageList)
                 {
@@ -843,7 +796,6 @@ namespace OpenNos.GameObject
                     {
                         firstHit = true;
                     }
-
                     if (attackerBattleEntity.MapMonster?.Owner != null)
                     {
                         AddToDamageList(attackerBattleEntity.MapMonster.Owner, damage);
@@ -855,6 +807,121 @@ namespace OpenNos.GameObject
                     else if (attackerBattleEntity.Character != null)
                     {
                         AddToDamageList(attackerBattleEntity, damage);
+
+                        #region C45 equipe buffs
+
+                        ItemInstance itemInUse = null;
+
+                        //Main weapons
+                        itemInUse = attackerBattleEntity.Character.Inventory.LoadBySlotAndType(0, InventoryType.Wear);
+
+                        //if it activates from another method
+                        if (attackerBattleEntity.Character.Buff.ContainsKey(413) || attackerBattleEntity.Character.Buff.ContainsKey(414))
+                        {
+                            attackerBattleEntity.Character.Session.CurrentMapInstance?.Broadcast(attackerBattleEntity.Character.GenerateRc((int)(damage * 8 / 100D)));
+                            attackerBattleEntity.Character.Hp += (int)(damage * 8 / 100D);
+                            attackerBattleEntity.Character.Session.SendPacket(attackerBattleEntity.Character.GenerateStat());
+                            if (attackerBattleEntity.Character.Buff.ContainsKey(413))
+                                attackerBattleEntity.Character.RemoveBuff(413);
+                            else
+                                attackerBattleEntity.Character.RemoveBuff(414);
+                        }
+                        else if (attackerBattleEntity.Character.Buff.ContainsKey(416))
+                        {
+                            attackerBattleEntity.Character.Session.CurrentMapInstance?.Broadcast(attackerBattleEntity.Character.GenerateRc((int)(damage * 15 / 100D)));
+                            attackerBattleEntity.Character.Hp += (int)(damage * 15 / 100D);
+                            attackerBattleEntity.Character.Mp += (int)(damage * 15 / 100D);
+                            attackerBattleEntity.Character.Session.SendPacket(attackerBattleEntity.Character.GenerateStat());
+                            attackerBattleEntity.Character.RemoveBuff(416);
+                        }
+
+
+                        //Sword
+                        if (itemInUse != null && itemInUse.Item.VNum == 4981 && ServerManager.RandomNumber() <= 3)
+                        {
+                            attackerBattleEntity.Character.ConvertedDamageToHP = (int)(damage * 8 / 100D);
+                            attackerBattleEntity.Character.AddBuff(new Buff(413, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                            attackerBattleEntity.Character.RemoveBuff(413);
+                        }
+
+                        //Staff
+                        if (itemInUse != null && itemInUse.Item.VNum == 4982 && ServerManager.RandomNumber() <= 4)
+                        {
+                            attackerBattleEntity.Character.ConvertedDamageToHP = (int)(damage * 15 / 100D);
+                            attackerBattleEntity.Character.AddBuff(new Buff(416, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                            attackerBattleEntity.Character.RemoveBuff(416);
+                        }
+
+                        //Bow
+
+                        if (itemInUse != null && itemInUse.Item.VNum == 4983 && ServerManager.RandomNumber() <= 4)
+                        {
+                            AddBuff(new Buff(415, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        if (Buff.ContainsKey(415) && ServerManager.RandomNumber() <= 50)
+                            foreach (Buff b in Buff.Where(b => b.Card.BuffType == BuffType.Good && b.Card.Level < 4))
+                                RemoveBuff(b.Card.CardId);
+
+                        //Punch
+                        if (itemInUse != null && itemInUse.Item.VNum == 4736 && ServerManager.RandomNumber() <= 7)
+                        {
+                            AddBuff(new Buff(672, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Secondary weapons
+                        itemInUse = attackerBattleEntity.Character.Inventory.LoadBySlotAndType(5, InventoryType.Wear);
+
+                        //Crossbow
+                        if (itemInUse != null && itemInUse.Item.VNum == 4978 && ServerManager.RandomNumber() <= 5)
+                        {
+                            this.AddBuff(new Buff(417, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Gun
+                        if (itemInUse != null && itemInUse.Item.VNum == 4979 && ServerManager.RandomNumber() <= 5)
+                        {
+                            this.AddBuff(new Buff(418, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Dagger
+                        if (itemInUse != null && itemInUse.Item.VNum == 4980 && ServerManager.RandomNumber() <= 3)
+                        {
+                            attackerBattleEntity.Character.ConvertedDamageToHP = (int)(damage * 8 / 100D);
+                            attackerBattleEntity.Character.AddBuff(new Buff(414, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                            attackerBattleEntity.Character.RemoveBuff(414);
+                        }
+
+                        //NO c45 secondary weap for MA 
+
+                        //Armors
+                        itemInUse = attackerBattleEntity.Character.Inventory.LoadBySlotAndType(1, InventoryType.Wear);
+
+                        //Swordsman
+                        if (itemInUse != null && itemInUse.Item.VNum == 4984 && ServerManager.RandomNumber() <= 2)
+                        {
+                            attackerBattleEntity.Character.AddBuff(new Buff(419, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Mage
+                        if (itemInUse != null && itemInUse.Item.VNum == 4985 && ServerManager.RandomNumber() <= 2)
+                        {
+                            attackerBattleEntity.Character.AddBuff(new Buff(421, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Archer
+                        if (itemInUse != null && itemInUse.Item.VNum == 4986 && ServerManager.RandomNumber() <= 2)
+                        {
+                            attackerBattleEntity.Character.AddBuff(new Buff(420, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        //Martial Artist
+                        if (itemInUse != null && itemInUse.Item.VNum == 4754 && ServerManager.RandomNumber() <= 2)
+                        {
+                            attackerBattleEntity.Character.AddBuff(new Buff(673, attackerBattleEntity.Character.Level), attackerBattleEntity.Character.BattleEntity);
+                        }
+
+                        #endregion
                     }
                 }
 
@@ -866,15 +933,8 @@ namespace OpenNos.GameObject
                     }
                 });
 
-                if (hitmode != 1)
-                {
-                    attackerBattleEntity.TryToApplyBeachBuff(BattleEntity);
-                }
-
-                hitRequest.SkillBCards.Where(s =>
-                                  !s.Type.Equals((byte)CardType.Buff) && !s.Type.Equals((byte)CardType.Capture) &&
-                                  s.CardId == null).ToList()
-                          .ForEach(s => s.ApplyBCards(BattleEntity, attackerBattleEntity));
+                hitRequest.SkillBCards.Where(s => !s.Type.Equals((byte)CardType.Buff) && !s.Type.Equals((byte)CardType.Capture) && s.CardId == null).ToList()
+                    .ForEach(s => s.ApplyBCards(BattleEntity, attackerBattleEntity));
 
                 if (hitmode != 4 && hitmode != 2)
                 {
@@ -884,75 +944,33 @@ namespace OpenNos.GameObject
                         RemoveBuff(548);
                     }
 
-                    // if (Debugger.IsAttached && MapInstance != null && attackerBattleEntity.Character != null)
-                    // {
-                    //     
-                    //     foreach (var item in attackerBattleEntity.BCards)
-                    //     {
-                    //         if (item.Type == (byte)CardType.Buff)
-                    //         {
-                    //             var b = new Buff((short)item.SecondData, Monster.Level);
-                    //             if (b.Card != null)
-                    //             {
-                    //                 MapInstance.Broadcast(attackerBattleEntity.Character.GenerateSay(b.Card.Name + " " + item.CastType.ToString(), 10));
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    //attackerBattleEntity.BCards.Where(s => s.CastType == 1).ForEach(s =>
-                    //{
-                    //    if (s.Type == (byte)CardType.Buff)
-                    //    {
-                    //        var b = new Buff((short)s.SecondData, Monster.Level);
-                    //        if (b.Card != null)
-                    //        {
-                    //            switch (b.Card?.BuffType)
-                    //            {
-                    //                case BuffType.Bad:
-                    //                    s.ApplyBCards(BattleEntity, attackerBattleEntity);
-                    //                    break;
-
-                    //                case BuffType.Good:
-                    //                case BuffType.Neutral:
-                    //                    s.ApplyBCards(attackerBattleEntity, attackerBattleEntity);
-                    //                    break;
-                    //            }
-                    //        }
-                    //    }
-                    //});
-
-                    foreach (var cardd in BattleEntity.BCards.Where(b => b.CastType == 2))
+                    attackerBattleEntity.BCards.Where(s => s.CastType == 1).ForEach(s =>
                     {
-                        if (cardd.Type != (byte)CardType.Buff)
+                        if (s.Type == (byte)CardType.Buff)
                         {
-                            continue;
-                        }
+                            Buff b = new Buff((short)s.SecondData, Monster.Level);
+                            if (b.Card != null)
+                            {
+                                switch (b.Card?.BuffType)
+                                {
+                                    case BuffType.Bad:
+                                        s.ApplyBCards(BattleEntity, attackerBattleEntity);
+                                        break;
 
-                        var b = new Buff((short)cardd.SecondData, Monster.Level);
-                        if (b.Card == null)
-                        {
-                            continue;
+                                    case BuffType.Good:
+                                    case BuffType.Neutral:
+                                        s.ApplyBCards(attackerBattleEntity, attackerBattleEntity);
+                                        break;
+                                }
+                            }
                         }
-
-                        switch (b.Card?.BuffType)
-                        {
-                            case BuffType.Bad:
-                                cardd.ApplyBCards(attackerBattleEntity, BattleEntity);
-                                break;
-
-                            case BuffType.Good:
-                            case BuffType.Neutral:
-                                cardd.ApplyBCards(BattleEntity, BattleEntity);
-                                break;
-                        }
-                    }
+                    });
 
                     BattleEntity.BCards.Where(s => s.CastType == 0).ForEach(s =>
                     {
                         if (s.Type == (byte)CardType.Buff)
                         {
-                            var b = new Buff((short)s.SecondData, BattleEntity.Level);
+                            Buff b = new Buff((short)s.SecondData, BattleEntity.Level);
                             if (b.Card != null)
                             {
                                 switch (b.Card?.BuffType)
@@ -967,17 +985,13 @@ namespace OpenNos.GameObject
                                         {
                                             s.ApplyBCards(BattleEntity, BattleEntity);
                                         }
-
                                         break;
                                 }
                             }
                         }
                     });
 
-                    hitRequest.SkillBCards.Where(s =>
-                            s.Type.Equals((byte)CardType.Buff) &&
-                            new Buff((short)s.SecondData, hitRequest.Session.Character.Level).Card?.BuffType ==
-                            BuffType.Bad).ToList()
+                    hitRequest.SkillBCards.Where(s => s.Type.Equals((byte)CardType.Buff) && new Buff((short)s.SecondData, hitRequest.Session.Character.Level).Card?.BuffType == BuffType.Bad).ToList()
                         .ForEach(s => s.ApplyBCards(BattleEntity, attackerBattleEntity));
 
                     hitRequest.SkillBCards.Where(s => s.Type.Equals((byte)CardType.Capture)).ToList()
@@ -988,57 +1002,70 @@ namespace OpenNos.GameObject
 
                     if (attackerBattleEntity?.ShellWeaponEffects != null)
                     {
-                        foreach (var shell in attackerBattleEntity.ShellWeaponEffects)
+                        foreach (ShellEffectDTO shell in attackerBattleEntity.ShellWeaponEffects)
                         {
-                            Buff buff = null;
-                            var chance = (short)(shell.Value >= 100 ? 100 : shell.Value);
                             switch (shell.Effect)
                             {
                                 case (byte)ShellWeaponEffectType.Blackout:
                                     {
-                                        buff = new Buff(7, attackerBattleEntity.Level);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(7, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.DeadlyBlackout:
                                     {
-                                        buff = new Buff(66, attackerBattleEntity.Level);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(66, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.MinorBleeding:
                                     {
-                                        buff = new Buff(1, attackerBattleEntity.Level);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(1, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.Bleeding:
                                     {
-                                        buff = new Buff(21, attackerBattleEntity.Level);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(21, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.HeavyBleeding:
                                     {
-                                        buff = new Buff(42, attackerBattleEntity.Level);
-                                    }
-                                    break;
+                                        Buff buff = new Buff(42, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
 
+                                        break;
+                                    }
                                 case (byte)ShellWeaponEffectType.Freeze:
                                     {
-                                        buff = new Buff(27, attackerBattleEntity.Level);
+                                        Buff buff = new Buff(27, attackerBattleEntity.Level);
+                                        if (ServerManager.RandomNumber() < shell.Value)
+                                        {
+                                            AddBuff(buff, attackerBattleEntity);
+                                        }
+
+                                        break;
                                     }
-                                    break;
-                            }
-
-                            if (buff == null)
-                            {
-                                break;
-                            }
-
-                            if (ServerManager.RandomNumber() < chance || chance == 100)
-                            {
-                                AddBuff(buff, attackerBattleEntity);
                             }
                         }
                     }
@@ -1076,7 +1103,6 @@ namespace OpenNos.GameObject
                 if (CurrentHp <= damage)
                 {
                     SetDeathStatement();
-
                 }
                 else
                 {
@@ -1088,7 +1114,6 @@ namespace OpenNos.GameObject
                 {
                     LastSkill = DateTime.Now;
                 }
-
                 if (hitmode != 2)
                 {
                     if (hitRequest.Skill != null)
@@ -1096,47 +1121,27 @@ namespace OpenNos.GameObject
                         switch (hitRequest.TargetHitType)
                         {
                             case TargetHitType.SingleTargetHit:
-
                                 //if (!isCaptureSkill)
                                 {
-                                    
-                                    if (hitRequest.Session.Character != null)
-                                    {
-                                        if (hitRequest.Skill.SkillVNum == 1085 || hitRequest.Skill.SkillVNum == 1091 ||
-                                            hitRequest.Skill.SkillVNum == 1060 || hitRequest.Skill.SkillVNum == 718 || hitRequest.Skill.SkillVNum == 1607)
-                                        {
-                                            attackerBattleEntity.PositionX = MapX;
-                                            attackerBattleEntity.PositionY = MapY;
-                                            attackerBattleEntity.MapInstance.Broadcast(hitRequest.Session.Character
-                                                .GenerateTp());
-                                        }
-                                    }
-                                    
-                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                            attackerBattleEntity.UserType,
-                                            attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                            BattleEntity.MapEntityId,
-                                            hitRequest.Skill.SkillVNum,
-                                            (short)(hitRequest.Skill.Cooldown),
-                                            hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                            attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                            IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                            (byte)(hitRequest.Skill.SkillType - 1)));
+                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                        hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
+                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                        (byte)(hitRequest.Skill.SkillType - 1)));
                                 }
 
                                 break;
 
                             case TargetHitType.SingleTargetHitCombo:
-                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                        attackerBattleEntity.UserType,
-                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                        BattleEntity.MapEntityId,
-                                        hitRequest.Skill.SkillVNum,
-                                        (short)(hitRequest.Skill.Cooldown),
-                                        hitRequest.SkillCombo.Animation, hitRequest.SkillCombo.Effect,
-                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                        (byte)(hitRequest.Skill.SkillType - 1)));
+                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                    attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                    hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                    hitRequest.SkillCombo.Animation, hitRequest.SkillCombo.Effect,
+                                    attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                    IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                    (byte)(hitRequest.Skill.SkillType - 1)));
                                 break;
 
                             case TargetHitType.SingleAOETargetHit:
@@ -1144,26 +1149,20 @@ namespace OpenNos.GameObject
                                 {
                                     if (hitRequest.Session.Character != null)
                                     {
-                                        if (hitRequest.Skill.SkillVNum == 1085 || hitRequest.Skill.SkillVNum == 1091 ||
-                                            hitRequest.Skill.SkillVNum == 1060 || hitRequest.Skill.SkillVNum == 718 || hitRequest.Skill.SkillVNum == 1607)
+                                        if (hitRequest.Skill.SkillVNum == 1085 || hitRequest.Skill.SkillVNum == 1091 || hitRequest.Skill.SkillVNum == 1060)
                                         {
                                             attackerBattleEntity.PositionX = MapX;
                                             attackerBattleEntity.PositionY = MapY;
-                                            attackerBattleEntity.MapInstance.Broadcast(hitRequest.Session.Character
-                                                                                                 .GenerateTp());
+                                            attackerBattleEntity.MapInstance.Broadcast(hitRequest.Session.Character.GenerateTp());
                                         }
                                     }
-
-                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                            attackerBattleEntity.UserType,
-                                            attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                            BattleEntity.MapEntityId,
-                                            hitRequest.Skill.SkillVNum,
-                                            (short)(hitRequest.Skill.Cooldown),
-                                            hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                            attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                            IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                            (byte)(hitRequest.Skill.SkillType - 1)));
+                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                        hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
+                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                        (byte)(hitRequest.Skill.SkillType - 1)));
                                 }
                                 else
                                 {
@@ -1187,18 +1186,14 @@ namespace OpenNos.GameObject
                                             break;
                                     }
 
-                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                            attackerBattleEntity.UserType,
-                                            attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                            BattleEntity.MapEntityId,
-                                            -1,
-                                            (short)(hitRequest.Skill.Cooldown),
-                                            hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                            attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                            IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                            (byte)(hitRequest.Skill.SkillType - 1)));
+                                    BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                        -1, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
+                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                        (byte)(hitRequest.Skill.SkillType - 1)));
                                 }
-
                                 break;
 
                             case TargetHitType.AOETargetHit:
@@ -1222,94 +1217,76 @@ namespace OpenNos.GameObject
                                         break;
                                 }
 
-                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                        attackerBattleEntity.UserType,
-                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                        BattleEntity.MapEntityId,
-                                        hitRequest.Skill.SkillVNum,
-                                        (short)(hitRequest.Skill.Cooldown),
-                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                        (byte)(hitRequest.Skill.SkillType - 1)));
+                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                    attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                    hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                    hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
+                                    attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                    IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                    (byte)(hitRequest.Skill.SkillType - 1)));
                                 break;
 
                             case TargetHitType.ZoneHit:
-                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                        attackerBattleEntity.UserType,
-                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                        BattleEntity.MapEntityId,
-                                        hitRequest.Skill.SkillVNum,
-                                        (short)(hitRequest.Skill.Cooldown),
-                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect, hitRequest.MapX,
-                                        hitRequest.MapY, IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                        (byte)(hitRequest.Skill.SkillType - 1)));
+                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                    attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                    hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                    hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect, hitRequest.MapX,
+                                    hitRequest.MapY, IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                    (byte)(hitRequest.Skill.SkillType - 1)));
                                 break;
 
                             case TargetHitType.SpecialZoneHit:
-                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(
-                                        attackerBattleEntity.UserType,
-                                        attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType,
-                                        BattleEntity.MapEntityId,
-                                        hitRequest.Skill.SkillVNum,
-                                        (short)(hitRequest.Skill.Cooldown),
-                                        hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
-                                        attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
-                                        IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
-                                        (byte)(hitRequest.Skill.SkillType - 1)));
+                                BattleEntity.MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
+                                    attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                                    hitRequest.Skill.SkillVNum, (short)(hitRequest.Skill.Cooldown + hitRequest.Skill.Cooldown * cooldownReduction / 100D),
+                                    hitRequest.Skill.AttackAnimation, hitRequest.SkillEffect,
+                                    attackerBattleEntity.PositionX, attackerBattleEntity.PositionY,
+                                    IsAlive, (int)(CurrentHp / MaxHp * 100), damage, hitmode,
+                                    (byte)(hitRequest.Skill.SkillType - 1)));
                                 break;
                         }
                     }
                     else
                     {
                         MapInstance?.Broadcast(StaticPacketHelper.SkillUsed(attackerBattleEntity.UserType,
-                                attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
-                                0, (short)(hitRequest.Mate != null ? hitRequest.Mate.Monster.BasicCooldown : 12), 11,
-                                (short)(hitRequest.Mate != null ? hitRequest.Mate.Monster.BasicSkill : 12), 0, 0, IsAlive,
-                                (int)(CurrentHp / MaxHp * 100), damage, hitmode, 0));
+                            attackerBattleEntity.MapEntityId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                            0, (short)(hitRequest.Mate != null ? hitRequest.Mate.Monster.BasicCooldown : 12), 11, (short)(hitRequest.Mate != null ? hitRequest.Mate.Monster.BasicSkill : 12), 0, 0, IsAlive,
+                            (int)(CurrentHp / MaxHp * 100), damage, hitmode, 0));
                     }
                 }
                 else
                 {
                     hitRequest.Session.SendPacket(StaticPacketHelper.Cancel(2, MapMonsterId));
                 }
-
                 if (attackerBattleEntity.Character != null)
                 {
                     if (hitmode != 4 && hitmode != 2 && damage > 0)
                     {
                         attackerBattleEntity.Character.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
-                        {
-                                new KeyValuePair<byte, byte>((byte) CardType.SpecialActions,
-                                        (byte) AdditionalTypes.SpecialActions.Hide)
-                        });
+                            {
+                                new KeyValuePair<byte, byte>((byte)CardType.SpecialActions, (byte)AdditionalTypes.SpecialActions.Hide)
+                            });
                     }
 
                     if (attackerBattleEntity.HasBuff(CardType.FalconSkill, (byte)AdditionalTypes.FalconSkill.Hide))
                     {
                         attackerBattleEntity.Character.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
-                        {
-                            new KeyValuePair<byte, byte>((byte) CardType.FalconSkill,
-                                (byte) AdditionalTypes.FalconSkill.Hide)
-                        });
+                            {
+                                new KeyValuePair<byte, byte>((byte)CardType.FalconSkill, (byte)AdditionalTypes.FalconSkill.Hide)
+                            });
                         attackerBattleEntity.AddBuff(new Buff(560, attackerBattleEntity.Level), attackerBattleEntity);
                     }
                 }
-
                 if (CurrentHp <= 0 && !isCaptureSkill)
                 {
                     // generate the kill bonus
                     hitRequest.Session.Character.GenerateKillBonus(this, attackerBattleEntity);
 
-                    if (attackerBattleEntity.Character != null && hitRequest.SkillBCards.FirstOrDefault(s =>
-                            s.Type == (byte)CardType.TauntSkill &&
-                            s.SubType == (byte)AdditionalTypes.TauntSkill.EffectOnKill) is BCard EffectOnKill)
+                    if (attackerBattleEntity.Character != null && hitRequest.SkillBCards.FirstOrDefault(s => s.Type == (byte)CardType.TauntSkill && s.SubType == (byte)AdditionalTypes.TauntSkill.EffectOnKill / 10) is BCard EffectOnKill)
                     {
                         if (ServerManager.RandomNumber() < EffectOnKill.FirstData)
                         {
-                            attackerBattleEntity.AddBuff(
-                                    new Buff((short)EffectOnKill.SecondData, attackerBattleEntity.Level),
-                                    attackerBattleEntity);
+                            attackerBattleEntity.AddBuff(new Buff((short)EffectOnKill.SecondData, attackerBattleEntity.Level), attackerBattleEntity);
                         }
                     }
                 }
@@ -1335,8 +1312,7 @@ namespace OpenNos.GameObject
         {
             lock (AggroList)
             {
-                AggroList.RemoveAll(s =>
-                    s.MapEntityId == aggroEntity.MapEntityId && s.EntityType == aggroEntity.EntityType);
+                AggroList.RemoveAll(s => s.MapEntityId == aggroEntity.MapEntityId && s.EntityType == aggroEntity.EntityType);
             }
         }
 
@@ -1356,35 +1332,28 @@ namespace OpenNos.GameObject
 
             MapInstance.InstanceBag.MonstersKilled++;
 
-            if (Owner != null && Monster.BCards.FirstOrDefault(s =>
-                    s.CastType == 0 && s.Type == (byte)CardType.SummonAndRecoverHP &&
-                    s.SubType == (byte)AdditionalTypes.SummonAndRecoverHP.RestoreHP) is BCard RestoreHP)
+            if (Owner != null && Monster.BCards.FirstOrDefault(s => s.CastType == 0 && s.Type == (byte)CardType.SummonAndRecoverHP && s.SubType == (byte)AdditionalTypes.SummonAndRecoverHP.RestoreHP / 10) is BCard RestoreHP)
             {
                 double recoverHp = Owner.HpMax * RestoreHP.FirstData / 100;
                 if (Owner.Hp + recoverHp > Owner.HpMax)
                 {
                     recoverHp = Owner.HpMax - Owner.Hp;
                 }
-
                 Owner.Hp += (int)recoverHp;
                 MapInstance.Broadcast(Owner.GenerateRc((int)recoverHp));
             }
 
             if (OnDeathEvents.Any(s => s.EventActionType == EventActionType.SPAWNMONSTERS)
-                && (List<MonsterToSummon>)OnDeathEvents
-                    .FirstOrDefault(e => e.EventActionType == EventActionType.SPAWNMONSTERS)
-                    .Parameter is List<MonsterToSummon> summonParameters)
+            && (List<MonsterToSummon>)OnDeathEvents.FirstOrDefault(e => e.EventActionType == EventActionType.SPAWNMONSTERS).Parameter is List<MonsterToSummon> summonParameters)
             {
-                foreach (var npcMonster in summonParameters)
+                Parallel.ForEach(summonParameters, npcMonster =>
                 {
                     npcMonster.SpawnCell.X = MapX;
                     npcMonster.SpawnCell.Y = MapY;
-                }
+                });
             }
-
             if (OnDeathEvents.Any(s => s.EventActionType == EventActionType.SPAWNNPC)
-             && (NpcToSummon)OnDeathEvents.FirstOrDefault(e => e.EventActionType == EventActionType.SPAWNNPC)
-                                           .Parameter is NpcToSummon npcMonsterToSummon)
+            && (NpcToSummon)OnDeathEvents.FirstOrDefault(e => e.EventActionType == EventActionType.SPAWNNPC).Parameter is NpcToSummon npcMonsterToSummon)
             {
                 npcMonsterToSummon.SpawnCell.X = MapX;
                 npcMonsterToSummon.SpawnCell.Y = MapY;
@@ -1431,11 +1400,11 @@ namespace OpenNos.GameObject
 
         public void TargetHit2(BattleEntity target, NpcMonsterSkill npcMonsterSkill, int damage, int hitmode)
         {
-            var attackGreaterDistance = false;
-            var bCards = new List<BCard>();
+            bool attackGreaterDistance = false;
+            List<BCard> bCards = new List<BCard>();
             bCards.AddRange(Monster.BCards.ToList());
-            var skillRange = Monster.BasicRange;
-            var skillTargetRange = Monster.BasicRange;
+            byte skillRange = Monster.BasicRange;
+            byte skillTargetRange = Monster.BasicRange;
             if (npcMonsterSkill != null)
             {
                 if (npcMonsterSkill.SkillVNum == 1321)
@@ -1446,59 +1415,49 @@ namespace OpenNos.GameObject
                 skillRange = npcMonsterSkill.Skill.Range;
                 skillTargetRange = npcMonsterSkill.Skill.TargetRange;
                 bCards.AddRange(npcMonsterSkill.Skill.BCards.ToList());
-                if (npcMonsterSkill.Skill.TargetType == 1 && npcMonsterSkill.Skill.HitType == 1 &&
-                    npcMonsterSkill.Skill.TargetRange == 0 && npcMonsterSkill.Skill.Range > 0)
+                if (npcMonsterSkill.Skill.TargetType == 1 && npcMonsterSkill.Skill.HitType == 1 && npcMonsterSkill.Skill.TargetRange == 0 && npcMonsterSkill.Skill.Range > 0)
                 {
                     if (npcMonsterSkill.SkillVNum != 1207)
                     {
                         attackGreaterDistance = true;
                     }
                 }
-
                 if (npcMonsterSkill.Skill.CastEffect == 4657 || npcMonsterSkill.Skill.CastEffect == 4940)
                 {
                     skillRange = 3;
                 }
-
                 if (npcMonsterSkill.Skill.TargetType == 0 && npcMonsterSkill.Skill.HitType == 0)
                 {
                     skillRange = npcMonsterSkill.Skill.TargetRange;
                     skillTargetRange = 0;
                 }
-
                 if (npcMonsterSkill.Skill.TargetType == 1 && npcMonsterSkill.Skill.HitType == 1)
                 {
                     skillRange = npcMonsterSkill.Skill.TargetRange;
                     skillTargetRange = 0;
                 }
-
-                if (attackGreaterDistance ||
-                    npcMonsterSkill.Skill.TargetType == 0 && npcMonsterSkill.Skill.HitType == 1)
+                if (attackGreaterDistance || (npcMonsterSkill.Skill.TargetType == 0 && npcMonsterSkill.Skill.HitType == 1))
                 {
                     skillRange = npcMonsterSkill.Skill.TargetRange;
                     skillTargetRange = npcMonsterSkill.Skill.Range;
                 }
-
                 if (npcMonsterSkill.Skill.TargetType == 1 && npcMonsterSkill.Skill.HitType == 2) // Area Buff
                 {
-                    MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId,
-                        (byte)BattleEntity.UserType, MapMonsterId,
-                        npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
-                        npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
-                        CurrentHp > 0,
-                        (int)(CurrentHp / MaxHp * 100), 0,
-                        0, 0));
+                    MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)BattleEntity.UserType, MapMonsterId,
+                            npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
+                            npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
+                            CurrentHp > 0,
+                            (int)(CurrentHp / MaxHp * 100), 0,
+                            0, 0));
 
                     MapInstance.GetBattleEntitiesInRange(new MapCell { X = MapX, Y = MapY }, skillTargetRange)
                         .Where(s => !BattleEntity.CanAttackEntity(s))
-                        .ToList().ForEach(s =>
-                            npcMonsterSkill.Skill.BCards.ForEach(b => b.ApplyBCards(s, BattleEntity, MapX, MapY)));
+                        .ToList().ForEach(s => npcMonsterSkill.Skill.BCards.ForEach(b => b.ApplyBCards(s, BattleEntity, MapX, MapY)));
                     return;
                 }
-
                 if (npcMonsterSkill.SkillVNum == 1215)
                 {
-                    var recoverHp = 0;
+                    int recoverHp = 0;
                     MapInstance.BattleEntities
                         .Where(s => !BattleEntity.CanAttackEntity(s) && s.MapMonster?.MonsterVNum == 2017)
                         .ToList().ForEach(s =>
@@ -1512,12 +1471,10 @@ namespace OpenNos.GameObject
                     {
                         recoverHp = (int)(MaxHp - CurrentHp);
                     }
-
                     if (recoverHp > 0)
                     {
                         MapInstance.Broadcast(UserInterfaceHelper.GenerateMsg(string.Format(
-                            Language.Instance.GetMessageFromKey("EARNED_VITALLITY"), Monster.Name,
-                            ServerManager.GetNpcMonster(2017).Name), 0));
+                            Language.Instance.GetMessageFromKey("EARNED_VITALLITY"), Monster.Name, ServerManager.GetNpcMonster(2017).Name), 0));
                         CurrentHp += recoverHp;
                         MapInstance.Broadcast(BattleEntity.GenerateRc(recoverHp));
                     }
@@ -1527,25 +1484,17 @@ namespace OpenNos.GameObject
             lock (target.PVELockObject)
             {
                 if (target.Hp > 0 && target.MapInstance == MapInstance && !attackGreaterDistance
-                    && (skillTargetRange == 0 || Map.GetDistance(new MapCell { X = MapX, Y = MapY },
-                            new MapCell { X = target.PositionX, Y = target.PositionY }) <= skillTargetRange))
+                    && (skillTargetRange == 0 || Map.GetDistance(new MapCell { X = MapX, Y = MapY }, new MapCell { X = target.PositionX, Y = target.PositionY }) <= skillTargetRange))
                 {
                     if (damage >= target.Hp &&
-                        Monster.BCards.Any(s =>
-                            s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                            s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill &&
-                            s.FirstData == 1))
+                        Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill / 10 && s.FirstData == 1))
                     {
                         damage = target.Hp - 1;
                     }
-
                     if (damage >= target.Hp &&
-                        target.BCards.Any(s =>
-                                s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                                s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath &&
-                                s.FirstData == 1))
+                        target.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath / 10 && s.FirstData == -1))
                     {
-                        damage = target.Hp - 1;
+                        damage = (int)target.Hp - 1;
                     }
 
                     if (Owner != null && MonsterVNum == 945)
@@ -1553,7 +1502,7 @@ namespace OpenNos.GameObject
                         hitmode = 0;
                     }
 
-                    var firstHit = false;
+                    bool firstHit = false;
 
                     target.GetDamage(damage, BattleEntity);
 
@@ -1578,10 +1527,9 @@ namespace OpenNos.GameObject
                             {
                                 // Magic Spell
 
-                                target.Character.AddBuff(new Buff(617, target.Character.Level),
-                                        target.Character.BattleEntity);
+                                target.Character.AddBuff(new Buff(617, target.Character.Level), target.Character.BattleEntity);
 
-                                var castId = 10 + Monster.Element;
+                                int castId = 10 + Monster.Element;
 
                                 if (castId == 10)
                                 {
@@ -1596,50 +1544,38 @@ namespace OpenNos.GameObject
 
                     if (target.Mate != null)
                     {
-                        target.Mate.Owner.Session.SendPacket(target.Mate.Owner.GeneratePst()
-                            .FirstOrDefault(s => s.Contains(target.Mate.MateTransportId.ToString())));
+                        target.Mate.Owner.Session.SendPacket(target.Mate.Owner.GeneratePst().FirstOrDefault(s => s.Contains(target.Mate.MateTransportId.ToString())));
                         if (target.Mate.IsSitting)
                         {
                             target.Mate.Owner.MapInstance.Broadcast(target.Mate.GenerateRest(false));
                         }
                     }
-
                     if (target.MapMonster != null && Owner != null)
                     {
                         if (target.MapMonster.Target == null)
                         {
                             target.MapMonster.Target = BattleEntity;
                         }
-
                         lock (target.MapMonster.DamageList)
                         {
                             if (!target.MapMonster.DamageList.Any(s => s.Value > 0))
                             {
                                 firstHit = true;
                             }
-
                             target.MapMonster.AddToDamageList(Owner, damage);
                         }
                     }
-
                     MapInstance.Broadcast(npcMonsterSkill != null
-                        ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)target.UserType,
-                            target.MapEntityId,
+                        ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)target.UserType, target.MapEntityId,
                             npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
                             npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
                             target.Hp > 0,
                             (int)(target.Hp / target.HPLoad() * 100), damage,
                             hitmode, 0)
-                        : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)target.UserType,
-                            target.MapEntityId, 0,
+                        : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)target.UserType, target.MapEntityId, 0,
                             Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, target.Hp > 0,
                             (int)(target.Hp / target.HPLoad() * 100), damage,
                             hitmode, 0));
-
-                    if (hitmode != 1)
-                    {
-                        BattleEntity.TryToApplyBeachBuff(target);
-                    }
 
                     if (hitmode != 4 && hitmode != 2)
                     {
@@ -1656,7 +1592,7 @@ namespace OpenNos.GameObject
                         {
                             if (s.Type == (byte)CardType.Buff)
                             {
-                                var b = new Buff((short)s.SecondData, Monster.Level);
+                                Buff b = new Buff((short)s.SecondData, Monster.Level);
                                 if (b.Card != null)
                                 {
                                     switch (b.Card?.BuffType)
@@ -1674,59 +1610,11 @@ namespace OpenNos.GameObject
                             }
                         });
 
-                        target.BCards.Where(s => s.CastType == 1).ForEach(s =>
-                        {
-                            if (s.Type == (byte)CardType.Buff)
-                            {
-                                var b = new Buff((short)s.SecondData, target.Level);
-                                if (b.Card != null)
-                                {
-                                    switch (b.Card?.BuffType)
-                                    {
-                                        case BuffType.Bad:
-                                            s.ApplyBCards(this.BattleEntity, target);
-                                            break;
-
-                                        case BuffType.Good:
-                                        case BuffType.Neutral:
-                                            s.ApplyBCards(target, null);
-                                            break;
-                                    }
-                                }
-                            }
-                        });
-
-                        foreach (var card in target.BCards.Where(b => b.CastType == 2))
-                        {
-                            if (card.Type != (byte)CardType.Buff)
-                            {
-                                continue;
-                            }
-
-                            var b = new Buff((short)card.SecondData, BattleEntity.Level);
-                            if (b.Card == null)
-                            {
-                                continue;
-                            }
-
-                            switch (b.Card?.BuffType)
-                            {
-                                case BuffType.Bad:
-                                    card.ApplyBCards(BattleEntity, target);
-                                    break;
-
-                                case BuffType.Good:
-                                case BuffType.Neutral:
-                                    card.ApplyBCards(target, target);
-                                    break;
-                            }
-                        }
-
                         target.BCards.Where(s => s.CastType == 0).ForEach(s =>
                         {
                             if (s.Type == (byte)CardType.Buff)
                             {
-                                var b = new Buff((short)s.SecondData, BattleEntity.Level);
+                                Buff b = new Buff((short)s.SecondData, BattleEntity.Level);
                                 if (b.Card != null)
                                 {
                                     switch (b.Card?.BuffType)
@@ -1741,7 +1629,6 @@ namespace OpenNos.GameObject
                                             {
                                                 s.ApplyBCards(target, target);
                                             }
-
                                             break;
                                     }
                                 }
@@ -1752,14 +1639,12 @@ namespace OpenNos.GameObject
                         {
                             target.Character?.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
                             {
-                                new KeyValuePair<byte, byte>((byte) CardType.SpecialActions,
-                                    (byte) AdditionalTypes.SpecialActions.Hide)
+                                new KeyValuePair<byte, byte>((byte)CardType.SpecialActions, (byte)AdditionalTypes.SpecialActions.Hide)
                             });
                             target.RemoveBuff(36);
                             target.RemoveBuff(548);
                         }
                     }
-
                     if (target.Hp <= 0)
                     {
                         if (target.Character != null)
@@ -1768,18 +1653,13 @@ namespace OpenNos.GameObject
                             {
                                 target.Character.RemoveVehicle();
                             }
-
                             if (Owner?.Character != null)
                             {
-                                Owner.Character.BattleEntity.ApplyScoreArena(target);
-                                Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"), Owner.Character.Name, target.Character.Name), 10));
+                                Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(
+                                    string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
+                                        Owner.Character.Name, target.Character.Name), 10));
                                 Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
-                                ServerManager.Instance.AskPvpRevive((long)target.Character?.CharacterId));
-                            }
-                            else
-                            {
-                                Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
-                                    ServerManager.Instance.AskRevive((long)target.Character?.CharacterId));
+                                    ServerManager.Instance.AskPvpRevive((long)target.Character?.CharacterId));
                             }
                         }
                         else if (target.Mate != null)
@@ -1787,11 +1667,9 @@ namespace OpenNos.GameObject
                             if (target.Mate.IsTsProtected)
                             {
                                 target.Mate.Owner.Session.SendPacket(target.Mate.Owner.GenerateSay(
-                                    string.Format(Language.Instance.GetMessageFromKey("PET_DIED"), target.Mate.Name),
-                                    11));
+                                    string.Format(Language.Instance.GetMessageFromKey("PET_DIED"), target.Mate.Name), 11));
                                 target.Mate.Owner.Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                    string.Format(Language.Instance.GetMessageFromKey("PET_DIED"), target.Mate.Name),
-                                    0));
+                                    string.Format(Language.Instance.GetMessageFromKey("PET_DIED"), target.Mate.Name), 0));
                             }
                         }
                         else if (target.MapMonster != null)
@@ -1813,17 +1691,14 @@ namespace OpenNos.GameObject
                             target.MapNpc.SetDeathStatement();
                             target.MapNpc.RunDeathEvent();
                         }
-
                         RemoveTarget();
                     }
                 }
                 else
                 {
-                    if (npcMonsterSkill != null && npcMonsterSkill.Skill.TargetType == 1 &&
-                        npcMonsterSkill.Skill.HitType == 1)
+                    if (npcMonsterSkill != null && (npcMonsterSkill.Skill.TargetType == 1 && npcMonsterSkill.Skill.HitType == 1))
                     {
-                        MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId,
-                            (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
+                        MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)BattleEntity.UserType, BattleEntity.MapEntityId,
                             npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
                             npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
                             BattleEntity.Hp > 0,
@@ -1832,12 +1707,11 @@ namespace OpenNos.GameObject
 
                         if (npcMonsterSkill.Skill.Range > 0)
                         {
-                            MapInstance.GetBattleEntitiesInRange(new MapCell { X = MapX, Y = MapY },
-                                               npcMonsterSkill.Skill.Range).ToList()
-                                       .ForEach(e =>
-                                       {
-                                           npcMonsterSkill.Skill.BCards.ForEach(bc => bc.ApplyBCards(e, BattleEntity));
-                                       });
+                            MapInstance.GetBattleEntitiesInRange(new MapCell { X = MapX, Y = MapY }, npcMonsterSkill.Skill.Range).ToList()
+                                .ForEach(e =>
+                                {
+                                    npcMonsterSkill.Skill.BCards.ForEach(bc => bc.ApplyBCards(e, BattleEntity));
+                                });
                         }
                     }
                 }
@@ -1851,8 +1725,8 @@ namespace OpenNos.GameObject
 
             // In range entities
 
-            var RangeBaseX = target.PositionX;
-            var RangeBaseY = target.PositionY;
+            short RangeBaseX = target.PositionX;
+            short RangeBaseY = target.PositionY;
 
             if (npcMonsterSkill != null && npcMonsterSkill.Skill.HitType == 1 && npcMonsterSkill.Skill.TargetType == 1)
             {
@@ -1862,9 +1736,9 @@ namespace OpenNos.GameObject
 
             if (npcMonsterSkill != null && (npcMonsterSkill.Skill.Range > 0 || npcMonsterSkill.Skill.TargetRange > 0))
             {
-                var onyxWings = false;
+                bool onyxWings = false;
                 var zephyrWings = false;
-                foreach (var characterInRange in MapInstance
+                foreach (Character characterInRange in MapInstance
                     .GetCharactersInRange(
                         npcMonsterSkill.Skill.TargetRange == 0 ? MapX : RangeBaseX,
                         npcMonsterSkill.Skill.TargetRange == 0 ? MapY : RangeBaseY,
@@ -1874,18 +1748,18 @@ namespace OpenNos.GameObject
                     if (!BattleEntity.CanAttackEntity(characterInRange.BattleEntity))
                     {
                         npcMonsterSkill.Skill.BCards.Where(s => s.Type == (byte)CardType.Buff).ToList().ForEach(s =>
-                       {
-                           if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
-                           {
-                               switch (b.Card?.BuffType)
-                               {
-                                   case BuffType.Good:
-                                   case BuffType.Neutral:
-                                       s.ApplyBCards(characterInRange.BattleEntity, BattleEntity);
-                                       break;
-                               }
-                           }
-                       });
+                        {
+                            if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
+                            {
+                                switch (b.Card?.BuffType)
+                                {
+                                    case BuffType.Good:
+                                    case BuffType.Neutral:
+                                        s.ApplyBCards(characterInRange.BattleEntity, BattleEntity);
+                                        break;
+                                }
+                            }
+                        });
                     }
                     else
                     {
@@ -1903,31 +1777,18 @@ namespace OpenNos.GameObject
 
                         if (characterInRange.Hp > 0)
                         {
-                            var dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this),
-                                    new BattleEntity(characterInRange, null), npcMonsterSkill.Skill, ref hitmode,
-                                    ref onyxWings, ref zephyrWings, attackGreaterDistance);
+                            int dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this), new BattleEntity(characterInRange, null), npcMonsterSkill.Skill, ref hitmode, ref onyxWings, ref zephyrWings, attackGreaterDistance);
                             if (dmg >= characterInRange.Hp &&
-                                Monster.BCards.Any(s =>
-                                        s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                                        s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill &&
-                                        s.FirstData == 1))
+                                Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill / 10 && s.FirstData == 1))
                             {
                                 dmg = characterInRange.Hp - 1;
                             }
-
-                            if (hitmode != 1)
-                            {
-                                BattleEntity.TryToApplyBeachBuff(characterInRange.BattleEntity);
-                            }
-
-                            
 
                             if (hitmode != 4 && hitmode != 2)
                             {
                                 bCards.Where(s => s.CastType == 1 || s.SkillVNum != null).ToList().ForEach(s =>
                                 {
-                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons &&
-                                        s.Type != (byte)CardType.SummonSkill)
+                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons && s.Type != (byte)CardType.SummonSkill)
                                     {
                                         s.ApplyBCards(characterInRange.BattleEntity, BattleEntity);
                                     }
@@ -1937,7 +1798,7 @@ namespace OpenNos.GameObject
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, Monster.Level);
+                                        Buff b = new Buff((short)s.SecondData, Monster.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -1955,38 +1816,11 @@ namespace OpenNos.GameObject
                                     }
                                 });
 
-                                foreach (var card in characterInRange.BattleEntity.BCards.Where(b => b.CastType == 2))
-                                {
-                                    if (card.Type != (byte)CardType.Buff)
-                                    {
-                                        continue;
-                                    }
-
-                                    var b = new Buff((short)card.SecondData, BattleEntity.Level);
-                                    if (b.Card == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    switch (b.Card?.BuffType)
-                                    {
-                                        case BuffType.Bad:
-                                            card.ApplyBCards(BattleEntity, characterInRange.BattleEntity);
-                                            break;
-
-                                        case BuffType.Good:
-                                        case BuffType.Neutral:
-                                            card.ApplyBCards(characterInRange.BattleEntity,
-                                                    characterInRange.BattleEntity);
-                                            break;
-                                    }
-                                }
-
                                 characterInRange.BattleEntity.BCards.Where(s => s.CastType == 0).ForEach(s =>
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, BattleEntity.Level);
+                                        Buff b = new Buff((short)s.SecondData, BattleEntity.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -1997,8 +1831,7 @@ namespace OpenNos.GameObject
 
                                                 case BuffType.Good:
                                                 case BuffType.Neutral:
-                                                    s.ApplyBCards(characterInRange.BattleEntity,
-                                                            characterInRange.BattleEntity);
+                                                    s.ApplyBCards(characterInRange.BattleEntity, characterInRange.BattleEntity);
                                                     break;
                                             }
                                         }
@@ -2014,9 +1847,8 @@ namespace OpenNos.GameObject
                                     AddToAggroList(characterInRange.BattleEntity);
                                 }
                             }
-
                             MapInstance.Broadcast(null, characterInRange.GenerateStat(), ReceiverType.OnlySomeone,
-                                    "", characterInRange.CharacterId);
+                                "", characterInRange.CharacterId);
 
                             switch (hitmode)
                             {
@@ -2039,41 +1871,37 @@ namespace OpenNos.GameObject
                             }
 
                             MapInstance.Broadcast(npcMonsterSkill != null
-                                    ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Player,
-                                            characterInRange.CharacterId,
-                                            npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
-                                            npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
-                                            characterInRange.Hp > 0,
-                                            (int)(characterInRange.Hp / characterInRange.HPLoad() * 100), dmg,
-                                            hitmode, 0)
-                                    : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Player,
-                                            characterInRange.CharacterId, 0,
-                                            Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, characterInRange.Hp > 0,
-                                            (int)(characterInRange.Hp / characterInRange.HPLoad() * 100), dmg,
-                                            hitmode, 0));
+                                ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Player, characterInRange.CharacterId,
+                                    npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
+                                    npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
+                                    characterInRange.Hp > 0,
+                                    (int)(characterInRange.Hp / characterInRange.HPLoad() * 100), dmg,
+                                    hitmode, 0)
+                                : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Player, characterInRange.CharacterId, 0,
+                                    Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, characterInRange.Hp > 0,
+                                    (int)(characterInRange.Hp / characterInRange.HPLoad() * 100), dmg,
+                                    hitmode, 0));
 
                             if (hitmode != 4 && hitmode != 2 && dmg > 0)
                             {
                                 characterInRange.RemoveBuffByBCardTypeSubType(new List<KeyValuePair<byte, byte>>
                                 {
-                                        new KeyValuePair<byte, byte>((byte) CardType.SpecialActions,
-                                                (byte) AdditionalTypes.SpecialActions.Hide)
+                                    new KeyValuePair<byte, byte>((byte)CardType.SpecialActions, (byte)AdditionalTypes.SpecialActions.Hide)
                                 });
                                 characterInRange.RemoveBuff(36);
                                 characterInRange.RemoveBuff(548);
                             }
-
                             if (characterInRange.Hp <= 0)
                             {
                                 if (characterInRange.IsVehicled)
                                 {
                                     characterInRange.RemoveVehicle();
                                 }
-
                                 if (Owner?.Character != null)
                                 {
-                                    Owner.Character.BattleEntity.ApplyScoreArena(characterInRange.BattleEntity);
-                                    Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"), Owner.Character.Name, characterInRange?.Name), 10));
+                                    Owner.MapInstance?.Broadcast(Owner.Character.GenerateSay(
+                                        string.Format(Language.Instance.GetMessageFromKey("PVP_KILL"),
+                                            Owner.Character.Name, characterInRange?.Name), 10));
                                     Observable.Timer(TimeSpan.FromMilliseconds(1000)).Subscribe(o =>
                                     {
                                         ServerManager.Instance.AskPvpRevive((long)characterInRange?.CharacterId);
@@ -2091,28 +1919,28 @@ namespace OpenNos.GameObject
                     }
                 }
 
-                foreach (var mateInRange in BattleEntity.MapInstance
-                                                        .GetListMateInRange(
-                                                                npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
-                                                                npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
-                                                                skillRange,
-                                                                attackGreaterDistance).Where(s => s.MateTransportId != target.MapEntityId))
+                foreach (Mate mateInRange in BattleEntity.MapInstance
+                    .GetListMateInRange(
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
+                        skillRange,
+                        attackGreaterDistance).Where(s => s.MateTransportId != target.MapEntityId))
                 {
                     if (!BattleEntity.CanAttackEntity(mateInRange.BattleEntity))
                     {
                         npcMonsterSkill.Skill.BCards.Where(s => s.Type == (byte)CardType.Buff).ToList().ForEach(s =>
-                       {
-                           if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
-                           {
-                               switch (b.Card?.BuffType)
-                               {
-                                   case BuffType.Good:
-                                   case BuffType.Neutral:
-                                       s.ApplyBCards(mateInRange.BattleEntity, BattleEntity);
-                                       break;
-                               }
-                           }
-                       });
+                        {
+                            if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
+                            {
+                                switch (b.Card?.BuffType)
+                                {
+                                    case BuffType.Good:
+                                    case BuffType.Neutral:
+                                        s.ApplyBCards(mateInRange.BattleEntity, BattleEntity);
+                                        break;
+                                }
+                            }
+                        });
                     }
                     else
                     {
@@ -2120,56 +1948,46 @@ namespace OpenNos.GameObject
                     }
                 }
 
-                foreach (var monsterInRange in MapInstance
-                                               .GetMonsterInRangeList(
-                                                       npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
-                                                       npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
-                                                       skillRange,
-                                                       attackGreaterDistance).Where(s => s.MapMonsterId != target.MapEntityId))
+                foreach (MapMonster monsterInRange in MapInstance
+                    .GetMonsterInRangeList(
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
+                        skillRange,
+                        attackGreaterDistance).Where(s => s.MapMonsterId != target.MapEntityId))
                 {
                     if (!BattleEntity.CanAttackEntity(monsterInRange.BattleEntity))
                     {
                         npcMonsterSkill.Skill.BCards.Where(s => s.Type == (byte)CardType.Buff).ToList().ForEach(s =>
-                       {
-                           if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
-                           {
-                               switch (b.Card?.BuffType)
-                               {
-                                   case BuffType.Good:
-                                   case BuffType.Neutral:
-                                       s.ApplyBCards(monsterInRange.BattleEntity, BattleEntity);
-                                       break;
-                               }
-                           }
-                       });
+                        {
+                            if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
+                            {
+                                switch (b.Card?.BuffType)
+                                {
+                                    case BuffType.Good:
+                                    case BuffType.Neutral:
+                                        s.ApplyBCards(monsterInRange.BattleEntity, BattleEntity);
+                                        break;
+                                }
+                            }
+                        });
                     }
                     else
                     {
-                        if (monsterInRange.CurrentHp > 0 && monsterInRange.Owner?.Character == null &&
-                            monsterInRange.Owner?.Mate == null)
+                        if (monsterInRange.CurrentHp > 0 && monsterInRange.Owner?.Character == null && monsterInRange.Owner?.Mate == null)
                         {
-                            var dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this),
-                                    new BattleEntity(monsterInRange), npcMonsterSkill.Skill, ref hitmode, ref onyxWings,
-                                    ref zephyrWings, attackGreaterDistance);
+                            int dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this), new BattleEntity(monsterInRange), npcMonsterSkill.Skill, ref hitmode, ref onyxWings, ref zephyrWings, attackGreaterDistance);
                             if (dmg >= monsterInRange.CurrentHp &&
-                                Monster.BCards.Any(s =>
-                                        s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                                        s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill &&
-                                        s.FirstData == 1))
+                                Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill / 10 && s.FirstData == 1))
+                            {
+                                dmg = (int)monsterInRange.CurrentHp - 1;
+                            }
+                            if (dmg >= monsterInRange.CurrentHp &&
+                                monsterInRange.Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath / 10 && s.FirstData == -1))
                             {
                                 dmg = (int)monsterInRange.CurrentHp - 1;
                             }
 
-                            if (dmg >= monsterInRange.CurrentHp &&
-                                monsterInRange.Monster.BCards.Any(s =>
-                                        s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                                        s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoDeath &&
-                                        s.FirstData == 1))
-                            {
-                                dmg = (int)monsterInRange.CurrentHp - 1;
-                            }
-
-                            var firstHit = false;
+                            bool firstHit = false;
                             lock (monsterInRange.DamageList)
                             {
                                 if (!monsterInRange.DamageList.Any(s => s.Value > 0))
@@ -2183,17 +2001,11 @@ namespace OpenNos.GameObject
                                 monsterInRange.Target = BattleEntity;
                             }
 
-                            if (hitmode != 1)
-                            {
-                                BattleEntity.TryToApplyBeachBuff(monsterInRange.BattleEntity);
-                            }
-
                             if (hitmode != 4 && hitmode != 2)
                             {
                                 bCards.Where(s => s.CastType == 1 || s.SkillVNum != null).ToList().ForEach(s =>
                                 {
-                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons &&
-                                        s.Type != (byte)CardType.SummonSkill)
+                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons && s.Type != (byte)CardType.SummonSkill)
                                     {
                                         s.ApplyBCards(monsterInRange.BattleEntity, BattleEntity);
                                     }
@@ -2209,7 +2021,7 @@ namespace OpenNos.GameObject
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, Monster.Level);
+                                        Buff b = new Buff((short)s.SecondData, Monster.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -2227,37 +2039,11 @@ namespace OpenNos.GameObject
                                     }
                                 });
 
-                                foreach (var card in monsterInRange.BattleEntity.BCards.Where(b => b.CastType == 2))
-                                {
-                                    if (card.Type != (byte)CardType.Buff)
-                                    {
-                                        continue;
-                                    }
-
-                                    var b = new Buff((short)card.SecondData, BattleEntity.Level);
-                                    if (b.Card == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    switch (b.Card?.BuffType)
-                                    {
-                                        case BuffType.Bad:
-                                            card.ApplyBCards(BattleEntity, monsterInRange.BattleEntity);
-                                            break;
-
-                                        case BuffType.Good:
-                                        case BuffType.Neutral:
-                                            card.ApplyBCards(monsterInRange.BattleEntity, monsterInRange.BattleEntity);
-                                            break;
-                                    }
-                                }
-
                                 monsterInRange.BattleEntity.BCards.Where(s => s.CastType == 0).ForEach(s =>
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, BattleEntity.Level);
+                                        Buff b = new Buff((short)s.SecondData, BattleEntity.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -2270,10 +2056,8 @@ namespace OpenNos.GameObject
                                                 case BuffType.Neutral:
                                                     if (s.NpcMonsterVNum == null || firstHit)
                                                     {
-                                                        s.ApplyBCards(monsterInRange.BattleEntity,
-                                                                monsterInRange.BattleEntity);
+                                                        s.ApplyBCards(monsterInRange.BattleEntity, monsterInRange.BattleEntity);
                                                     }
-
                                                     break;
                                             }
                                         }
@@ -2289,7 +2073,6 @@ namespace OpenNos.GameObject
                                     AddToAggroList(monsterInRange.BattleEntity);
                                 }
                             }
-
                             if (Owner != null)
                             {
                                 lock (monsterInRange.DamageList)
@@ -2319,18 +2102,16 @@ namespace OpenNos.GameObject
                             }
 
                             MapInstance.Broadcast(npcMonsterSkill != null
-                                    ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Monster,
-                                            monsterInRange.MapMonsterId,
-                                            npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
-                                            npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
-                                            monsterInRange.CurrentHp > 0,
-                                            (int)(monsterInRange.CurrentHp / monsterInRange.MaxHp * 100), dmg,
-                                            hitmode, 0)
-                                    : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Monster,
-                                            monsterInRange.MapMonsterId, 0,
-                                            Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, monsterInRange.CurrentHp > 0,
-                                            (int)(monsterInRange.CurrentHp / monsterInRange.MaxHp * 100), dmg,
-                                            hitmode, 0));
+                                ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Monster, monsterInRange.MapMonsterId,
+                                    npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
+                                    npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
+                                    monsterInRange.CurrentHp > 0,
+                                    (int)(monsterInRange.CurrentHp / monsterInRange.MaxHp * 100), dmg,
+                                    hitmode, 0)
+                                : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Monster, monsterInRange.MapMonsterId, 0,
+                                    Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, monsterInRange.CurrentHp > 0,
+                                    (int)(monsterInRange.CurrentHp / monsterInRange.MaxHp * 100), dmg,
+                                    hitmode, 0));
 
                             if (monsterInRange.CurrentHp <= 0)
                             {
@@ -2350,56 +2131,45 @@ namespace OpenNos.GameObject
                     }
                 }
 
-                foreach (var npcInRange in MapInstance
-                                           .GetListNpcInRange(
-                                                   npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
-                                                   npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
-                                                   skillRange,
-                                                   attackGreaterDistance).Where(s => s.MapNpcId != target.MapEntityId))
+                foreach (MapNpc npcInRange in MapInstance
+                    .GetListNpcInRange(
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionX : RangeBaseX,
+                        npcMonsterSkill.Skill.TargetRange == 0 ? BattleEntity.PositionY : RangeBaseY,
+                        skillRange,
+                        attackGreaterDistance).Where(s => s.MapNpcId != target.MapEntityId))
                 {
                     if (!BattleEntity.CanAttackEntity(npcInRange.BattleEntity))
                     {
                         npcMonsterSkill.Skill.BCards.Where(s => s.Type == (byte)CardType.Buff).ToList().ForEach(s =>
-                       {
-                           if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
-                           {
-                               switch (b.Card?.BuffType)
-                               {
-                                   case BuffType.Good:
-                                   case BuffType.Neutral:
-                                       s.ApplyBCards(npcInRange.BattleEntity, BattleEntity);
-                                       break;
-                               }
-                           }
-                       });
+                        {
+                            if (new Buff((short)s.SecondData, Monster.Level) is Buff b)
+                            {
+                                switch (b.Card?.BuffType)
+                                {
+                                    case BuffType.Good:
+                                    case BuffType.Neutral:
+                                        s.ApplyBCards(npcInRange.BattleEntity, BattleEntity);
+                                        break;
+                                }
+                            }
+                        });
                     }
                     else
                     {
                         if (npcInRange.CurrentHp > 0)
                         {
-                            var dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this),
-                                    new BattleEntity(npcInRange), npcMonsterSkill.Skill, ref hitmode, ref onyxWings,
-                                    ref zephyrWings, attackGreaterDistance);
+                            int dmg = DamageHelper.Instance.CalculateDamage(new BattleEntity(this), new BattleEntity(npcInRange), npcMonsterSkill.Skill, ref hitmode, ref onyxWings, ref zephyrWings, attackGreaterDistance);
                             if (dmg >= npcInRange.CurrentHp &&
-                                Monster.BCards.Any(s =>
-                                        s.Type == (byte)CardType.NoDefeatAndNoDamage &&
-                                        s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill &&
-                                        s.FirstData == 1))
+                                Monster.BCards.Any(s => s.Type == (byte)CardType.NoDefeatAndNoDamage && s.SubType == (byte)AdditionalTypes.NoDefeatAndNoDamage.DecreaseHPNoKill / 10 && s.FirstData == 1))
                             {
                                 dmg = (int)npcInRange.CurrentHp - 1;
-                            }
-
-                            if (hitmode != 1)
-                            {
-                                BattleEntity.TryToApplyBeachBuff(npcInRange.BattleEntity);
                             }
 
                             if (hitmode != 4 && hitmode != 2)
                             {
                                 bCards.Where(s => s.CastType == 1 || s.SkillVNum != null).ToList().ForEach(s =>
                                 {
-                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons &&
-                                        s.Type != (byte)CardType.SummonSkill)
+                                    if (s.Type != (byte)CardType.Buff && s.Type != (byte)CardType.Summons && s.Type != (byte)CardType.SummonSkill)
                                     {
                                         s.ApplyBCards(npcInRange.BattleEntity, BattleEntity);
                                     }
@@ -2415,7 +2185,7 @@ namespace OpenNos.GameObject
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, Monster.Level);
+                                        Buff b = new Buff((short)s.SecondData, Monster.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -2433,37 +2203,11 @@ namespace OpenNos.GameObject
                                     }
                                 });
 
-                                foreach (var card in npcInRange.BattleEntity.BCards.Where(b => b.CastType == 2))
-                                {
-                                    if (card.Type != (byte)CardType.Buff)
-                                    {
-                                        continue;
-                                    }
-
-                                    var b = new Buff((short)card.SecondData, BattleEntity.Level);
-                                    if (b.Card == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    switch (b.Card?.BuffType)
-                                    {
-                                        case BuffType.Bad:
-                                            card.ApplyBCards(BattleEntity, npcInRange.BattleEntity);
-                                            break;
-
-                                        case BuffType.Good:
-                                        case BuffType.Neutral:
-                                            card.ApplyBCards(npcInRange.BattleEntity, npcInRange.BattleEntity);
-                                            break;
-                                    }
-                                }
-
                                 npcInRange.BattleEntity.BCards.Where(s => s.CastType == 0).ForEach(s =>
                                 {
                                     if (s.Type == (byte)CardType.Buff)
                                     {
-                                        var b = new Buff((short)s.SecondData, BattleEntity.Level);
+                                        Buff b = new Buff((short)s.SecondData, BattleEntity.Level);
                                         if (b.Card != null)
                                         {
                                             switch (b.Card?.BuffType)
@@ -2488,7 +2232,6 @@ namespace OpenNos.GameObject
                             {
                                 npcInRange.Target = MapMonsterId;
                             }
-
                             lock (DamageList)
                             {
                                 if (!DamageList.Any(s => s.Key.MapEntityId == npcInRange.MapNpcId))
@@ -2518,18 +2261,16 @@ namespace OpenNos.GameObject
                             }
 
                             MapInstance.Broadcast(npcMonsterSkill != null
-                                    ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Npc,
-                                            npcInRange.MapNpcId,
-                                            npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
-                                            npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
-                                            npcInRange.CurrentHp > 0,
-                                            (int)(npcInRange.CurrentHp / npcInRange.MaxHp * 100), dmg,
-                                            hitmode, 0)
-                                    : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Npc,
-                                            npcInRange.MapNpcId, 0,
-                                            Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, npcInRange.CurrentHp > 0,
-                                            (int)(npcInRange.CurrentHp / npcInRange.MaxHp * 100), dmg,
-                                            hitmode, 0));
+                                ? StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Npc, npcInRange.MapNpcId,
+                                    npcMonsterSkill.SkillVNum, npcMonsterSkill.Skill.Cooldown,
+                                    npcMonsterSkill.Skill.AttackAnimation, npcMonsterSkill.Skill.Effect, MapX, MapY,
+                                    npcInRange.CurrentHp > 0,
+                                    (int)(npcInRange.CurrentHp / npcInRange.MaxHp * 100), dmg,
+                                    hitmode, 0)
+                                : StaticPacketHelper.SkillUsed(UserType.Monster, MapMonsterId, (byte)UserType.Npc, npcInRange.MapNpcId, 0,
+                                    Monster.BasicCooldown, 11, Monster.BasicSkill, 0, 0, npcInRange.CurrentHp > 0,
+                                    (int)(npcInRange.CurrentHp / npcInRange.MaxHp * 100), dmg,
+                                    hitmode, 0));
 
                             if (npcInRange.CurrentHp <= 0)
                             {
@@ -2546,25 +2287,17 @@ namespace OpenNos.GameObject
         {
             lock (AggroList)
             {
-                var entitiesList = AggroList.ToList();
+                List<BattleEntity> entitiesList = AggroList.ToList();
 
                 if (entitiesList.Any())
                 {
-                    entitiesList.AddRange(entitiesList.Where(s => s.Mate != null).Select(s => s.Mate.Owner.BattleEntity)
-                        .ToList());
-                    entitiesList.AddRange(entitiesList.Where(s => s.Character != null).SelectMany(s =>
-                        s.Character.Mates
-                            .Where(m => (m.IsTeamMember || m.IsTemporalMate) && !entitiesList.Contains(m.BattleEntity))
-                            .Select(m2 => m2.BattleEntity)).ToList());
-                    entitiesList.AddRange(entitiesList.Where(s => s.Character != null).SelectMany(s =>
-                        s.Character.BattleEntity.GetOwnedMonsters().Select(m => m.BattleEntity)).ToList());
+                    entitiesList.AddRange(entitiesList.Where(s => s.Mate != null).Select(s => s.Mate.Owner.BattleEntity).ToList());
+                    entitiesList.AddRange(entitiesList.Where(s => s.Character != null).SelectMany(s => s.Character.Mates.Where(m => (m.IsTeamMember || m.IsTemporalMate) && !entitiesList.Contains(m.BattleEntity)).Select(m2 => m2.BattleEntity)).ToList());
+                    entitiesList.AddRange(entitiesList.Where(s => s.Character != null).SelectMany(s => s.Character.BattleEntity.GetOwnedMonsters().Select(m => m.BattleEntity)).ToList());
                     entitiesList.AddRange(entitiesList.Where(s => s.MapNpc != null).ToList());
 
-                    var newTarget = entitiesList.Where(s =>
-                            s.Character == null || !s.Character.InvisibleGm &&
-                            (!s.Character.Invisible || CanSeeHiddenThings))
-                        .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
-                        .FirstOrDefault(e => BattleEntity.CanAttackEntity(e));
+                    BattleEntity newTarget = entitiesList.Where(s => (s.Character == null || !s.Character.InvisibleGm && (!s.Character.Invisible || CanSeeHiddenThings)))
+                        .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos())).FirstOrDefault(e => BattleEntity.CanAttackEntity(e));
 
                     if (newTarget == null && Target != null)
                     {
@@ -2595,10 +2328,11 @@ namespace OpenNos.GameObject
                 return;
             }
 
-            var target = MapInstance.BattleEntities.FirstOrDefault(e =>
-                                             Map.GetDistance(GetPos(), e.GetPos()) < (NoticeRange == 0 ? Monster.NoticeRange : NoticeRange));
+            BattleEntity target = MapInstance.BattleEntities.OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
+                .FirstOrDefault(e => BattleEntity.CanAttackEntity(e) && (e.CanBeTargetted) && (e.Mate == null || !BattleEntity.IsMateTrainer(MonsterVNum) || e.MapInstance != e.Mate?.Owner.Miniland || e.TargettedByMonstersList(false).Count() < 9) && (e.Character == null
+                    || !e.Character.InvisibleGm && (!e.Character.Invisible || CanSeeHiddenThings)) && Map.GetDistance(GetPos(), e.GetPos()) < (NoticeRange == 0 ? Monster.NoticeRange : NoticeRange));
 
-            if (target == null /* || MoveEvent != null*/)
+            if (target == null || MoveEvent != null)
             {
                 return;
             }
@@ -2640,8 +2374,7 @@ namespace OpenNos.GameObject
             AddToAggroList(target);
             if (!Monster.NoAggresiveIcon && target.Character != null)
             {
-                Target.Character.Session.SendPacket(
-                        StaticPacketHelper.GenerateEff(UserType.Monster, MapMonsterId, 5000));
+                Target.Character.Session.SendPacket(StaticPacketHelper.GenerateEff(UserType.Monster, MapMonsterId, 5000));
             }
         }
 
@@ -2751,11 +2484,11 @@ namespace OpenNos.GameObject
                     X = MapX,
                     Y = MapY
                 },
-                        new MapCell
-                        {
-                            X = target.PositionX,
-                            Y = target.PositionY
-                        }) <= Monster.BasicRange && Monster.BasicRange > 0)
+                new MapCell
+                {
+                    X = target.PositionX,
+                    Y = target.PositionY
+                }) <= Monster.BasicRange && Monster.BasicRange > 0)
                 {
                     return;
                 }
@@ -2804,9 +2537,8 @@ namespace OpenNos.GameObject
                 }
 
                 if (MonsterVNum == 2305 && MapInstance.MapInstanceType == MapInstanceType.CaligorInstance
-                                        && RunToX == 0 && RunToY == 0
-                                        && Map.GetDistance(new MapCell { X = FirstX, Y = FirstY },
-                                                   new MapCell { X = MapX, Y = MapY }) > 30)
+                    && RunToX == 0 && RunToY == 0
+                    && Map.GetDistance(new MapCell { X = FirstX, Y = FirstY }, new MapCell { X = MapX, Y = MapY }) > 30)
                 {
                     RunToX = FirstX;
                     RunToY = FirstY;
@@ -2832,26 +2564,23 @@ namespace OpenNos.GameObject
                 }
 
                 // handle hit queue
-                while (HitQueue.TryDequeue(out var hitRequest))
+                while (HitQueue.TryDequeue(out HitRequest hitRequest))
                 {
                     OnReceiveHit(hitRequest);
                 }
 
                 lock (DamageList)
                 {
-                    // Check DamageList members on map and entity (Character or Mate or Mob or Npc
-                    // not null)
-                    var newDamageList = new Dictionary<BattleEntity, long>();
-                    DamageList.Where(s => s.Key.HasEntity && s.Key.MapInstance == MapInstance).ToList()
-                        .ForEach(s => newDamageList.Add(s.Key, s.Value));
+                    // Check DamageList members on map and entity (Character or Mate or Mob or Npc not null)
+                    Dictionary<BattleEntity, long> newDamageList = new Dictionary<BattleEntity, long>();
+                    DamageList.Where(s => s.Key.HasEntity && s.Key.MapInstance == MapInstance).ToList().ForEach(s => newDamageList.Add(s.Key, s.Value));
                     DamageList = newDamageList;
                 }
 
                 lock (AggroList)
                 {
-                    var newAggroList = new List<BattleEntity>();
-                    AggroList.ToList().Where(s => s.HasEntity && s.MapInstance == MapInstance).ToList()
-                        .ForEach(s => newAggroList.Add(s));
+                    List<BattleEntity> newAggroList = new List<BattleEntity>();
+                    AggroList.ToList().Where(s => s.HasEntity && s.MapInstance == MapInstance).ToList().ForEach(s => newAggroList.Add(s));
                     AggroList = newAggroList;
                 }
 
@@ -2865,12 +2594,13 @@ namespace OpenNos.GameObject
 
                 if (!IsAlive && ShouldRespawn != null && ShouldRespawn.Value)
                 {
-                    var timeDeath = (DateTime.Now - Death).TotalSeconds;
+                    double timeDeath = (DateTime.Now - Death).TotalSeconds;
                     if (timeDeath >= Monster.RespawnTime / 10d)
                     {
                         Respawn();
                     }
                 }
+
                 else if (IsSelfAttack)
                 {
                     if (!IsPendingDelete && MapInstance != null && Skills != null)
@@ -2884,8 +2614,7 @@ namespace OpenNos.GameObject
                             {
                                 RunDeathEvent();
                                 MapInstance?.RemoveMonster(this);
-                                MapInstance?.Broadcast(StaticPacketHelper.Die(UserType.Monster, MapMonsterId,
-                                    UserType.Monster, MapMonsterId));
+                                MapInstance?.Broadcast(StaticPacketHelper.Die(UserType.Monster, MapMonsterId, UserType.Monster, MapMonsterId));
                             });
                     }
                 }
@@ -2916,10 +2645,8 @@ namespace OpenNos.GameObject
 
                         case EntityType.Mate:
                             {
-                                var mate = MapInstance.Sessions.SelectMany(x => x.Character.Mates)
-                                    .FirstOrDefault(s =>
-                                        (s.IsTeamMember || s.IsTemporalMate) &&
-                                        s.BattleEntity.MapEntityId == Target.MapEntityId);
+                                Mate mate = MapInstance.Sessions.SelectMany(x => x.Character.Mates)
+                                    .FirstOrDefault(s => (s.IsTeamMember || s.IsTemporalMate) && s.BattleEntity.MapEntityId == Target.MapEntityId);
 
                                 if (mate != null)
                                 {
@@ -2952,9 +2679,9 @@ namespace OpenNos.GameObject
                         || targetEntity.Hp <= 0
                         || CurrentHp <= 0
                         || targetEntity.MapInstance != MapInstance
-                        || targetEntity.Character != null
-                        && (targetEntity.Character.Invisible || targetEntity.Character.InvisibleGm)
-                        && !CanSeeHiddenThings)
+                        || (targetEntity.Character != null
+                            && (targetEntity.Character.Invisible || targetEntity.Character.InvisibleGm)
+                            && !CanSeeHiddenThings))
                     {
                         RemoveTarget();
                         return;
@@ -2966,15 +2693,13 @@ namespace OpenNos.GameObject
                         return;
                     }
 
-                    var instantAttack = MonsterVNum == 1439 || MonsterVNum == 1436 || MonsterVNum == 946 ||
-                                        MonsterVNum == 1382;
+                    bool instantAttack = MonsterVNum == 1439 || MonsterVNum == 1436 || MonsterVNum == 946 || MonsterVNum == 1382;
 
-                    if ((DateTime.Now - LastSkill).TotalMilliseconds >=
-                        1100 + (instantAttack ? 0 : Monster.BasicCooldown * 200))
+                    if ((DateTime.Now - LastSkill).TotalMilliseconds >= 1100 + (instantAttack ? 0 : (Monster.BasicCooldown * 200)))
                     {
                         if (Skills != null)
                         {
-                            var specialSkillsRate = ServerManager.RandomNumber(0, 12);
+                            int specialSkillsRate = ServerManager.RandomNumber(0, 12);
 
                             if (ServerManager.Instance.BossVNums.Contains(MonsterVNum))
                             {
@@ -2985,14 +2710,13 @@ namespace OpenNos.GameObject
 
                             if (UseSkillOnDamage != null)
                             {
-                                var useSkillOnDamage = UseSkillOnDamage.FirstOrDefault(u => HpPercent() <= u.HpPercent);
+                                UseSkillOnDamage useSkillOnDamage = UseSkillOnDamage.FirstOrDefault(u => HpPercent() <= u.HpPercent);
 
                                 if (useSkillOnDamage != null)
                                 {
                                     UseSkillOnDamage.Remove(useSkillOnDamage);
 
-                                    npcMonsterSkill =
-                                        Skills.FirstOrDefault(s => s.SkillVNum == useSkillOnDamage.SkillVNum);
+                                    npcMonsterSkill = Skills.FirstOrDefault(s => s.SkillVNum == useSkillOnDamage.SkillVNum);
 
                                     if (npcMonsterSkill != null)
                                     {
@@ -3005,17 +2729,13 @@ namespace OpenNos.GameObject
 
                             #endregion
 
-                            var possibleSkills = Skills.Where(s =>
-                                !SkillHelper.IsManagedSkill(s.SkillVNum) &&
-                                ((DateTime.Now - s.LastSkillUse).TotalMilliseconds >= 100 * s.Skill.Cooldown ||
-                                 s.Rate == 0 || instantAttack)).ToList();
+                            List<NpcMonsterSkill> possibleSkills = Skills.Where(s => !SkillHelper.IsManagedSkill(s.SkillVNum) && ((DateTime.Now - s.LastSkillUse).TotalMilliseconds >= 100 * s.Skill.Cooldown || s.Rate == 0 || instantAttack)).ToList();
 
-                            foreach (var skill in possibleSkills.OrderBy(rnd => ServerManager.RandomNumber()))
+                            foreach (NpcMonsterSkill skill in possibleSkills.OrderBy(rnd => ServerManager.RandomNumber()))
                             {
                                 if (skill.Rate == 0 || instantAttack)
                                 {
-                                    if (skill.SkillVNum == 1226 && _previousSkillVNum != 1224 ||
-                                        skill.SkillVNum == 1256 && _previousSkillVNum != 1255)
+                                    if ((skill.SkillVNum == 1226 && _previousSkillVNum != 1224) || (skill.SkillVNum == 1256 && _previousSkillVNum != 1255))
                                     {
                                         continue;
                                     }
@@ -3024,8 +2744,7 @@ namespace OpenNos.GameObject
                                 }
                                 else if (ServerManager.RandomNumber() < skill.Rate && specialSkillsRate > 8)
                                 {
-                                    if (skill.SkillVNum != 1226 && _previousSkillVNum == 1224 ||
-                                        skill.SkillVNum != 1256 && _previousSkillVNum == 1255)
+                                    if ((skill.SkillVNum != 1226 && _previousSkillVNum == 1224) || (skill.SkillVNum != 1256 && _previousSkillVNum == 1255))
                                     {
                                         continue;
                                     }
@@ -3037,8 +2756,7 @@ namespace OpenNos.GameObject
                             }
                         }
 
-                        if (_previousSkillVNum == 1255 && LastSkill.AddSeconds(10) > DateTime.Now
-                        ) //Glacerus wait after storm skill)
+                        if (_previousSkillVNum == 1255 && LastSkill.AddSeconds(10) > DateTime.Now) //Glacerus wait after storm skill)
                         {
                             return;
                         }
@@ -3050,19 +2768,30 @@ namespace OpenNos.GameObject
                                 TargetHit(targetEntity, npcMonsterSkill);
                                 return;
                             }
-
-                            if (npcMonsterSkill?.Skill.TargetType == 1 && npcMonsterSkill?.Skill.HitType == 2)
+                            else if (npcMonsterSkill?.Skill.TargetType == 1 && npcMonsterSkill?.Skill.HitType == 2)
                             {
                                 TargetHit(BattleEntity, npcMonsterSkill);
                                 return;
                             }
-
-                            if ((targetEntity.Character == null || !targetEntity.Character.InvisibleGm ||
-                                 !targetEntity.Character.Invisible || CanSeeHiddenThings) && targetEntity.Hp > 0)
+                            else if ((targetEntity.Character == null || (!targetEntity.Character.InvisibleGm || (!targetEntity.Character.Invisible || CanSeeHiddenThings))) && targetEntity.Hp > 0)
                             {
-                                if (npcMonsterSkill?.Skill.TargetType == 1 && npcMonsterSkill?.Skill.HitType == 1 &&
-                                    npcMonsterSkill?.Skill.TargetRange > 0
-                                    && CurrentMp >= npcMonsterSkill.Skill.MpCost && Map.GetDistance(
+                                if (npcMonsterSkill?.Skill.TargetType == 1 && npcMonsterSkill?.Skill.HitType == 1 && npcMonsterSkill?.Skill.TargetRange > 0
+                                    && CurrentMp >= npcMonsterSkill.Skill.MpCost && ((Map.GetDistance(
+                                      new MapCell
+                                      {
+                                          X = MapX,
+                                          Y = MapY
+                                      },
+                                      new MapCell
+                                      {
+                                          X = targetEntity.PositionX,
+                                          Y = targetEntity.PositionY
+                                      }) <= npcMonsterSkill.Skill.TargetRange)))
+                                {
+                                    TargetHit(targetEntity, npcMonsterSkill);
+                                    return;
+                                }
+                                else if (npcMonsterSkill != null && CurrentMp >= npcMonsterSkill.Skill.MpCost && (Map.GetDistance(
                                         new MapCell
                                         {
                                             X = MapX,
@@ -3072,44 +2801,27 @@ namespace OpenNos.GameObject
                                         {
                                             X = targetEntity.PositionX,
                                             Y = targetEntity.PositionY
-                                        }) <= npcMonsterSkill.Skill.TargetRange)
+                                        }) <= (npcMonsterSkill.Skill.Range > 0 ? npcMonsterSkill.Skill.Range : Monster.BasicRange)))
                                 {
                                     TargetHit(targetEntity, npcMonsterSkill);
                                     return;
                                 }
-
-                                if (npcMonsterSkill != null && CurrentMp >= npcMonsterSkill.Skill.MpCost &&
-                                    Map.GetDistance(
-                                        new MapCell
-                                        {
-                                            X = MapX,
-                                            Y = MapY
-                                        },
-                                        new MapCell
-                                        {
-                                            X = targetEntity.PositionX,
-                                            Y = targetEntity.PositionY
-                                        }) <= (npcMonsterSkill.Skill.Range > 0
-                                        ? npcMonsterSkill.Skill.Range
-                                        : Monster.BasicRange))
+                                else
                                 {
-                                    TargetHit(targetEntity, npcMonsterSkill);
-                                    return;
-                                }
-
-                                if (Map.GetDistance(new MapCell
-                                {
-                                    X = MapX,
-                                    Y = MapY
-                                },
-                                        new MapCell
-                                        {
-                                            X = targetEntity.PositionX,
-                                            Y = targetEntity.PositionY
-                                        }) <= Monster.BasicRange && Monster.BasicRange > 0)
-                                {
-                                    TargetHit(targetEntity, null);
-                                    return;
+                                    if (Map.GetDistance(new MapCell
+                                    {
+                                        X = MapX,
+                                        Y = MapY
+                                    },
+                                             new MapCell
+                                             {
+                                                 X = targetEntity.PositionX,
+                                                 Y = targetEntity.PositionY
+                                             }) <= Monster.BasicRange && Monster.BasicRange > 0)
+                                    {
+                                        TargetHit(targetEntity, null);
+                                        return;
+                                    }
                                 }
                             }
                         }
@@ -3119,7 +2831,6 @@ namespace OpenNos.GameObject
                 }
             }
         }
-
         private void Move()
         {
             MoveTest();
@@ -3212,24 +2923,23 @@ namespace OpenNos.GameObject
 
         private void RunAway()
         {
-            if (Target == null || Monster == null || CurrentHp < 1 || !IsMoving || Monster.Speed < 1)
+            if (Target == null || Monster == null || CurrentHp < 1 || (!IsMoving || Monster.Speed < 1))
             {
                 return;
             }
 
-            var time = (DateTime.Now - LastMove).TotalMilliseconds;
+            double time = (DateTime.Now - LastMove).TotalMilliseconds;
 
-            var timeToWalk = 2000 / Monster.Speed;
+            int timeToWalk = 2000 / Monster.Speed;
 
             if (time > timeToWalk)
             {
-                var tempX = MapX;
-                var tempY = MapY;
+                short tempX = MapX;
+                short tempY = MapY;
 
-                var cells = (short)ServerManager.RandomNumber(1, 3);
+                short cells = (short)ServerManager.RandomNumber(1, 3);
 
-                if (SkillHelper.CalculateNewPosition(MapInstance, Target.PositionX, Target.PositionY, cells, ref tempX,
-                    ref tempY))
+                if (SkillHelper.CalculateNewPosition(MapInstance, Target.PositionX, Target.PositionY, cells, ref tempX, ref tempY))
                 {
                     MapX = tempX;
                     MapY = tempY;
@@ -3243,8 +2953,7 @@ namespace OpenNos.GameObject
                             MoveEvent?.Events.ForEach(e => EventHelper.Instance.RunEvent(e, monster: this));
                         });
 
-                    MapInstance.Broadcast(StaticPacketHelper.Move(UserType.Monster, MapMonsterId, tempX, tempY,
-                        Monster.Speed));
+                    MapInstance.Broadcast(StaticPacketHelper.Move(UserType.Monster, MapMonsterId, tempX, tempY, Monster.Speed));
                     MapInstance.Broadcast(StaticPacketHelper.Say(3, MapMonsterId, 0, "!!!!"));
                 }
             }
@@ -3259,7 +2968,7 @@ namespace OpenNos.GameObject
         {
             if (Monster != null && !HasBuff(CardType.SpecialAttack, (byte)AdditionalTypes.SpecialAttack.NoAttack))
             {
-                var castTime = 0;
+                int castTime = 0;
                 if (npcMonsterSkill != null)
                 {
                     if (CurrentMp < npcMonsterSkill.Skill.MpCost)
@@ -3272,8 +2981,7 @@ namespace OpenNos.GameObject
 
                     npcMonsterSkill.LastSkillUse = DateTime.Now;
                     DecreaseMp(npcMonsterSkill.Skill.MpCost);
-                    MapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Monster, MapMonsterId,
-                        target.UserType, target.MapEntityId,
+                    MapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Monster, MapMonsterId, target.UserType, target.MapEntityId,
                         npcMonsterSkill.Skill.CastAnimation, npcMonsterSkill.Skill.CastEffect,
                         npcMonsterSkill.Skill.SkillVNum));
                     if (npcMonsterSkill.Skill.CastEffect != 0)
@@ -3283,16 +2991,12 @@ namespace OpenNos.GameObject
                                 npcMonsterSkill.Skill.CastEffect), MapX, MapY);
                         castTime = npcMonsterSkill.Skill.CastTime * 100;
                     }
-
                     if (npcMonsterSkill.Skill.CastEffect == 4657 || npcMonsterSkill.Skill.CastEffect == 4940)
                     {
-                        var possibleTargets = MapInstance.BattleEntities
-                            .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
-                            .Where(e => e.UserType == UserType.Player && e.Character != null &&
-                                        BattleEntity.CanAttackEntity(e) && !e.Character.InvisibleGm &&
-                                        (!e.Character.Invisible || CanSeeHiddenThings) &&
-                                        Map.GetDistance(GetPos(), e.GetPos()) < npcMonsterSkill.Skill.Range)
-                            .ToList();
+                        List<BattleEntity> possibleTargets = MapInstance.BattleEntities
+                           .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
+                           .Where(e => e.UserType == UserType.Player && e.Character != null && BattleEntity.CanAttackEntity(e) && !e.Character.InvisibleGm && (!e.Character.Invisible || CanSeeHiddenThings) && Map.GetDistance(GetPos(), e.GetPos()) < npcMonsterSkill.Skill.Range)
+                           .ToList();
                         Observable.Timer(TimeSpan.FromMilliseconds(castTime > 200 ? 200 : 0)).Subscribe(obs =>
                         {
                             MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, MapMonsterId));
@@ -3300,33 +3004,24 @@ namespace OpenNos.GameObject
                         IsJumping = true;
                         if (possibleTargets?.Count > 0)
                         {
-                            var chosenTarget = possibleTargets.OrderBy(s => ServerManager.RandomNumber())
-                                .FirstOrDefault();
+                            BattleEntity chosenTarget = possibleTargets.OrderBy(s => ServerManager.RandomNumber()).FirstOrDefault();
                             MapX = chosenTarget.PositionX;
                             MapY = chosenTarget.PositionY;
-                            MapInstance.Broadcast(StaticPacketHelper.GenerateEff(chosenTarget.UserType,
-                                chosenTarget.MapEntityId, 4660));
-                            possibleTargets.Except(new List<BattleEntity> { chosenTarget }).ToList().ForEach(s =>
-                                  MapInstance.Broadcast(StaticPacketHelper.GenerateEff(s.UserType, s.MapEntityId, 4660)));
+                            MapInstance.Broadcast(StaticPacketHelper.GenerateEff(chosenTarget.UserType, chosenTarget.MapEntityId, 4660));
+                            possibleTargets.Except(new List<BattleEntity> { chosenTarget }).ToList().ForEach(s => MapInstance.Broadcast(StaticPacketHelper.GenerateEff(s.UserType, s.MapEntityId, 4660)));
                         }
-
-                        Observable.Timer(TimeSpan.FromMilliseconds(castTime > 100 ? castTime - 100 : 0)).Subscribe(
-                            obs =>
-                            {
-                                IsJumping = false;
-                                MapInstance.Broadcast(GenerateIn());
-                            });
+                        Observable.Timer(TimeSpan.FromMilliseconds(castTime > 100 ? castTime - 100 : 0)).Subscribe(obs =>
+                        {
+                            IsJumping = false;
+                            MapInstance.Broadcast(GenerateIn());
+                        });
                     }
-
                     if (npcMonsterSkill.Skill.CastEffect == 4426)
                     {
-                        var possibleTargets = MapInstance.BattleEntities
-                            .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
-                            .Where(e => e.UserType == UserType.Player && e.Character != null &&
-                                        BattleEntity.CanAttackEntity(e) && !e.Character.InvisibleGm &&
-                                        (!e.Character.Invisible || CanSeeHiddenThings) &&
-                                        Map.GetDistance(GetPos(), e.GetPos()) < npcMonsterSkill.Skill.Range)
-                            .ToList();
+                        List<BattleEntity> possibleTargets = MapInstance.BattleEntities
+                           .OrderBy(e => Map.GetDistance(GetPos(), e.GetPos()))
+                           .Where(e => e.UserType == UserType.Player && e.Character != null && BattleEntity.CanAttackEntity(e) && !e.Character.InvisibleGm && (!e.Character.Invisible || CanSeeHiddenThings) && Map.GetDistance(GetPos(), e.GetPos()) < npcMonsterSkill.Skill.Range)
+                           .ToList();
                         Observable.Timer(TimeSpan.FromMilliseconds(castTime > 200 ? 200 : 0)).Subscribe(obs =>
                         {
                             MapInstance.Broadcast(StaticPacketHelper.Out(UserType.Monster, MapMonsterId));
@@ -3334,33 +3029,27 @@ namespace OpenNos.GameObject
                         IsJumping = true;
                         if (possibleTargets?.Count > 0)
                         {
-                            var chosenTarget = possibleTargets.OrderBy(s => ServerManager.RandomNumber())
-                                .FirstOrDefault();
+                            BattleEntity chosenTarget = possibleTargets.OrderBy(s => ServerManager.RandomNumber()).FirstOrDefault();
 
-                            Observable.Timer(TimeSpan.FromMilliseconds(castTime > 2000 ? castTime - 2000 : 0))
-                                .Subscribe(obs =>
-                                {
-                                    MapX = chosenTarget.PositionX;
-                                    MapY = chosenTarget.PositionY;
-                                    MapInstance.Broadcast($"eff_g  4431 0 {MapX} {MapY} 0");
-                                });
+                            Observable.Timer(TimeSpan.FromMilliseconds(castTime > 2000 ? castTime - 2000 : 0)).Subscribe(obs =>
+                            {
+                                MapX = chosenTarget.PositionX;
+                                MapY = chosenTarget.PositionY;
+                                MapInstance.Broadcast($"eff_g  4431 0 {MapX} {MapY} 0");
+                            });
 
                             possibleTargets.Except(new List<BattleEntity> { chosenTarget }).ToList().ForEach(s =>
-                              {
-                                  MapInstance.SummonMonster(new MonsterToSummon(2048,
-                                      new MapCell { X = s.PositionX, Y = s.PositionY }, null, false));
-                              });
-                        }
-
-                        Observable.Timer(TimeSpan.FromMilliseconds((castTime > 2000 ? castTime - 2000 : 0) + 1900))
-                            .Subscribe(obs2 =>
                             {
-                                IsJumping = false;
-                                MapInstance.Broadcast(GenerateIn());
-                                MapInstance.Broadcast($"eff_g  4425 0 {MapX} {MapY} 0");
+                                MapInstance.SummonMonster(new MonsterToSummon(2048, new MapCell() { X = s.PositionX, Y = s.PositionY }, null, false));
                             });
+                        }
+                        Observable.Timer(TimeSpan.FromMilliseconds((castTime > 2000 ? castTime - 2000 : 0) + 1900)).Subscribe(obs2 =>
+                        {
+                            IsJumping = false;
+                            MapInstance.Broadcast(GenerateIn());
+                            MapInstance.Broadcast($"eff_g  4425 0 {MapX} {MapY} 0");
+                        });
                     }
-
                     if (npcMonsterSkill.SkillVNum == 1226)
                     {
                         AddBuff(new Buff(529, BattleEntity.Level), BattleEntity, true);
@@ -3374,8 +3063,8 @@ namespace OpenNos.GameObject
 
                 Observable.Timer(TimeSpan.FromMilliseconds(castTime)).Subscribe(obs =>
                 {
-                    var hitmode = 0;
-                    var onyxWings = false;
+                    int hitmode = 0;
+                    bool onyxWings = false;
                     var zephyrWings = false;
                     BattleEntity targetEntity = null;
                     switch (target.EntityType)
@@ -3383,27 +3072,23 @@ namespace OpenNos.GameObject
                         case EntityType.Player:
                             targetEntity = new BattleEntity(target.Character, null);
                             break;
-
                         case EntityType.Mate:
                             targetEntity = new BattleEntity(target.Mate);
                             break;
-
                         case EntityType.Monster:
                             targetEntity = new BattleEntity(target.MapMonster);
                             break;
-
                         case EntityType.Npc:
                             targetEntity = new BattleEntity(target.MapNpc);
                             break;
                     }
 
-                    var damage = DamageHelper.Instance.CalculateDamage(new BattleEntity(this),
+                    int damage = DamageHelper.Instance.CalculateDamage(new BattleEntity(this),
                         targetEntity, npcMonsterSkill?.Skill, ref hitmode,
                         ref onyxWings, ref zephyrWings);
 
                     // deal 0 damage to GM with GodMode
-                    if (target.Character != null && target.Character.HasGodMode ||
-                        target.Mate != null && target.Mate.Owner.HasGodMode)
+                    if (target.Character != null && target.Character.HasGodMode || target.Mate != null && target.Mate.Owner.HasGodMode)
                     {
                         damage = 0;
                     }
@@ -3411,9 +3096,9 @@ namespace OpenNos.GameObject
                     if (target.Character != null)
                     {
                         if (ServerManager.RandomNumber() < target.Character.GetBuff(CardType.DarkCloneSummon,
-                                (byte)AdditionalTypes.DarkCloneSummon.ConvertDamageToHPChance)[0])
+                            (byte)AdditionalTypes.DarkCloneSummon.ConvertDamageToHPChance)[0])
                         {
-                            var amount = damage;
+                            int amount = damage;
 
                             target.Character.ConvertedDamageToHP += amount;
                             target.Character.MapInstance?.Broadcast(target.Character.GenerateRc(amount));
@@ -3430,11 +3115,11 @@ namespace OpenNos.GameObject
                         }
                     }
 
-                    var manaShield = target.GetBuff(CardType.LightAndShadow,
+                    int[] manaShield = target.GetBuff(CardType.LightAndShadow,
                         (byte)AdditionalTypes.LightAndShadow.InflictDamageToMP);
                     if (manaShield[0] != 0 && hitmode != 4)
                     {
-                        var reduce = damage / 100 * manaShield[0];
+                        int reduce = damage / 100 * manaShield[0];
                         if (target.Mp < reduce)
                         {
                             reduce = target.Mp;
@@ -3444,7 +3129,6 @@ namespace OpenNos.GameObject
                         {
                             target.DecreaseMp(reduce);
                         }
-
                         damage -= reduce;
                     }
 
@@ -3458,14 +3142,13 @@ namespace OpenNos.GameObject
 
                     if (Owner?.Mate != null || MonsterHelper.IsKamikaze(MonsterVNum))
                     {
-                        double ms = MonsterVNum >= 2112 && MonsterVNum <= 2115 ? 1000 : 250;
+                        double ms = (MonsterVNum >= 2112 && MonsterVNum <= 2115) ? 1000 : 250;
 
                         Observable.Timer(TimeSpan.FromMilliseconds(ms)).Subscribe(t =>
                         {
                             RunDeathEvent();
                             MapInstance.RemoveMonster(this);
-                            MapInstance.Broadcast(StaticPacketHelper.Die(UserType.Monster, MapMonsterId,
-                                UserType.Monster, MapMonsterId));
+                            MapInstance.Broadcast(StaticPacketHelper.Die(UserType.Monster, MapMonsterId, UserType.Monster, MapMonsterId));
                         });
                     }
                 });

@@ -80,13 +80,12 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                 {
                     if (Session.Character.Buff.Any(s => s.Card.BuffType == BuffType.Bad))
                     {
-                        Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                            Language.Instance.GetMessageFromKey("CANT_TRASFORM_WITH_DEBUFFS"),
+                        Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CANT_TRASFORM_WITH_DEBUFFS"),
                             0));
                         return;
                     }
 
-                    if (Session.Character.Skills.Any(s => !s.CanBeUsed()))
+                    if (Session.Character.Skills.Any(s => !s.CanBeUsed(true)))
                     {
                         Session.SendPacket(
                             UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SKILLS_IN_LOADING"),
@@ -108,18 +107,15 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                         return;
                     }
 
-                    var currentRunningSeconds =
+                    double currentRunningSeconds =
                         (DateTime.Now - Process.GetCurrentProcess().StartTime.AddSeconds(-50)).TotalSeconds;
 
                     if (Session.Character.UseSp)
                     {
-                        if (Session.Character.Timespace != null &&
-                            Session.Character.Timespace.SpNeeded?[(byte) Session.Character.Class] != 0 &&
-                            Session.Character.Timespace.InstanceBag.Lock)
+                        if (Session.Character.Timespace != null && Session.Character.Timespace.SpNeeded?[(byte)Session.Character.Class] != 0 && Session.Character.Timespace.InstanceBag.Lock)
                         {
                             return;
                         }
-
                         Session.Character.LastSp = currentRunningSeconds;
                         Session.Character.RemoveSp(specialistInstance.ItemVNum, false);
                     }
@@ -133,18 +129,16 @@ namespace OpenNos.Handler.PacketHandler.Inventory
 
                         if (Session.Character.SpPoint == 0 && Session.Character.SpAdditionPoint == 0)
                         {
-                            Session.SendPacket(
-                                    UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SP_NOPOINTS"), 0));
+                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("SP_NOPOINTS"), 0));
                         }
 
-                        var timeSpanSinceLastSpUsage = currentRunningSeconds - Session.Character.LastSp;
+                        double timeSpanSinceLastSpUsage = currentRunningSeconds - Session.Character.LastSp;
                         if (timeSpanSinceLastSpUsage >= Session.Character.SpCooldown)
                         {
                             if (spTransformPacket.Type == 1)
                             {
-                                var delay = DateTime.Now.AddSeconds(-2);
-                                if (Session.Character.LastDelay > delay
-                                    && Session.Character.LastDelay < delay.AddSeconds(2))
+                                DateTime delay = DateTime.Now.AddSeconds(-6);
+                                if (Session.Character.LastDelay > delay && Session.Character.LastDelay < delay.AddSeconds(2))
                                 {
                                     Session.ChangeSp();
                                 }
@@ -152,20 +146,17 @@ namespace OpenNos.Handler.PacketHandler.Inventory
                             else
                             {
                                 Session.Character.LastDelay = DateTime.Now;
-                                Session.SendPacket(UserInterfaceHelper.GenerateDelay(1500, 3, "#sl^1")); // 5000
-                                Session.CurrentMapInstance?.Broadcast(
-                                    UserInterfaceHelper.GenerateGuri(2, 1, Session.Character.CharacterId),
-                                    Session.Character.PositionX, Session.Character.PositionY);
+                                Session.SendPacket(UserInterfaceHelper.GenerateDelay(1500, 3, "#sl^1"));
+                                Session.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateGuri(2, 1, Session.Character.CharacterId),
+                                Session.Character.PositionX, Session.Character.PositionY);
                             }
                         }
                         else
                         {
-                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(
-                                string.Format(Language.Instance.GetMessageFromKey("SP_INLOADING"),
-                                    Session.Character.SpCooldown - (int) Math.Round(timeSpanSinceLastSpUsage, 0)), 0));
+                            Session.SendPacket(UserInterfaceHelper.GenerateMsg(string.Format(Language.Instance.GetMessageFromKey("SP_INLOADING"),
+                            Session.Character.SpCooldown - (int)Math.Round(timeSpanSinceLastSpUsage, 0)), 0));
                         }
                     }
-
                 }
             }
         }

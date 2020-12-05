@@ -1774,27 +1774,26 @@ namespace OpenNos.GameObject.Helpers
 
             #region ReflectMaximumDamageFrom
 
-            if (defender.GetBuff(CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectMaximumDamageFrom) is int
-                [] ReflectsMaximumDamageFrom)
-                if (ReflectsMaximumDamageFrom[0] > 0)
+            if (defender.GetBuff(CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectMaximumDamageFrom) is int[] ReflectsMaximumDamageFrom)
+            {
+                if (ReflectsMaximumDamageFrom[0] < 0)
                 {
-                    var maxReflectDamage = ReflectsMaximumDamageFrom[0];
+                    int maxReflectDamage = -ReflectsMaximumDamageFrom[0];
 
-                    var reflectedDamage = Math.Min(totalDamage, maxReflectDamage);
+                    int reflectedDamage = Math.Min(totalDamage, maxReflectDamage);
                     totalDamage -= reflectedDamage;
 
                     if (!percentDamage)
                     {
                         reflectedDamage = realAttacker.GetDamage(reflectedDamage, defender, true);
 
-                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType,
-                            realAttacker.MapEntityId, (byte)realAttacker.UserType, realAttacker.MapEntityId,
-                            -1, 0, 0, 0, 0, 0, realAttacker.Hp > 0,
-                            (int)(realAttacker.Hp / realAttacker.HPLoad() * 100), reflectedDamage, 0, 1));
+                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType, realAttacker.MapEntityId, (byte)realAttacker.UserType, realAttacker.MapEntityId,
+                            -1, 0, 0, 0, 0, 0, realAttacker.Hp > 0, (int)(realAttacker.Hp / realAttacker.HPLoad() * 100), reflectedDamage, 0, 1));
 
                         defender.Character?.Session?.SendPacket(defender.Character.GenerateStat());
                     }
                 }
+            }
 
             if (defender.GetBuff(CardType.TauntSkill, (byte)AdditionalTypes.TauntSkill.ReflectsMaximumDamageFromNegated) is int
                 [] ReflectsMaximumDamageFromNegated)
@@ -1822,28 +1821,26 @@ namespace OpenNos.GameObject.Helpers
 
             #region ReflectMaximumReceivedDamage
 
-            if (defender.GetBuff(CardType.DamageConvertingSkill,
-                    (byte)AdditionalTypes.DamageConvertingSkill.ReflectMaximumReceivedDamage) is int[]
-                ReflectMaximumReceivedDamage)
+            if (defender.GetBuff(CardType.DamageConvertingSkill, (byte)AdditionalTypes.DamageConvertingSkill.ReflectMaximumReceivedDamage) is int[] ReflectMaximumReceivedDamage)
+            {
                 if (ReflectMaximumReceivedDamage[0] > 0)
                 {
-                    var maxReflectDamage = ReflectMaximumReceivedDamage[0];
+                    int maxReflectDamage = ReflectMaximumReceivedDamage[0];
 
-                    var reflectedDamage = Math.Min(totalDamage, maxReflectDamage);
+                    int reflectedDamage = Math.Min(totalDamage, maxReflectDamage);
                     totalDamage -= reflectedDamage;
 
                     if (!percentDamage)
                     {
                         reflectedDamage = realAttacker.GetDamage(reflectedDamage, defender, true);
 
-                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType,
-                            realAttacker.MapEntityId, (byte)realAttacker.UserType, realAttacker.MapEntityId,
-                            -1, 0, 0, 0, 0, 0, realAttacker.Hp > 0,
-                            (int)(realAttacker.Hp / realAttacker.HPLoad() * 100), reflectedDamage, 0, 1));
+                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType, realAttacker.MapEntityId, (byte)realAttacker.UserType, realAttacker.MapEntityId,
+                            -1, 0, 0, 0, 0, 0, realAttacker.Hp > 0, (int)(realAttacker.Hp / realAttacker.HPLoad() * 100), reflectedDamage, 0, 1));
 
                         defender.Character?.Session?.SendPacket(defender.Character.GenerateStat());
                     }
                 }
+            }
 
             #endregion
 
@@ -1993,36 +1990,32 @@ namespace OpenNos.GameObject.Helpers
                 totalDamage = 0;
             }
 
-            if (defender.Buffs.FirstOrDefault(s => s.Card.BCards.Any(b =>
-                        b.Type.Equals((byte)CardType.DamageConvertingSkill) &&
-                        b.SubType.Equals((byte)AdditionalTypes.DamageConvertingSkill.TransferInflictedDamage / 10)))
-                    ?.Sender is BattleEntity TransferInflictedDamageSender)
-                if (defender.GetBuff(CardType.DamageConvertingSkill,
-                        (byte)AdditionalTypes.DamageConvertingSkill.TransferInflictedDamage) is int[]
-                    TransferInflictedDamage)
+            if (defender.Buffs.FirstOrDefault(s => s.Card.BCards.Any(b => b.Type.Equals((byte)CardType.DamageConvertingSkill) && b.SubType.Equals((byte)AdditionalTypes.DamageConvertingSkill.TransferInflictedDamage / 10)))?.Sender is BattleEntity TransferInflictedDamageSender)
+            {
+                if (defender.GetBuff(CardType.DamageConvertingSkill, (byte)AdditionalTypes.DamageConvertingSkill.TransferInflictedDamage) is int[] TransferInflictedDamage)
+                {
                     if (TransferInflictedDamage[0] > 0)
                     {
-                        var transferedDamage = (int)(totalDamage * TransferInflictedDamage[0] / 100d);
+                        int transferedDamage = (int)(totalDamage * TransferInflictedDamage[0] / 100d);
                         totalDamage -= transferedDamage;
                         TransferInflictedDamageSender.GetDamage(transferedDamage, defender, true);
                         if (TransferInflictedDamageSender.Hp - transferedDamage <= 0)
+                        {
                             transferedDamage = TransferInflictedDamageSender.Hp - 1;
-                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType,
-                            realAttacker.MapEntityId, (byte)TransferInflictedDamageSender.UserType,
-                            TransferInflictedDamageSender.MapEntityId,
-                            skill?.SkillVNum ?? 0, skill?.Cooldown ?? 0,
-                            0,
-                            skill?.Effect ?? attacker.Mate?.Monster.BasicSkill ??
-                            attacker.MapMonster?.Monster.BasicSkill ?? attacker.MapNpc?.Npc.BasicSkill ?? 0,
-                            defender.PositionX, defender.PositionY,
-                            TransferInflictedDamageSender.Hp > 0,
-                            (int)(TransferInflictedDamageSender.Hp / TransferInflictedDamageSender.HPLoad() * 100),
-                            transferedDamage,
-                            0, 1));
+                        }
+                        defender.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(realAttacker.UserType, realAttacker.MapEntityId, (byte)TransferInflictedDamageSender.UserType, TransferInflictedDamageSender.MapEntityId,
+                                        skill?.SkillVNum ?? 0, skill?.Cooldown ?? 0,
+                                        0, skill?.Effect ?? attacker.Mate?.Monster.BasicSkill ?? attacker.MapMonster?.Monster.BasicSkill ?? attacker.MapNpc?.Npc.BasicSkill ?? 0, defender.PositionX, defender.PositionY,
+                                        TransferInflictedDamageSender.Hp > 0,
+                                        (int)(TransferInflictedDamageSender.Hp / TransferInflictedDamageSender.HPLoad() * 100), transferedDamage,
+                                        0, 1));
                         if (TransferInflictedDamageSender.Character != null)
-                            TransferInflictedDamageSender.Character.Session.SendPacket(TransferInflictedDamageSender
-                                .Character.GenerateStat());
+                        {
+                            TransferInflictedDamageSender.Character.Session.SendPacket(TransferInflictedDamageSender.Character.GenerateStat());
+                        }
                     }
+                }
+            }
 
             totalDamage = Math.Max(0, totalDamage);
 
@@ -2572,18 +2565,31 @@ namespace OpenNos.GameObject.Helpers
         private static int GetMonsterDamageBonus(byte level)
         {
             if (level < 45)
+            {
                 return 0;
-            if (level < 55)
+            }
+            else if (level < 55)
+            {
                 return level;
-            if (level < 60)
+            }
+            else if (level < 60)
+            {
                 return level * 2;
-            if (level < 65)
+            }
+            else if (level < 65)
+            {
                 return level * 3;
-            if (level < 70)
+            }
+            else if (level < 70)
+            {
                 return level * 4;
-            return level * 5;
+            }
+            else
+            {
+                return level * 5;
+            }
         }
 
-        
+
     }
 }

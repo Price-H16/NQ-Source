@@ -2010,7 +2010,7 @@ namespace OpenNos.GameObject
                                     Session.SendPacket(GenerateStat());
                                     Session.SendPackets(GenerateStatChar());
 
-                                    Logger.LogUserEvent("CHARACTER_SPECIALIST_RETURN", Session.GenerateIdentity(),$"SpCooldown: {SpCooldown}");
+                                    Logger.LogUserEvent("CHARACTER_SPECIALIST_RETURN", Session.GenerateIdentity(), $"SpCooldown: {SpCooldown}");
 
                                     Observable.Timer(TimeSpan.FromMilliseconds(SpCooldown * 1000)).Subscribe(o =>
                                     {
@@ -2020,7 +2020,6 @@ namespace OpenNos.GameObject
                                 }
                             }
                         }
-
                         Session.SendPacket(GenerateSpPoint());
                         LastSpGaugeRemove = DateTime.Now;
                     }
@@ -3425,29 +3424,27 @@ namespace OpenNos.GameObject
                 {
                     return;
                 }
-
                 monsterToAttack.RunDeathEvent();
 
-                // Not 100% sure if this covers all mob kills, have to look it later.
                 if (Killer != null)
                 {
                     if (Killer.Character != null && Killer.Character is Character chara) chara.MobKillCounter++;
-                    if (Killer.Mate != null && Killer.Mate.Owner != null && Killer.Mate.Owner is Character charaMate) charaMate.MobKillCounter++;
+                    if (Killer.Mate != null && Killer.Mate.Owner != null && Killer.Mate.Owner is Character charaMate)
+                        charaMate.MobKillCounter++;
                 }
 
-                if (monsterToAttack.GetBuff(CardType.SpecialEffects, (byte) AdditionalTypes.SpecialEffects.DecreaseKillerHP) is int[] DecreaseKillerHp)
+                if (monsterToAttack.GetBuff(CardType.SpecialEffects, (byte)AdditionalTypes.SpecialEffects.DecreaseKillerHP) is int[] DecreaseKillerHp)
                 {
                     bool EffectResistance = false;
                     if (Killer.MapEntityId != CharacterId)
                     {
-                        if (Killer.HasBuff(CardType.Buff, (byte) AdditionalTypes.Buff.EffectResistance))
+                        if (Killer.HasBuff(CardType.Buff, (byte)AdditionalTypes.Buff.EffectResistance))
                         {
                             if (ServerManager.RandomNumber() < 90)
                             {
                                 EffectResistance = true;
                             }
                         }
-
                         if (!EffectResistance)
                         {
                             if (DecreaseKillerHp[0] > 0)
@@ -3463,29 +3460,26 @@ namespace OpenNos.GameObject
                                     {
                                         DecreasedHp = Killer.Hp - 1;
                                     }
-
                                     Killer.GetDamage(DecreasedHp, monsterToAttack.BattleEntity, true);
                                     Session.SendPacket(Killer.GenerateDm(DecreasedHp));
                                     if (Killer.Mate != null)
                                     {
                                         Session.SendPacket(Killer.Mate.GenerateStatInfo());
                                     }
-
-                                    Session.SendPacket(new EffectPacket{EffectType = Killer.UserType, CallerId = Killer.MapEntityId, EffectId = 6007});
+                                    Session.SendPacket(new EffectPacket { EffectType = Killer.UserType, CallerId = Killer.MapEntityId, EffectId = 6007 });
                                 }
                             }
                         }
                     }
                     else
                     {
-                        if (HasBuff(CardType.Buff, (byte) AdditionalTypes.Buff.EffectResistance))
+                        if (HasBuff(CardType.Buff, (byte)AdditionalTypes.Buff.EffectResistance))
                         {
                             if (ServerManager.RandomNumber() < 90)
                             {
                                 EffectResistance = true;
                             }
                         }
-
                         if (!EffectResistance)
                         {
                             if (DecreaseKillerHp[0] > 0)
@@ -3501,7 +3495,6 @@ namespace OpenNos.GameObject
                                     {
                                         DecreasedHp = Hp - 1;
                                     }
-
                                     GetDamage(DecreasedHp, monsterToAttack.BattleEntity, true);
                                     Session.SendPacket(GenerateDm(DecreasedHp));
                                     Session.SendPacket(GenerateStat());
@@ -3618,7 +3611,6 @@ namespace OpenNos.GameObject
                                 {
                                     DecreasedHp = Killer.Hp - 1;
                                 }
-
                                 Killer.GetDamage(DecreasedHp, monsterToAttack.BattleEntity, true);
                                 if (Killer.Mate != null)
                                 {
@@ -3639,12 +3631,10 @@ namespace OpenNos.GameObject
                                 {
                                     DecreasedHp = Hp - 1;
                                 }
-
                                 GetDamage(DecreasedHp, monsterToAttack.BattleEntity, true);
                                 Session.SendPacket(GenerateStat());
                             }
                         }
-
                         return;
                     }
 
@@ -5225,41 +5215,44 @@ namespace OpenNos.GameObject
         {
             List<long> result = new List<long>();
 
-            if (BattleEntity != null && MapInstance != null && ski?.Skill != null)
+            if (BattleEntity != null
+                && MapInstance != null
+                && ski?.Skill != null)
             {
-                foreach (long targetId in MTListTargetQueue.Where(target => target.EntityType == entityType && (byte) target.TargetHitType == ski.Skill.HitType).Select(s => s.TargetId))
+                foreach (long targetId in MTListTargetQueue.Where(target => target.EntityType == entityType
+                    && (byte)target.TargetHitType == ski.Skill.HitType).Select(s => s.TargetId))
                 {
                     switch (entityType)
                     {
                         case UserType.Player:
-                        {
-                            Character targetCharacter = MapInstance.GetCharacterById(targetId);
-
-                            if (targetCharacter?.BattleEntity == null /* Invalid character  */
-                                || targetCharacter.Hp < 1 /* Amen */
-                                || !targetCharacter.IsInRange(PositionX, PositionY,ski.Skill.Range) /* Character not in range */
-                                || !BattleEntity.CanAttackEntity(targetCharacter.BattleEntity) /* Try again later */
-                            )
                             {
-                                continue;
+                                Character targetCharacter = MapInstance.GetCharacterById(targetId);
+
+                                if (targetCharacter?.BattleEntity == null /* Invalid character  */
+                                    || targetCharacter.Hp < 1 /* Amen */
+                                    || !targetCharacter.IsInRange(PositionX, PositionY, ski.Skill.Range) /* Character not in range */
+                                    || !BattleEntity.CanAttackEntity(targetCharacter.BattleEntity) /* Try again later */
+                                    )
+                                {
+                                    continue;
+                                }
                             }
-                        }
                             break;
 
                         case UserType.Monster:
-                        {
-                            MapMonster targetMonster = MapInstance.GetMonsterById(targetId);
-
-                            if (targetMonster?.BattleEntity == null /* Invalid monster */
-                                || !targetMonster.IsAlive /* Amen */
-                                || targetMonster.CurrentHp < 1 /* Schrödinger's cat */
-                                || !targetMonster.IsInRange(PositionX, PositionY,ski.Skill.Range) /* Monster not in range */
-                                || !BattleEntity.CanAttackEntity(targetMonster.BattleEntity) /* Try again later */
-                            )
                             {
-                                continue;
+                                MapMonster targetMonster = MapInstance.GetMonsterById(targetId);
+
+                                if (targetMonster?.BattleEntity == null /* Invalid monster */
+                                    || !targetMonster.IsAlive /* Amen */
+                                    || targetMonster.CurrentHp < 1 /* Schrödinger's cat */
+                                    || !targetMonster.IsInRange(PositionX, PositionY, ski.Skill.Range) /* Monster not in range */
+                                    || !BattleEntity.CanAttackEntity(targetMonster.BattleEntity) /* Try again later */
+                                    )
+                                {
+                                    continue;
+                                }
                             }
-                        }
                             break;
                     }
 
@@ -6603,32 +6596,32 @@ namespace OpenNos.GameObject
             {
                 if (Buff.Any(s => s.Card.BuffType == BuffType.Bad) && !forced)
                 {
-                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CANT_UNTRASFORM_WITH_DEBUFFS"),0));
+                    Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("CANT_UNTRASFORM_WITH_DEBUFFS"),
+                        0));
                     return false;
                 }
-
                 LastTransform = DateTime.Now;
                 DisableBuffs(BuffType.All);
 
                 EquipmentBCards.RemoveAll(s => s.ItemVNum.Equals(vnum));
 
                 UseSp = false;
-                CharacterHelper.RemoveSpecialistWingsBuff(Session);
                 LoadSpeed();
                 Session.SendPacket(GenerateCond());
                 Session.SendPacket(GenerateLev());
                 SpCooldown = 30;
                 if (SkillsSp != null)
                 {
-                    foreach (CharacterSkill ski in SkillsSp.Where(s => !s.CanBeUsed()))
+                    foreach (CharacterSkill ski in SkillsSp.Where(s => !s.CanBeUsed(true)))
                     {
                         short time = ski.Skill.Cooldown;
                         double temp = (ski.LastUse - DateTime.Now).TotalMilliseconds + (time * 100);
                         temp /= 1000;
-                        SpCooldown = temp > SpCooldown ? (int) temp : SpCooldown;
+                        SpCooldown = temp > SpCooldown
+                            ? (int)temp
+                            : SpCooldown;
                     }
                 }
-
                 if (Authority >= AuthorityType.User || forced)
                 {
                     SpCooldown = 10;
@@ -6638,35 +6631,37 @@ namespace OpenNos.GameObject
                 {
                     SpCooldown = 1;
                 }
-
                 if (SpCooldown > 0)
                 {
-                    Session.SendPacket(GenerateSay(string.Format(Language.Instance.GetMessageFromKey("STAY_TIME"), SpCooldown), 11));
+                    Session.SendPacket(GenerateSay(
+                        string.Format(Language.Instance.GetMessageFromKey("STAY_TIME"), SpCooldown), 11));
                     Session.SendPacket($"sd {SpCooldown}");
                 }
-
                 Session.CurrentMapInstance?.Broadcast(GenerateCMode());
-                Session.CurrentMapInstance?.Broadcast(UserInterfaceHelper.GenerateGuri(6, 1, CharacterId), PositionX, PositionY);
-
+                Session.CurrentMapInstance?.Broadcast(
+                    UserInterfaceHelper.GenerateGuri(6, 1, CharacterId), PositionX,
+                    PositionY);
                 // ms_c
                 Session.SendPacket(GenerateSki());
                 Session.SendPackets(GenerateQuicklist());
                 Session.SendPacket(GenerateStat());
                 Session.SendPackets(GenerateStatChar());
                 BattleEntity.RemoveOwnedMonsters();
-                Logger.LogUserEvent("CHARACTER_SPECIALIST_RETURN", Session.GenerateIdentity(), $"SpCooldown: {SpCooldown}");
+                Logger.LogUserEvent("CHARACTER_SPECIALIST_RETURN", Session.GenerateIdentity(),
+                    $"SpCooldown: {SpCooldown}");
                 if (SpCooldown > 0)
                 {
                     Observable.Timer(TimeSpan.FromMilliseconds(SpCooldown * 1000)).Subscribe(o =>
                     {
-                        Session.SendPacket(GenerateSay(Language.Instance.GetMessageFromKey("TRANSFORM_DISAPPEAR"), 11));
+                        Session.SendPacket(
+                            GenerateSay(Language.Instance.GetMessageFromKey("TRANSFORM_DISAPPEAR"), 11));
                         Session.SendPacket("sd 0");
                     });
                 }
             }
-
             return true;
         }
+
 
         public void RemoveTemporalMates()
         {

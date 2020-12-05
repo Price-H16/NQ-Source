@@ -20,8 +20,7 @@ namespace OpenNos.GameObject.Battle
             SkillEffect = skill?.Skill.Effect ?? 0;
         }
 
-        public HitRequest(TargetHitType targetHitType, MapMonster monster, NpcMonsterSkill skill,
-            bool showTargetAnimation = false)
+        public HitRequest(TargetHitType targetHitType, MapMonster monster, NpcMonsterSkill skill, bool showTargetAnimation = false)
         {
             HitTimestamp = DateTime.Now;
             Monster = monster;
@@ -32,9 +31,7 @@ namespace OpenNos.GameObject.Battle
             ShowTargetHitAnimation = showTargetAnimation;
         }
 
-        public HitRequest(TargetHitType targetHitType, ClientSession session, Skill skill, short? skillEffect = null,
-            short? mapX = null, short? mapY = null, ComboDTO skillCombo = null, bool showTargetAnimation = false,
-            List<BCard> skillBCards = null)
+        public HitRequest(TargetHitType targetHitType, ClientSession session, Skill skill, short? skillEffect = null, short? mapX = null, short? mapY = null, ComboDTO skillCombo = null, bool showTargetAnimation = false, List<BCard> skillBCards = null)
         {
             HitTimestamp = DateTime.Now;
             Session = session;
@@ -43,16 +40,29 @@ namespace OpenNos.GameObject.Battle
             SkillEffect = skillEffect ?? skill.Effect;
             ShowTargetHitAnimation = showTargetAnimation;
 
-            if (mapX.HasValue) MapX = mapX.Value;
+            if (mapX.HasValue)
+            {
+                MapX = mapX.Value;
+            }
 
-            if (mapY.HasValue) MapY = mapY.Value;
+            if (mapY.HasValue)
+            {
+                MapY = mapY.Value;
+            }
 
-            if (skillCombo != null) SkillCombo = skillCombo;
+            if (skillCombo != null)
+            {
+                SkillCombo = skillCombo;
+            }
 
             if (skillBCards != null)
+            {
                 SkillBCards = skillBCards;
+            }
             else
+            {
                 SkillBCards = skill?.BCards ?? new List<BCard>();
+            }
         }
 
         #endregion

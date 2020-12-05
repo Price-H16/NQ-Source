@@ -1357,77 +1357,66 @@ namespace OpenNos.GameObject
                             break;
 
                         case BCardType.CardType.SpecialActions:
-                            if (SubType.Equals((byte) AdditionalTypes.SpecialActions.PushBack))
+                            if (SubType.Equals((byte)AdditionalTypes.SpecialActions.PushBack / 10))
                             {
-                                if (!ServerManager.RandomProbabilityCheck(session.ResistForcedMovement))
+                                if (session.ResistForcedMovement <= 0
+                                    || ServerManager.RandomNumber() < session.ResistForcedMovement)
                                 {
                                     PushBackSession(firstData, session, sender);
                                 }
                             }
-                            else if (SubType.Equals((byte) AdditionalTypes.SpecialActions.Hide))
+                            else if (SubType.Equals((byte)AdditionalTypes.SpecialActions.Hide / 10))
                             {
-                                if (session.Character is Character charact)
+                                if (FirstData >= 0)
                                 {
-                                    if (charact.MapInstance.MapInstanceType != MapInstanceType.NormalInstance ||
-                                        charact.MapInstance.Map.MapId != 2004)
+                                    if (session.Character is Character charact)
                                     {
-                                        charact.Invisible = true;
-                                        charact.Mates.Where(s => s.IsTeamMember).ToList().ForEach(s =>
-                                            charact.Session.CurrentMapInstance?.Broadcast(s.GenerateOut()));
-                                        charact.Session.CurrentMapInstance?.Broadcast(charact.GenerateInvisible());
-                                    }
-                                    else if (card != null)
-                                    {
-                                        charact.RemoveBuff(card.CardId);
+                                        if (charact.MapInstance.MapInstanceType != MapInstanceType.NormalInstance || charact.MapInstance.Map.MapId != 2004)
+                                        {
+                                            charact.Invisible = true;
+                                            charact.Mates.Where(s => s.IsTeamMember).ToList().ForEach(s => charact.Session.CurrentMapInstance?.Broadcast(s.GenerateOut()));
+                                            charact.Session.CurrentMapInstance?.Broadcast(charact.GenerateInvisible());
+                                        }
+                                        else if (card != null)
+                                        {
+                                            charact.RemoveBuff(card.CardId);
+                                        }
                                     }
                                 }
                             }
-                            else if (SubType.Equals((byte) AdditionalTypes.SpecialActions.FocusEnemies))
+                            else if (SubType.Equals((byte)AdditionalTypes.SpecialActions.FocusEnemies / 10))
                             {
-                                if (!ServerManager.RandomProbabilityCheck(session.ResistForcedMovement))
+                                if (session.ResistForcedMovement <= 0
+                                    || ServerManager.RandomNumber() < session.ResistForcedMovement)
                                 {
-                                    if ((session.MapMonster == null ||
-                                         !session.MapMonster.IsBoss &&
-                                         !ServerManager.Instance.BossVNums.Contains(session.MapMonster.MonsterVNum) ||
-                                         session.MapMonster.Owner?.Character != null ||
-                                         session.MapMonster.Owner?.Mate != null)
-                                        && (session.MapNpc == null ||
-                                            !ServerManager.Instance.BossVNums.Contains(session.MapNpc.NpcVNum)))
+                                    if ((session.MapMonster == null || !session.MapMonster.IsBoss && !ServerManager.Instance.BossVNums.Contains(session.MapMonster.MonsterVNum) || session.MapMonster.Owner?.Character != null || session.MapMonster.Owner?.Mate != null)
+                                        && (session.MapNpc == null || !ServerManager.Instance.BossVNums.Contains(session.MapNpc.NpcVNum)))
                                     {
                                         Observable.Timer(TimeSpan.FromMilliseconds(skill.CastTime * 100)).Subscribe(s =>
                                         {
-                                            if (!session.MapInstance.Map.isBlockedZone(session.PositionX,
-                                                session.PositionY, sender.PositionX, sender.PositionY))
+                                            if (!session.MapInstance.Map.isBlockedZone(session.PositionX, session.PositionY, sender.PositionX, sender.PositionY))
                                             {
                                                 session.PositionX = sender.PositionX;
                                                 session.PositionY = sender.PositionY;
-                                                session.MapInstance.Broadcast(
-                                                    $"guri 3 {(short) session.UserType} {session.MapEntityId} {session.PositionX} {session.PositionY} 3 {SecondData} 2 -1");
+                                                session.MapInstance.Broadcast($"guri 3 {(short)session.UserType} {session.MapEntityId} {session.PositionX} {session.PositionY} 3 {SecondData} 2 -1");
                                             }
                                         });
                                     }
                                 }
                             }
-                            else if (SubType.Equals((byte) AdditionalTypes.SpecialActions.RunAway))
+                            else if (SubType.Equals((byte)AdditionalTypes.SpecialActions.RunAway / 10))
                             {
-                                if (session.MapMonster != null && session.MapMonster.IsMoving &&
-                                    !session.MapMonster.IsBoss &&
-                                    !ServerManager.Instance.BossVNums.Contains(session.MapMonster.MonsterVNum) &&
-                                    session.MapMonster.Owner?.Character == null &&
-                                    session.MapMonster.Owner?.Mate == null)
+                                if (session.MapMonster != null && session.MapMonster.IsMoving && !session.MapMonster.IsBoss && !ServerManager.Instance.BossVNums.Contains(session.MapMonster.MonsterVNum) && session.MapMonster.Owner?.Character == null && session.MapMonster.Owner?.Mate == null)
                                 {
                                     if (session.MapMonster.Target != null)
                                     {
-                                        (session.MapMonster.Path ?? (session.MapMonster.Path = new List<Node>()))
-                                            .Clear();
+                                        (session.MapMonster.Path ?? (session.MapMonster.Path = new List<Node>())).Clear();
                                         session.MapMonster.Target = null;
 
-                                        var RunToX = session.MapMonster.FirstX;
-                                        var RunToY = session.MapMonster.FirstY;
+                                        short RunToX = session.MapMonster.FirstX;
+                                        short RunToY = session.MapMonster.FirstY;
 
-                                        var RunToPos =
-                                            session.MapInstance.Map.GetRandomPositionByDistance(session.PositionX,
-                                                session.PositionY, 20);
+                                        MapCell RunToPos = session.MapInstance.Map.GetRandomPositionByDistance(session.PositionX, session.PositionY, 20);
                                         if (RunToPos != null)
                                         {
                                             RunToX = RunToPos.X;
@@ -1438,17 +1427,10 @@ namespace OpenNos.GameObject
                                             session.MapMonster.MapInstance.Map.JaggedGrid);*/
                                         session.MapMonster.RunToX = RunToX;
                                         session.MapMonster.RunToY = RunToY;
-                                        Observable.Timer(
-                                                TimeSpan.FromMilliseconds(card != null ? card.Duration * 100 : 10000))
-                                            .Subscribe(s =>
-                                            {
-                                                session.MapMonster.RunToX = 0;
-                                                session.MapMonster.RunToY = 0;
-                                            });
+                                        Observable.Timer(TimeSpan.FromMilliseconds(card != null ? card.Duration * 100 : 10000)).Subscribe(s => { session.MapMonster.RunToX = 0; session.MapMonster.RunToY = 0; });
                                     }
                                 }
                             }
-
                             break;
 
                         case BCardType.CardType.Mode:

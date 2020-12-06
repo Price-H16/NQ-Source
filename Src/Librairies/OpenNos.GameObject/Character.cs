@@ -27,6 +27,7 @@ using OpenNos.GameObject._Event;
 using static OpenNos.Domain.BCardType;
 using OpenNos.GameObject.RainbowBattle;
 using OpenNos.GameObject.Extensions;
+using System.Threading.Tasks;
 
 namespace OpenNos.GameObject
 {
@@ -187,6 +188,10 @@ namespace OpenNos.GameObject
         public ThreadSafeSortedList<short, Buff> Buff => BattleEntity.Buffs;
 
         public ThreadSafeSortedList<short, IDisposable> BuffObservables => BattleEntity.BuffObservables;
+
+        public bool OnlyNormalAttacks { get; set; }
+
+        public string GenerateInfo(string Info) => $"info {Info}";
 
         public bool CanFight => !IsSitting && ExchangeInfo == null;
 
@@ -1327,7 +1332,18 @@ namespace OpenNos.GameObject
                 BuffObservables[bf.Card.CardId].Dispose();
                 BuffObservables.Remove(bf.Card.CardId);
             }
+            if (bf.Card.BCards.Any(s => s.Type == (byte)CardType.AngerSkill && s.SubType.Equals((byte)AdditionalTypes.AngerSkill.OnlyNormalAttacks / 10)))
+            {
+                if (GetBuff(CardType.AngerSkill, (byte)AdditionalTypes.AngerSkill.OnlyNormalAttacks / 10)[0] > 0)
+                {
 
+                }
+                else
+                {
+                    OnlyNormalAttacks = false;
+                    Session.SendPacket(GenerateCond());
+                }
+            }
             if (bf.RemainingTime > 0)
             {
                 BuffObservables[bf.Card.CardId] = Observable.Timer(TimeSpan.FromSeconds(bf.RemainingTime)).Subscribe(o =>
@@ -1392,6 +1408,66 @@ namespace OpenNos.GameObject
                     }
                 });
             }
+        }
+
+        public void GenerateLastStance()
+        {
+            ItemInstance sp =
+                Session.Character.Inventory.LoadBySlotAndType((byte)EquipmentType.Sp, InventoryType.Wear);
+            Session.Character.DisableBuffs(BuffType.All);
+            Session.Character.EquipmentBCards.AddRange(sp.Item.BCards);
+            Session.Character.LastTransform = DateTime.Now;
+            Session.Character.UseSp = true;
+            Session.Character.Morph = sp.Item.Morph;
+            Session.Character.MorphUpgrade = sp.Upgrade;
+            Session.Character.MorphUpgrade2 = sp.Design;
+            Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateCMode());
+            Session.SendPacket(Session.Character.GenerateLev());
+            Session.CurrentMapInstance?.Broadcast(
+                StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId, 196),
+                Session.Character.PositionX, Session.Character.PositionY);
+            Session.CurrentMapInstance?.Broadcast(
+                UserInterfaceHelper.GenerateGuri(6, 1, Session.Character.CharacterId), Session.Character.PositionX,
+                Session.Character.PositionY);
+            Session.SendPacket(Session.Character.GenerateSpPoint());
+            Session.Character.LoadSpeed();
+            Session.SendPacket(Session.Character.GenerateCond());
+            Session.SendPacket(Session.Character.GenerateStat());
+            Session.SendPackets(Session.Character.GenerateStatChar());
+            Session.Character.SkillsSp = new ThreadSafeSortedList<int, CharacterSkill>();
+            Parallel.ForEach(ServerManager.GetAllSkill(), skill =>
+            {
+                var morphUpdate = 31;
+
+                if (skill.Class == Session.Character.Morph + morphUpdate && sp.SpLevel >= skill.LevelMinimum)
+                {
+                    Session.Character.SkillsSp[skill.SkillVNum] = new CharacterSkill
+                    {
+                        SkillVNum = skill.SkillVNum,
+                        CharacterId = Session.Character.CharacterId
+                    };
+                }
+            });
+            Session.SendPacket(Session.Character.GenerateSki());
+            Session.SendPackets(Session.Character.GenerateQuicklist());
+        }
+
+        public void GenerateCharacterStats()
+        {
+            Session.CurrentMapInstance?.Broadcast(Session.Character.GenerateCMode());
+            Session.SendPacket(Session.Character.GenerateLev());
+            Session.CurrentMapInstance?.Broadcast(
+                StaticPacketHelper.GenerateEff(UserType.Player, Session.Character.CharacterId, 196),
+                Session.Character.PositionX, Session.Character.PositionY);
+            Session.CurrentMapInstance?.Broadcast(
+                UserInterfaceHelper.GenerateGuri(6, 1, Session.Character.CharacterId), Session.Character.PositionX,
+                Session.Character.PositionY);
+            Session.SendPacket(Session.Character.GenerateSpPoint());
+            Session.Character.LoadSpeed();
+            Session.SendPacket(Session.Character.GenerateSki());
+            Session.SendPacket(Session.Character.GenerateCond());
+            Session.SendPacket(Session.Character.GenerateStat());
+            Session.SendPackets(Session.Character.GenerateStatChar());
         }
 
         public void AddUltimatePoints(short points)

@@ -1023,47 +1023,37 @@ namespace OpenNos.GameObject.Helpers
 
         public static int MagicalDefence(ClassType @class, byte level)
         {
-            if (_magicalDef == null)
-            {
-                new CharacterHelper();
-            }
-            return _magicalDef[(int)@class, level]; ;
+            if (_magicalDef == null) new CharacterHelper();
+            return _magicalDef[(int) @class, level];
+            ;
         }
 
         public static int MaxDistance(ClassType @class, byte level)
         {
-            if (_maxDist == null)
-            {
-                new CharacterHelper();
-            }
-            return _maxDist[(int)@class, level]; ;
+            if (_maxDist == null) new CharacterHelper();
+            return _maxDist[(int) @class, level];
+            ;
         }
 
         public static int MaxHit(ClassType @class, byte level)
         {
-            if (_maxHit == null)
-            {
-                new CharacterHelper();
-            }
-            return _maxHit[(int)@class, level]; ;
+            if (_maxHit == null) new CharacterHelper();
+            return _maxHit[(int) @class, level];
+            ;
         }
 
         public static int MinDistance(ClassType @class, byte level)
         {
-            if (_minDist == null)
-            {
-                new CharacterHelper();
-            }
-            return _minDist[(int)@class, level]; ;
+            if (_minDist == null) new CharacterHelper();
+            return _minDist[(int) @class, level];
+            ;
         }
 
         public static int MinHit(ClassType @class, byte level)
         {
-            if (_minHit == null)
-            {
-                new CharacterHelper();
-            }
-            return _minHit[(int)@class, level]; ;
+            if (_minHit == null) new CharacterHelper();
+            return _minHit[(int) @class, level];
+            ;
         }
 
         public static int RarityPoint(short rarity, short lvl, bool armor)
@@ -1304,92 +1294,72 @@ namespace OpenNos.GameObject.Helpers
 
         internal static int Defence(ClassType @class, byte level)
         {
-            if (_hitDef == null)
-            {
-                new CharacterHelper();
-            }
-            return _hitDef[(int)@class, level]; ;
+            if (_hitDef == null) new CharacterHelper();
+            return _hitDef[(int) @class, level];
+            ;
         }
 
         internal static int DefenceRate(ClassType @class, byte level)
         {
-            if (_hitDodge == null)
-            {
-                new CharacterHelper();
-            }
-            return _hitDodge[(int)@class, level]; ;
+            if (_hitDodge == null) new CharacterHelper();
+            return _hitDodge[(int) @class, level];
+            ;
         }
 
         internal static int DistanceDefence(ClassType @class, byte level)
         {
-            if (_distDef == null)
-            {
-                new CharacterHelper();
-            }
-            return _distDef[(int)@class, level]; ;
+            if (_distDef == null) new CharacterHelper();
+            return _distDef[(int) @class, level];
+            ;
         }
 
         internal static int DistanceDefenceRate(ClassType @class, byte level)
         {
-            if (_distDodge == null)
-            {
-                new CharacterHelper();
-            }
-            return _distDodge[(int)@class, level]; ;
+            if (_distDodge == null) new CharacterHelper();
+            return _distDodge[(int) @class, level];
+            ;
         }
 
         internal static int DistanceRate(ClassType @class, byte level)
         {
-            if (_distRate == null)
-            {
-                new CharacterHelper();
-            }
-            return _distRate[(int)@class, level]; ;
+            if (_distRate == null) new CharacterHelper();
+            return _distRate[(int) @class, level];
+            ;
         }
 
         internal static int DistCritical(ClassType @class, byte level)
         {
-            if (_criticalDist == null)
-            {
-                new CharacterHelper();
-            }
-            return _criticalDist[(int)@class, level]; ;
+            if (_criticalDist == null) new CharacterHelper();
+            return _criticalDist[(int) @class, level];
+            ;
         }
 
         internal static int DistCriticalRate(ClassType @class, byte level)
         {
-            if (_criticalDistRate == null)
-            {
-                new CharacterHelper();
-            }
-            return _criticalDistRate[(int)@class, level]; ;
+            if (_criticalDistRate == null) new CharacterHelper();
+            return _criticalDistRate[(int) @class, level];
+            ;
         }
 
         internal static int HitCritical(ClassType @class, byte level)
         {
-            if (_criticalHit == null)
-            {
-                new CharacterHelper();
-            }
-            return _criticalHit[(int)@class, level]; ;
+            if (_criticalHit == null) new CharacterHelper();
+            return _criticalHit[(int) @class, level];
+            ;
         }
 
         internal static int HitCriticalRate(ClassType @class, byte level)
         {
-            if (_criticalHitRate == null)
-            {
-                new CharacterHelper();
-            }
-            return _criticalHitRate[(int)@class, level]; ;
+            if (_criticalHitRate == null) new CharacterHelper();
+            return _criticalHitRate[(int) @class, level];
+            ;
         }
 
         internal static int HitRate(ClassType @class, byte level)
         {
-            if (_hitRate == null)
-            {
-                new CharacterHelper();
-            }
-            return _hitRate[(int)@class, level]; ;
+            if (_hitRate == null) new CharacterHelper();
+            return _hitRate[(int) @class, level];
+            ;
         }
 
         private static void loadHeroXpData()
@@ -1623,102 +1593,102 @@ namespace OpenNos.GameObject.Helpers
             _distDodge = new int[5, 256];
             _magicalDef = new int[5, 256];
 
-            for (int i = 0; i < 256; i++)
+            for (var i = 0; i < 256; i++)
             {
                 // ADVENTURER
-                _minHit[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _maxHit[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _hitRate[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _criticalHitRate[(int)ClassType.Adventurer, i] = 0; // sure
-                _criticalHit[(int)ClassType.Adventurer, i] = 0; // sure
-                _minDist[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _maxDist[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _distRate[(int)ClassType.Adventurer, i] = (i + 9) * 2; // approx
-                _criticalDistRate[(int)ClassType.Adventurer, i] = 0; // sure
-                _criticalDist[(int)ClassType.Adventurer, i] = 0; // sure
-                _hitDef[(int)ClassType.Adventurer, i] = i + (9 / 2); // approx
-                _hitDodge[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _distDef[(int)ClassType.Adventurer, i] = (i + 9) / 2; // approx
-                _distDodge[(int)ClassType.Adventurer, i] = i + 9; // approx
-                _magicalDef[(int)ClassType.Adventurer, i] = (i + 9) / 2; // approx
+                _minHit[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _maxHit[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _hitRate[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _criticalHitRate[(int) ClassType.Adventurer, i] = 0; // sure
+                _criticalHit[(int) ClassType.Adventurer, i] = 0; // sure
+                _minDist[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _maxDist[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _distRate[(int) ClassType.Adventurer, i] = (i + 9) * 2; // approx
+                _criticalDistRate[(int) ClassType.Adventurer, i] = 0; // sure
+                _criticalDist[(int) ClassType.Adventurer, i] = 0; // sure
+                _hitDef[(int) ClassType.Adventurer, i] = i + 9 / 2; // approx
+                _hitDodge[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _distDef[(int) ClassType.Adventurer, i] = (i + 9) / 2; // approx
+                _distDodge[(int) ClassType.Adventurer, i] = i + 9; // approx
+                _magicalDef[(int) ClassType.Adventurer, i] = (i + 9) / 2; // approx
 
                 // SWORDMAN
-                _criticalHitRate[(int)ClassType.Swordsman, i] = 0; // approx
-                _criticalHit[(int)ClassType.Swordsman, i] = 0; // approx
-                _criticalDist[(int)ClassType.Swordsman, i] = 0; // approx
-                _criticalDistRate[(int)ClassType.Swordsman, i] = 0; // approx
-                _minDist[(int)ClassType.Swordsman, i] = i + 12; // approx
-                _maxDist[(int)ClassType.Swordsman, i] = i + 12; // approx
-                _distRate[(int)ClassType.Swordsman, i] = 2 * (i + 12); // approx
-                _hitDodge[(int)ClassType.Swordsman, i] = i + 12; // approx
-                _distDodge[(int)ClassType.Swordsman, i] = i + 12; // approx
-                _magicalDef[(int)ClassType.Swordsman, i] = (i + 9) / 2; // approx
-                _hitRate[(int)ClassType.Swordsman, i] = i + 27; // approx
-                _hitDef[(int)ClassType.Swordsman, i] = i + 2; // approx
+                _criticalHitRate[(int) ClassType.Swordsman, i] = 0; // approx
+                _criticalHit[(int) ClassType.Swordsman, i] = 0; // approx
+                _criticalDist[(int) ClassType.Swordsman, i] = 0; // approx
+                _criticalDistRate[(int) ClassType.Swordsman, i] = 0; // approx
+                _minDist[(int) ClassType.Swordsman, i] = i + 12; // approx
+                _maxDist[(int) ClassType.Swordsman, i] = i + 12; // approx
+                _distRate[(int) ClassType.Swordsman, i] = 2 * (i + 12); // approx
+                _hitDodge[(int) ClassType.Swordsman, i] = i + 12; // approx
+                _distDodge[(int) ClassType.Swordsman, i] = i + 12; // approx
+                _magicalDef[(int) ClassType.Swordsman, i] = (i + 9) / 2; // approx
+                _hitRate[(int) ClassType.Swordsman, i] = i + 27; // approx
+                _hitDef[(int) ClassType.Swordsman, i] = i + 2; // approx
 
-                _minHit[(int)ClassType.Swordsman, i] = (2 * i) + 5; // approx Numbers n such that 10n+9 is prime.
-                _maxHit[(int)ClassType.Swordsman, i] = (2 * i) + 5; // approx Numbers n such that 10n+9 is prime.
-                _distDef[(int)ClassType.Swordsman, i] = i; // approx
+                _minHit[(int) ClassType.Swordsman, i] = 2 * i + 5; // approx Numbers n such that 10n+9 is prime.
+                _maxHit[(int) ClassType.Swordsman, i] = 2 * i + 5; // approx Numbers n such that 10n+9 is prime.
+                _distDef[(int) ClassType.Swordsman, i] = i; // approx
 
                 // MAGICIAN
-                _hitRate[(int)ClassType.Magician, i] = 0; // sure
-                _criticalHitRate[(int)ClassType.Magician, i] = 0; // sure
-                _criticalHit[(int)ClassType.Magician, i] = 0; // sure
-                _criticalDistRate[(int)ClassType.Magician, i] = 0; // sure
-                _criticalDist[(int)ClassType.Magician, i] = 0; // sure
+                _hitRate[(int) ClassType.Magician, i] = 0; // sure
+                _criticalHitRate[(int) ClassType.Magician, i] = 0; // sure
+                _criticalHit[(int) ClassType.Magician, i] = 0; // sure
+                _criticalDistRate[(int) ClassType.Magician, i] = 0; // sure
+                _criticalDist[(int) ClassType.Magician, i] = 0; // sure
 
-                _minDist[(int)ClassType.Magician, i] = 14 + i; // approx
-                _maxDist[(int)ClassType.Magician, i] = 14 + i; // approx
-                _distRate[(int)ClassType.Magician, i] = (14 + i) * 2; // approx
-                _hitDef[(int)ClassType.Magician, i] = (i + 11) / 2; // approx
-                _magicalDef[(int)ClassType.Magician, i] = i + 4; // approx
-                _hitDodge[(int)ClassType.Magician, i] = 24 + i; // approx
-                _distDodge[(int)ClassType.Magician, i] = 14 + i; // approx
+                _minDist[(int) ClassType.Magician, i] = 14 + i; // approx
+                _maxDist[(int) ClassType.Magician, i] = 14 + i; // approx
+                _distRate[(int) ClassType.Magician, i] = (14 + i) * 2; // approx
+                _hitDef[(int) ClassType.Magician, i] = (i + 11) / 2; // approx
+                _magicalDef[(int) ClassType.Magician, i] = i + 4; // approx
+                _hitDodge[(int) ClassType.Magician, i] = 24 + i; // approx
+                _distDodge[(int) ClassType.Magician, i] = 14 + i; // approx
 
-                _minHit[(int)ClassType.Magician, i] = (2 * i) + 9; // approx Numbers n such that n^2 is of form x^ 2 + 40y ^ 2 with positive x,y.
-                _maxHit[(int)ClassType.Magician, i] = (2 * i) + 9; // approx Numbers n such that n^2 is of form x^2+40y^2 with positive x,y.
-                _distDef[(int)ClassType.Magician, i] = 20 + i; // approx
+                _minHit[(int) ClassType.Magician, i] =
+                    2 * i + 9; // approx Numbers n such that n^2 is of form x^ 2 + 40y ^ 2 with positive x,y.
+                _maxHit[(int) ClassType.Magician, i] =
+                    2 * i + 9; // approx Numbers n such that n^2 is of form x^2+40y^2 with positive x,y.
+                _distDef[(int) ClassType.Magician, i] = 20 + i; // approx
 
                 // ARCHER
-                _criticalHitRate[(int)ClassType.Archer, i] = 0; // sure
-                _criticalHit[(int)ClassType.Archer, i] = 0; // sure
-                _criticalDistRate[(int)ClassType.Archer, i] = 0; // sure
-                _criticalDist[(int)ClassType.Archer, i] = 0; // sure
+                _criticalHitRate[(int) ClassType.Archer, i] = 0; // sure
+                _criticalHit[(int) ClassType.Archer, i] = 0; // sure
+                _criticalDistRate[(int) ClassType.Archer, i] = 0; // sure
+                _criticalDist[(int) ClassType.Archer, i] = 0; // sure
 
-                _minHit[(int)ClassType.Archer, i] = 9 + (i * 3); // approx
-                _maxHit[(int)ClassType.Archer, i] = 9 + (i * 3); // approx
-                int add = i % 2 == 0 ? 2 : 4;
-                _hitRate[(int)ClassType.Archer, 1] = 41;
-                _hitRate[(int)ClassType.Archer, i] += add; // approx
-                _minDist[(int)ClassType.Archer, i] = 2 * i; // approx
-                _maxDist[(int)ClassType.Archer, i] = 2 * i; // approx
+                _minHit[(int) ClassType.Archer, i] = 9 + i * 3; // approx
+                _maxHit[(int) ClassType.Archer, i] = 9 + i * 3; // approx
+                var add = i % 2 == 0 ? 2 : 4;
+                _hitRate[(int) ClassType.Archer, 1] = 41;
+                _hitRate[(int) ClassType.Archer, i] += add; // approx
+                _minDist[(int) ClassType.Archer, i] = 2 * i; // approx
+                _maxDist[(int) ClassType.Archer, i] = 2 * i; // approx
 
-                _distRate[(int)ClassType.Archer, i] = 20 + (2 * i); // approx
-                _hitDef[(int)ClassType.Archer, i] = i; // approx
-                _magicalDef[(int)ClassType.Archer, i] = i + 2; // approx
-                _hitDodge[(int)ClassType.Archer, i] = 41 + i; // approx
-                _distDodge[(int)ClassType.Archer, i] = i + 2; // approx
-                _distDef[(int)ClassType.Archer, i] = i; // approx
-
+                _distRate[(int) ClassType.Archer, i] = 20 + 2 * i; // approx
+                _hitDef[(int) ClassType.Archer, i] = i; // approx
+                _magicalDef[(int) ClassType.Archer, i] = i + 2; // approx
+                _hitDodge[(int) ClassType.Archer, i] = 41 + i; // approx
+                _distDodge[(int) ClassType.Archer, i] = i + 2; // approx
+                _distDef[(int) ClassType.Archer, i] = i; // approx
 
                 // MARTIAL ARTIST
-                _criticalHitRate[(int)ClassType.MartialArtist, i] = 0; // sure
-                _criticalHit[(int)ClassType.MartialArtist, i] = 0; // sure
-                _criticalDist[(int)ClassType.MartialArtist, i] = 0; // sure
-                _criticalDistRate[(int)ClassType.MartialArtist, i] = 0; // sure
-                _minDist[(int)ClassType.MartialArtist, i] = i + 53; // sure
-                _maxDist[(int)ClassType.MartialArtist, i] = i + 53; // sure
-                _distRate[(int)ClassType.MartialArtist, i] = 2 * (i + 33); // sure
-                _hitDodge[(int)ClassType.MartialArtist, i] = i + 53; // sure
-                _distDodge[(int)ClassType.MartialArtist, i] = i + 43; // sure
-                _magicalDef[(int)ClassType.MartialArtist, i] = 53; // sure
-                _hitRate[(int)ClassType.MartialArtist, i] = i + 33; // sure
-                _hitDef[(int)ClassType.MartialArtist, i] = i - 16; // sure
+                _criticalHitRate[(int) ClassType.MartialArtist, i] = 0; // approx
+                _criticalHit[(int) ClassType.MartialArtist, i] = 0; // approx
+                _criticalDist[(int) ClassType.MartialArtist, i] = 0; // approx
+                _criticalDistRate[(int) ClassType.MartialArtist, i] = 0; // approx
+                _minDist[(int) ClassType.MartialArtist, i] = i + 12; // approx
+                _maxDist[(int) ClassType.MartialArtist, i] = i + 12; // approx
+                _distRate[(int) ClassType.MartialArtist, i] = 2 * (i + 12); // approx
+                _hitDodge[(int) ClassType.MartialArtist, i] = i + 12; // approx
+                _distDodge[(int) ClassType.MartialArtist, i] = i + 12; // approx
+                _magicalDef[(int) ClassType.MartialArtist, i] = (i + 9) / 2; // approx
+                _hitRate[(int) ClassType.MartialArtist, i] = i + 27; // approx
+                _hitDef[(int) ClassType.MartialArtist, i] = i + 2; // approx
 
-                _minHit[(int)ClassType.MartialArtist, i] = i + 49; // sure
-                _maxHit[(int)ClassType.MartialArtist, i] = i + 49; // sure
-                _distDef[(int)ClassType.MartialArtist, i] = i - 14; // sure
-
+                _minHit[(int) ClassType.MartialArtist, i] = 2 * i + 5; // approx Numbers n such that 10n+9 is prime.
+                _maxHit[(int) ClassType.MartialArtist, i] = 2 * i + 5; // approx Numbers n such that 10n+9 is prime.
+                _distDef[(int) ClassType.MartialArtist, i] = i; // approx
             }
         }
 

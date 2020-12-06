@@ -180,8 +180,6 @@ namespace OpenNos.GameObject
 
         public byte BazarRequests { get; set; }
 
-        public CharacterSkill LastSkillUsed { get; set; }
-
         public DateTime BubbleMessageEnd { get; set; }
 
         public ThreadSafeSortedList<short, Buff> Buff => BattleEntity.Buffs;
@@ -4766,9 +4764,9 @@ namespace OpenNos.GameObject
             {
                 ItemInstance item = Inventory?.LoadBySlotAndType(i, InventoryType.Wear);
                 if (item != null && item.Item.EquipmentSlot != EquipmentType.MainWeapon
-                        && item.Item.EquipmentSlot != EquipmentType.SecondaryWeapon
-                        && item.Item.EquipmentSlot != EquipmentType.Armor
-                        && item.Item.EquipmentSlot != EquipmentType.Sp)
+                                 && item.Item.EquipmentSlot != EquipmentType.SecondaryWeapon
+                                 && item.Item.EquipmentSlot != EquipmentType.Armor
+                                 && item.Item.EquipmentSlot != EquipmentType.Sp)
                 {
                     FireResistance += item.FireResistance + item.Item.FireResistance;
                     LightResistance += item.LightResistance + item.Item.LightResistance;
@@ -4783,56 +4781,56 @@ namespace OpenNos.GameObject
             }
 
             //BCards
-            int BCardFireResistance = GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.FireIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.AllIncreased)[0];
-            int BCardLightResistance = GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.LightIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.AllIncreased)[0];
-            int BCardWaterResistance = GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.WaterIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.AllIncreased)[0];
-            int BCardDarkResistance = GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.DarkIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte)AdditionalTypes.ElementResistance.AllIncreased)[0];
+            int BCardFireResistance = GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.FireIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.AllIncreased)[0];
+            int BCardLightResistance = GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.LightIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.AllIncreased)[0];
+            int BCardWaterResistance = GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.WaterIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.AllIncreased)[0];
+            int BCardDarkResistance = GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.DarkIncreased)[0] + GetStuffBuff(CardType.ElementResistance, (byte) AdditionalTypes.ElementResistance.AllIncreased)[0];
 
-            int BCardHitCritical = GetStuffBuff(CardType.Critical, (byte)AdditionalTypes.Critical.DamageIncreased)[0] + GetStuffBuff(CardType.Critical, (byte)AdditionalTypes.Critical.DamageFromCriticalIncreased)[0];
-            int BCardHitCriticalRate = GetStuffBuff(CardType.Critical, (byte)AdditionalTypes.Critical.InflictingIncreased)[0];
+            int BCardHitCritical = GetStuffBuff(CardType.Critical, (byte) AdditionalTypes.Critical.DamageIncreased)[0] + GetStuffBuff(CardType.Critical,(byte) AdditionalTypes.Critical.DamageFromCriticalIncreased)[0];
+            int BCardHitCriticalRate = GetStuffBuff(CardType.Critical, (byte) AdditionalTypes.Critical.InflictingIncreased)[0];
 
-            int BCardHit = GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.AllAttacksIncreased)[0];
-            int BCardSecondHit = GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.AllAttacksIncreased)[0];
+            int BCardHit = GetStuffBuff(CardType.AttackPower, (byte) AdditionalTypes.AttackPower.AllAttacksIncreased)[0];
+            int BCardSecondHit = GetStuffBuff(CardType.AttackPower, (byte) AdditionalTypes.AttackPower.AllAttacksIncreased)[0];
 
-            int BCardHitRate = GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.AllHitRateIncreased)[0];
-            int BCardSecondHitRate = GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.AllHitRateIncreased)[0];
+            int BCardHitRate = GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.AllHitRateIncreased)[0];
+            int BCardSecondHitRate = GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.AllHitRateIncreased)[0];
 
-            int BCardMeleeDodge = GetStuffBuff(CardType.DodgeAndDefencePercent, (byte)AdditionalTypes.Target.AllHitRateIncreased)[0];
-            int BCardRangeDodge = GetStuffBuff(CardType.DodgeAndDefencePercent, (byte)AdditionalTypes.Target.AllHitRateIncreased)[0];
+            int BCardMeleeDodge = GetStuffBuff(CardType.DodgeAndDefencePercent,(byte) AdditionalTypes.Target.AllHitRateIncreased)[0];
+            int BCardRangeDodge = GetStuffBuff(CardType.DodgeAndDefencePercent,(byte) AdditionalTypes.Target.AllHitRateIncreased)[0];
 
-            int BCardMeleeDefence = GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.AllIncreased)[0] + GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.MeleeIncreased)[0];
-            int BCardRangeDefence = GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.AllIncreased)[0] + GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.RangedIncreased)[0];
-            int BCardMagicDefence = GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.AllIncreased)[0] + GetStuffBuff(CardType.Defence, (byte)AdditionalTypes.Defence.MagicalIncreased)[0];
+            int BCardMeleeDefence = GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.AllIncreased)[0] +GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.MeleeIncreased)[0];
+            int BCardRangeDefence = GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.AllIncreased)[0] +GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.RangedIncreased)[0];
+            int BCardMagicDefence = GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.AllIncreased)[0] +GetStuffBuff(CardType.Defence, (byte) AdditionalTypes.Defence.MagicalIncreased)[0];
 
             switch (Class)
             {
                 case ClassType.Adventurer:
                 case ClassType.Swordsman:
-                    BCardHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.MeleeAttacksIncreased)[0];
-                    BCardSecondHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
-                    BCardHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.MeleeHitRateIncreased)[0];
-                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.RangedHitRateIncreased)[0];
+                    BCardHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.MeleeAttacksIncreased)[0];
+                    BCardSecondHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
+                    BCardHitRate += GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.MeleeHitRateIncreased)[0];
+                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.RangedHitRateIncreased)[0];
                     break;
 
                 case ClassType.Archer:
-                    BCardHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
-                    BCardSecondHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.MeleeAttacksIncreased)[0];
-                    BCardHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.RangedHitRateIncreased)[0];
-                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.MeleeHitRateIncreased)[0];
+                    BCardHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
+                    BCardSecondHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.MeleeAttacksIncreased)[0];
+                    BCardHitRate += GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.RangedHitRateIncreased)[0];
+                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.MeleeHitRateIncreased)[0];
                     break;
 
                 case ClassType.Magician:
-                    BCardHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.MagicalAttacksIncreased)[0];
-                    BCardSecondHit += GetStuffBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
-                    BCardHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.MagicalConcentrationIncreased)[0];
-                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte)AdditionalTypes.Target.RangedHitRateIncreased)[0];
+                    BCardHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.MagicalAttacksIncreased)[0];
+                    BCardSecondHit += GetStuffBuff(CardType.AttackPower,(byte) AdditionalTypes.AttackPower.RangedAttacksIncreased)[0];
+                    BCardHitRate += GetStuffBuff(CardType.Target,(byte) AdditionalTypes.Target.MagicalConcentrationIncreased)[0];
+                    BCardSecondHitRate += GetStuffBuff(CardType.Target, (byte) AdditionalTypes.Target.RangedHitRateIncreased)[0];
                     break;
             }
 
-            byte type = Class == ClassType.Adventurer ? (byte)0 : (byte)(Class - 1);
+            byte type = Class == ClassType.Adventurer ? (byte) 0 : (byte) (Class - 1);
 
             List<string> packets = new List<string>();
-            packets.Add($"sc {type} {(weaponUpgrade == 10 ? weaponUpgrade : weaponUpgrade + GetBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.AttackLevelIncreased)[0])} {MinHit + BCardHit} {MaxHit + BCardHit} {HitRate + BCardHitRate} {HitCriticalChance + BCardHitCriticalRate} {HitCriticalRate + BCardHitCritical} {(Class == ClassType.Archer ? 1 : 0)} {(secondaryUpgrade == 10 ? secondaryUpgrade : secondaryUpgrade + GetBuff(CardType.AttackPower, (byte)AdditionalTypes.AttackPower.AttackLevelIncreased)[0])} {SecondWeaponMinHit + BCardSecondHit} {SecondWeaponMaxHit + BCardSecondHit} {SecondWeaponHitRate + BCardSecondHitRate} {SecondWeaponCriticalChance + BCardHitCriticalRate} {SecondWeaponCriticalRate + BCardHitCritical} {(armorUpgrade == 10 ? armorUpgrade : armorUpgrade + GetBuff(CardType.Defence, (byte)AdditionalTypes.Defence.DefenceLevelIncreased)[0])} {Defence + BCardMeleeDefence} {DefenceRate + BCardMeleeDodge} {DistanceDefence + BCardRangeDefence} {DistanceDefenceRate + BCardRangeDodge} {MagicalDefence + BCardMagicDefence} {FireResistance + BCardFireResistance} {WaterResistance + BCardWaterResistance} {LightResistance + BCardLightResistance} {DarkResistance + BCardDarkResistance}");
+            packets.Add( $"sc {type} {(weaponUpgrade == 10 ? weaponUpgrade : weaponUpgrade + GetBuff(CardType.AttackPower, (byte) AdditionalTypes.AttackPower.AttackLevelIncreased)[0])} {MinHit + BCardHit} {MaxHit + BCardHit} {HitRate + BCardHitRate} {HitCriticalChance + BCardHitCriticalRate} {HitCriticalRate + BCardHitCritical} {(Class == ClassType.Archer ? 1 : 0)} {(secondaryUpgrade == 10 ? secondaryUpgrade : secondaryUpgrade + GetBuff(CardType.AttackPower, (byte) AdditionalTypes.AttackPower.AttackLevelIncreased)[0])} {SecondWeaponMinHit + BCardSecondHit} {SecondWeaponMaxHit + BCardSecondHit} {SecondWeaponHitRate + BCardSecondHitRate} {SecondWeaponCriticalChance + BCardHitCriticalRate} {SecondWeaponCriticalRate + BCardHitCritical} {(armorUpgrade == 10 ? armorUpgrade : armorUpgrade + GetBuff(CardType.Defence, (byte) AdditionalTypes.Defence.DefenceLevelIncreased)[0])} {Defence + BCardMeleeDefence} {DefenceRate + BCardMeleeDodge} {DistanceDefence + BCardRangeDefence} {DistanceDefenceRate + BCardRangeDodge} {MagicalDefence + BCardMagicDefence} {FireResistance + BCardFireResistance} {WaterResistance + BCardWaterResistance} {LightResistance + BCardLightResistance} {DarkResistance + BCardDarkResistance}");
             packets.AddRange(GenerateScN());
             packets.AddRange(GenerateScP());
 
@@ -4988,11 +4986,8 @@ namespace OpenNos.GameObject
             return $"ta_ps {groups.TrimEnd(' ')}";
         }
 
-        public string GenerateTit()
-        {
-            return
-                $"tit {this.GetClassType()} {Name}";
-        }
+        public string GenerateTit() => $"tit {Language.Instance.GetMessageFromKey(Class == (byte) ClassType.Adventurer ? nameof(ClassType.Adventurer).ToUpper() : Class == ClassType.Swordsman ? nameof(ClassType.Swordsman).ToUpper() : Class == ClassType.Archer ? nameof(ClassType.Archer).ToUpper() : nameof(ClassType.Magician).ToUpper())} {Name}";
+
         public string GenerateTitInfo()
         {
             long tit = 0;

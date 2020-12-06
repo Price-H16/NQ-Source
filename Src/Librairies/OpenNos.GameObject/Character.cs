@@ -1512,6 +1512,12 @@ namespace OpenNos.GameObject
         public bool CanAttack() => !NoAttack && !HasBuff(CardType.SpecialAttack, (byte)AdditionalTypes.SpecialAttack.NoAttack) && !HasBuff(CardType.FrozenDebuff, (byte)AdditionalTypes.FrozenDebuff.EternalIce);
 
         public bool CanMove() => !NoMove && !HasBuff(CardType.Move, (byte)AdditionalTypes.Move.MovementImpossible) && !HasBuff(CardType.FrozenDebuff, (byte)AdditionalTypes.FrozenDebuff.EternalIce);
+        
+        public void GenerateCommandInterface()
+        {
+            string Command = "";
+            Session.SendPacket($"guri 10 1 579068 985 {Command}");
+        }
 
         public bool CanUseNosBazaar()
         {
@@ -4101,8 +4107,15 @@ namespace OpenNos.GameObject
 
         public string GenerateMinimapPosition() => MapInstance.MapInstanceType == MapInstanceType.TimeSpaceInstance || MapInstance.MapInstanceType == MapInstanceType.RaidInstance ? $"rsfp {MapInstance.MapIndexX} {MapInstance.MapIndexY}" : "rsfp 0 -1";
 
-        public string GenerateMlinfo() => $"mlinfo 3800 {MinilandPoint} 100 {GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland) && s.Timestamp.Day == DateTime.Now.Day)} {GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland))} 10 {(byte) MinilandState} {Language.Instance.GetMessageFromKey("WELCOME_MUSIC_INFO")} {MinilandMessage.Replace(' ', '^')}";
-
+        public string GenerateMlinfo()
+        {
+            //mlinfo 3800 2000 100 0 18 10 0 3800 338
+            return
+                $"mlinfo 3800 {MinilandPoint} 100 " +
+                $"{GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland) && s.Timestamp.Day == DateTime.Now.Day)} " +
+                $"{GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland))} 10 {(byte)MinilandState} " +
+                $"3800 {MinilandMessage.Replace(' ', '^')}";
+        }
         public string GenerateMlinfobr() => $"mlinfobr 3800 {Name} {GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland) && s.Timestamp.Day == DateTime.Now.Day)} {GeneralLogs.CountLinq(s => s.LogData == nameof(Miniland))} 25 {MinilandMessage.Replace(' ', '^')}";
 
         public string GenerateMloMg(MinilandObject mlobj, MinigamePacket packet) => $"mlo_mg {packet.MinigameVNum} {MinilandPoint} 0 0 {mlobj.ItemInstance.DurabilityPoint} {mlobj.ItemInstance.Item.MinilandObjectPoint}";
@@ -4480,7 +4493,7 @@ namespace OpenNos.GameObject
                     ski += $" {skills[0].SkillVNum} {skills[1].SkillVNum}";
                 }
 
-                ski = skills.Aggregate(ski,(packet, characterSKill) => $"{packet} {(characterSKill.IsTattoo ? $"{characterSKill.SkillVNum}|{characterSKill.TattooLevel}" : $"{characterSKill.SkillVNum}")}");
+                ski = skills.Aggregate(ski, (packet, characterSKill) => $"{packet} {(characterSKill.IsTattoo ? $"{characterSKill.SkillVNum}|{characterSKill.TattooUpgrade}" : $"{characterSKill.SkillVNum}")}");
             }
 
             return ski;
@@ -5670,7 +5683,7 @@ namespace OpenNos.GameObject
         /// <returns></returns>
         public int[] GetStuffBuff(CardType type, byte subtype)
         {
-            int[] result = new int[2] {0, 0};
+            int[] result = new int[2] { 0, 0 };
 
             List<BCard> bcards = new List<BCard>();
 
@@ -5690,14 +5703,7 @@ namespace OpenNos.GameObject
             {
                 bcards.AddRange(equipmentBCards);
             }
-
-            if (EffectFromTitle != null && EffectFromTitle.ToList().Any())
-            {
-                bcards.AddRange(EffectFromTitle.ToList());
-            }
-
-            foreach (BCard bcard in bcards.Where(s =>
-                s?.Type == (byte) type && s.SubType == (byte) (subtype) && s.FirstData > 0))
+            foreach (BCard bcard in bcards.Where(s => s?.Type == (byte)type && s.SubType == (byte)(subtype / 10) && s.FirstData > 0))
             {
                 result[0] += bcard.IsLevelScaled ? (bcard.FirstData * Level) : bcard.FirstData;
                 result[1] += bcard.SecondData;

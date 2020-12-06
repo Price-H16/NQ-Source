@@ -803,10 +803,8 @@ namespace NosTale.Extension.Extension.Packet
             }
         }
 
-        public static void TargetHit(this ClientSession Session, int castingId, UserType targetType, int targetId,
-            bool isPvp = false)
+        public static void TargetHit(this ClientSession Session, int castingId, UserType targetType, int targetId, bool isPvp = false)
         {
-
 
             bool shouldCancel = true;
             bool isSacrificeSkill = false;

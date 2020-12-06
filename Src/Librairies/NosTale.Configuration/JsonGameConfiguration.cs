@@ -15,9 +15,9 @@ namespace NosTale.Configuration
             // Config ip/port
             LogerPort = 6970,
             IPAddress = "89.203.249.171",
-            MasterIP = "127.0.0.1",
+            MasterIP = "89.203.249.171",
             Act4Port = 5100,
-            LoginPort = 4001,
+            LoginPort = 4000,
             MasterPort = 6969,
             WorldPort = 5000,
 

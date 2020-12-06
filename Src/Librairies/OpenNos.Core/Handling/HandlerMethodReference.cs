@@ -59,6 +59,8 @@ namespace OpenNos.Core.Handling
 
         public bool PassNonParseablePacket { get; }
 
+        public AuthorityType Authority { get; set; }
+
         #endregion
     }
 }

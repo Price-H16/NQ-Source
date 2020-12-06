@@ -30,7 +30,7 @@ namespace OpenNos.Handler.PacketHandler.Battle
         {
             Session.Character.Direction = Session.Character.BeforeDirection;
 
-            bool isMuted = Session.Character.MuteMessage();
+            var isMuted = Session.Character.MuteMessage();
             if (isMuted || Session.Character.IsVehicled)
             {
                 Session.SendPacket(StaticPacketHelper.Cancel());
@@ -46,9 +46,7 @@ namespace OpenNos.Handler.PacketHandler.Battle
                 }
 
                 if (Session.Character.CanFight && Session.Character.Hp > 0)
-                {
                     Session.ZoneHit(useAoeSkillPacket.CastId, useAoeSkillPacket.MapX, useAoeSkillPacket.MapY);
-                }
             }
         }
 

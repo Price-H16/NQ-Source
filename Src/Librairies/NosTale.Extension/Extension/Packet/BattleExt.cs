@@ -806,10 +806,10 @@ namespace NosTale.Extension.Extension.Packet
         public static void TargetHit(this ClientSession Session, int castingId, UserType targetType, int targetId,
             bool isPvp = false)
         {
+            // O gods of software development and operations, I have sinned.
 
-
-            bool shouldCancel = true;
-            bool isSacrificeSkill = false;
+            var shouldCancel = true;
+            var isSacrificeSkill = false;
 
             if ((DateTime.Now - Session.Character.LastTransform).TotalSeconds < 3)
             {
@@ -819,17 +819,19 @@ namespace NosTale.Extension.Extension.Packet
                 return;
             }
 
-            List<CharacterSkill> skills = Session.Character.GetSkills();
+            var skills = Session.Character.GetSkills();
 
             if (skills != null)
             {
-                CharacterSkill ski = skills.FirstOrDefault(s => s.Skill?.CastId == castingId && (s.Skill?.UpgradeSkill == 0 || s.Skill?.SkillType == 1));
+                var ski = skills.FirstOrDefault(s =>
+                    s.Skill?.CastId == castingId &&
+                    (s.Skill?.UpgradeSkill == 0 || s.Skill?.SkillType == (byte)SkillType.CharacterSKill));
 
                 if (castingId != 0)
                 {
                     Session.SendPacket("ms_c 0");
 
-                    foreach (string qslot in Session.Character.GenerateQuicklist())
+                    foreach (var qslot in Session.Character.GenerateQuicklist())
                     {
                         Session.SendPacket(qslot);
                     }
@@ -837,13 +839,15 @@ namespace NosTale.Extension.Extension.Packet
 
                 if (ski != null)
                 {
+                    // We will reinstantiate the skill so we can edit cooldown without modifying anything
+                    // Note: I did it like this because I didn't know MapMonster.cs had the cooldown reset calculation... Have to re-do it later.
+                    ski.ReinstantiateSkill();
                     if (!Session.Character.WeaponLoaded(ski) || !ski.CanBeUsed())
                     {
                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                         return;
                     }
 
-                    //TODO: Clean it up issou
                     if (ski.SkillVNum == 656)
                     {
                         Session.Character.RemoveUltimatePoints(2000);
@@ -858,13 +862,7 @@ namespace NosTale.Extension.Extension.Packet
                     }
 
                     if (Session.Character.LastSkillComboUse > DateTime.Now
-                        && ski.SkillVNum != SkillHelper.GetOriginalSkill(ski.Skill)?.SkillVNum)
-                    {
-                        Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
-                        return;
-                    }
-
-                    if (Session.Character.OnlyNormalAttacks == true)
+                     && ski.SkillVNum != SkillHelper.GetOriginalSkill(ski.Skill)?.SkillVNum)
                     {
                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                         return;
@@ -876,20 +874,27 @@ namespace NosTale.Extension.Extension.Packet
                     {
                         case UserType.Player:
                             {
-                                targetEntity = ServerManager.Instance.GetSessionByCharacterId(targetId)?.Character?.BattleEntity;
+                                targetEntity = ServerManager.Instance.GetSessionByCharacterId(targetId)?.Character
+                                    ?.BattleEntity;
                             }
                             break;
 
                         case UserType.Npc:
                             {
-                                targetEntity = Session.Character.MapInstance?.Npcs?.ToList().FirstOrDefault(n => n.MapNpcId == targetId)?.BattleEntity
-                                    ?? Session.Character.MapInstance?.Sessions?.Where(s => s?.Character?.Mates != null).SelectMany(s => s.Character.Mates).FirstOrDefault(m => m.MateTransportId == targetId)?.BattleEntity;
+                                targetEntity = Session.Character.MapInstance?.Npcs?.ToList()
+                                                   .FirstOrDefault(n => n.MapNpcId == targetId)?.BattleEntity
+                                               ?? Session.Character.MapInstance?.Sessions
+                                                   ?.Where(s => s?.Character?.Mates != null)
+                                                   .SelectMany(s => s.Character.Mates)
+                                                   .FirstOrDefault(m => m.MateTransportId == targetId)?.BattleEntity;
                             }
                             break;
 
                         case UserType.Monster:
                             {
-                                targetEntity = Session.Character.MapInstance?.Monsters?.ToList().FirstOrDefault(m => m.Owner?.Character == null && m.MapMonsterId == targetId)?.BattleEntity;
+                                targetEntity = Session.Character.MapInstance?.Monsters?.ToList()
+                                    .FirstOrDefault(m => m.Owner?.Character == null && m.MapMonsterId == targetId)
+                                    ?.BattleEntity;
                             }
                             break;
                     }
@@ -900,26 +905,35 @@ namespace NosTale.Extension.Extension.Packet
                         return;
                     }
 
-                    foreach (BCard bc in ski.GetSkillBCards().ToList().Where(s => s.Type.Equals((byte)CardType.MeditationSkill)
-                        && (!s.SubType.Equals((byte)AdditionalTypes.MeditationSkill.CausingChance / 10) || SkillHelper.IsCausingChance(ski.SkillVNum))))
+                    foreach (var bc in ski.GetSkillBCards().ToList().Where(s =>
+                        s.Type.Equals((byte)BCardType.CardType.MeditationSkill)
+                        && (!s.SubType.Equals((byte)AdditionalTypes.MeditationSkill.CausingChance) ||
+                            SkillHelper.IsCausingChance(ski.SkillVNum))))
                     {
                         shouldCancel = false;
 
-                        if (bc.SubType.Equals((byte)AdditionalTypes.MeditationSkill.Sacrifice / 10))
+                        if (bc.SubType.Equals((byte)AdditionalTypes.MeditationSkill.Sacrifice))
                         {
                             isSacrificeSkill = true;
-                            if (targetEntity == Session.Character.BattleEntity || targetEntity.MapMonster != null || targetEntity.MapNpc != null)
+                            if (targetEntity == Session.Character.BattleEntity || targetEntity.MapMonster != null ||
+                                targetEntity.MapNpc != null)
                             {
-                                Session.SendPacket(UserInterfaceHelper.GenerateMsg(Language.Instance.GetMessageFromKey("INVALID_TARGET"), 0));
+                                Session.SendPacket(
+                                    UserInterfaceHelper.GenerateMsg(
+                                        Language.Instance.GetMessageFromKey("INVALID_TARGET"), 0));
                                 Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                                 return;
                             }
                         }
 
-                        bc.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel);
+                        bc.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity);
                     }
 
-                    if (ski.Skill.SkillVNum == 1098 && ski.GetSkillBCards().FirstOrDefault(s => s.Type.Equals((byte)CardType.SpecialisationBuffResistance) && s.SubType.Equals((byte)AdditionalTypes.SpecialisationBuffResistance.RemoveBadEffects / 10)) is BCard RemoveBadEffectsBcard)
+                    if (ski.Skill.SkillVNum == 1098 && ski.GetSkillBCards().FirstOrDefault(s =>
+                                s.Type.Equals((byte)BCardType.CardType.SpecialisationBuffResistance) &&
+                                s.SubType.Equals((byte)AdditionalTypes.SpecialisationBuffResistance.RemoveBadEffects))
+                            is
+                            BCard RemoveBadEffectsBcard)
                     {
                         if (Session.Character.BattleEntity.BCardDisposables[RemoveBadEffectsBcard.BCardId] != null)
                         {
@@ -927,46 +941,58 @@ namespace NosTale.Extension.Extension.Packet
                             ski.LastUse = DateTime.Now.AddSeconds(29);
                             Observable.Timer(TimeSpan.FromSeconds(30)).Subscribe(o =>
                             {
-                                CharacterSkill
-                                    skill = Session.Character.GetSkills().Find(s =>
-                                        s.Skill?.CastId
-                                        == castingId && (s.Skill?.UpgradeSkill == 0 || s.Skill?.SkillType == 1));
+                                var
+                                        skill = Session.Character.GetSkills().Find(s =>
+                                                s.Skill?.CastId
+                                             == castingId &&
+                                                (s.Skill?.UpgradeSkill == 0 ||
+                                                 s.Skill?.SkillType == (byte)SkillType.CharacterSKill));
                                 if (skill != null && skill.LastUse <= DateTime.Now)
                                 {
                                     Session.SendPacket(StaticPacketHelper.SkillReset(castingId));
                                 }
                             });
-                            RemoveBadEffectsBcard.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel);
+                            RemoveBadEffectsBcard.ApplyBCards(Session.Character.BattleEntity,
+                                    Session.Character.BattleEntity);
                             Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                             return;
                         }
                     }
 
-                    double cooldownReduction = Session.Character.GetBuff(CardType.Morale, (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0];
+                    double cooldownReduction = Session.Character.GetBuff(BCardType.CardType.Morale,
+                                                       (byte)AdditionalTypes.Morale.SkillCooldownDecreased)[0] +
+                                               Session.Character.GetBuff(BCardType.CardType.Casting,
+                                                       (byte)AdditionalTypes.Casting.EffectDurationIncreased)[0];
 
-                    int[] increaseEnemyCooldownChance = Session.Character.GetBuff(CardType.DarkCloneSummon, (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
+                    var increaseEnemyCooldownChance = Session.Character.GetBuff(BCardType.CardType.DarkCloneSummon,
+                        (byte)AdditionalTypes.DarkCloneSummon.IncreaseEnemyCooldownChance);
 
                     if (ServerManager.RandomNumber() < increaseEnemyCooldownChance[0])
                     {
                         cooldownReduction -= increaseEnemyCooldownChance[1];
                     }
 
-                    short mpCost = ski.MpCost();
+                    var mpCost = ski.MpCost();
                     short hpCost = 0;
 
-                    mpCost = (short)(mpCost * ((100 - Session.Character.CellonOptions.Where(s => s.Type == CellonOptionType.MPUsage).Sum(s => s.Value)) / 100D));
+                    mpCost = (short)(mpCost * ((100 - Session.Character.CellonOptions
+                                                     .Where(s => s.Type == CellonOptionType.MPUsage)
+                                                     .Sum(s => s.Value)) / 100D));
 
-                    if (Session.Character.GetBuff(CardType.HealingBurningAndCasting, (byte)AdditionalTypes.HealingBurningAndCasting.HPDecreasedByConsumingMP)[0] is int HPDecreasedByConsumingMP)
+                    if (Session.Character.GetBuff(BCardType.CardType.HealingBurningAndCasting,
+                            (byte)AdditionalTypes.HealingBurningAndCasting.HPDecreasedByConsumingMP)[0] is int
+                        HPDecreasedByConsumingMP)
                     {
                         if (HPDecreasedByConsumingMP < 0)
                         {
-                            int amountDecreased = -(ski.MpCost() * HPDecreasedByConsumingMP / 100);
+                            var amountDecreased = ski.MpCost() * HPDecreasedByConsumingMP / 100;
                             hpCost = (short)amountDecreased;
                             mpCost -= (short)amountDecreased;
                         }
                     }
 
-                    if (Session.Character.Mp >= mpCost && Session.Character.Hp > hpCost && Session.HasCurrentMapInstance)
+                    if (Session.Character.Mp >= mpCost && Session.Character.Hp > hpCost &&
+                        Session.HasCurrentMapInstance)
                     {
                         if (!Session.Character.HasGodMode)
                         {
@@ -974,12 +1000,24 @@ namespace NosTale.Extension.Extension.Packet
                         }
 
                         ski.LastUse = DateTime.Now;
+
+                        // We save the reduced cooldown amount for using it later
+                        var reducedCooldown = (ski.Skill.Cooldown * (cooldownReduction / 100D));
+
+                        // We will check if there's a cooldown reduction in queue
+                        if (cooldownReduction != 0)
+                        {
+                            ski.Skill.Cooldown = (short)(ski.Skill.Cooldown - reducedCooldown);
+                            ski.LastUse = ski.LastUse.AddMilliseconds((reducedCooldown) * -1 * 100);
+                        }
+
                         Session.Character.PyjamaDead = ski.SkillVNum == 801;
 
                         // Area on attacker
                         if (ski.Skill.TargetType == 1 && ski.Skill.HitType == 1)
                         {
-                            if (Session.Character.MapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance && !Session.Character.MapInstance.IsPVP)
+                            if (Session.Character.MapInstance.MapInstanceType ==
+                                MapInstanceType.TalentArenaMapInstance && !Session.Character.MapInstance.IsPVP)
                             {
                                 Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                                 return;
@@ -991,7 +1029,7 @@ namespace NosTale.Extension.Extension.Packet
                             }
 
                             Session.SendPacket(Session.Character.GenerateStat());
-                            CharacterSkill skillinfo = Session.Character.Skills.FirstOrDefault(s =>
+                            var skillinfo = Session.Character.Skills.FirstOrDefault(s =>
                                 s.Skill.UpgradeSkill == ski.Skill.SkillVNum && s.Skill.Effect > 0
                                                                             && s.Skill.SkillType == 2);
 
@@ -1000,62 +1038,77 @@ namespace NosTale.Extension.Extension.Packet
                                 ski.Skill.CastAnimation, skillinfo?.Skill.CastEffect ?? ski.Skill.CastEffect,
                                 ski.Skill.SkillVNum));
 
-                            short skillEffect = skillinfo?.Skill.Effect ?? ski.Skill.Effect;
+                            var skillEffect = skillinfo?.Skill.Effect ?? ski.Skill.Effect;
 
-                            if (Session.Character.BattleEntity.HasBuff(CardType.FireCannoneerRangeBuff, (byte)AdditionalTypes.FireCannoneerRangeBuff.AOEIncreased) && ski.Skill.Effect == 4569)
+                            if (Session.Character.BattleEntity.HasBuff(BCardType.CardType.FireCannoneerRangeBuff,
+                                    (byte)AdditionalTypes.FireCannoneerRangeBuff.AOEIncreased) &&
+                                ski.Skill.Effect == 4569)
                             {
                                 skillEffect = 4572;
                             }
 
-                            byte targetRange = ski.TargetRange();
+                            var targetRange = ski.TargetRange();
 
                             if (targetRange != 0)
                             {
-                                ski.GetSkillBCards().Where(s => (s.Type.Equals((byte)CardType.Buff) && new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType == BuffType.Good)
-                                    || (s.Type.Equals((byte)CardType.SpecialEffects2) && s.SubType.Equals((byte)AdditionalTypes.SpecialEffects2.TeleportInRadius / 10))).ToList()
-                                    .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                ski.GetSkillBCards().Where(s =>
+                                           s.Type.Equals((byte)BCardType.CardType.Buff) &&
+                                           new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType ==
+                                           BuffType.Good
+                                        || s.Type.Equals((byte)BCardType.CardType.SpecialEffects2) &&
+                                           s.SubType.Equals((byte)AdditionalTypes.SpecialEffects2.TeleportInRadius))
+                                   .ToList()
+                                   .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity,
+                                           Session.Character.BattleEntity, partnerBuffLevel: ski.TattooLevel));
                             }
 
                             Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                            Session.Character.CharacterId, 1, Session.Character.CharacterId, ski.Skill.SkillVNum,
-                            (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation,
-                            skillEffect, Session.Character.PositionX,
-                            Session.Character.PositionY, true,
-                            (int)(Session.Character.Hp / Session.Character.HPLoad() * 100), 0, -2,
-                            (byte)(ski.Skill.SkillType - 1)));
+                                            Session.Character.CharacterId, 1, Session.Character.CharacterId, ski.Skill.SkillVNum,
+                                            (short)(ski.Skill.Cooldown),
+                                            ski.Skill.AttackAnimation,
+                                            skillEffect, Session.Character.PositionX,
+                                            Session.Character.PositionY, true,
+                                            (int)(Session.Character.Hp / Session.Character.HPLoad() * 100), 0, -2,
+                                            (byte)(ski.Skill.SkillType - 1)));
 
                             if (targetRange != 0)
                             {
-                                foreach (ClientSession character in ServerManager.Instance.Sessions.Where(s =>
+                                foreach (var character in ServerManager.Instance.Sessions.Where(s =>
                                     s.CurrentMapInstance == Session.CurrentMapInstance
                                     && s.Character.CharacterId != Session.Character.CharacterId
                                     && s.Character.IsInRange(Session.Character.PositionX, Session.Character.PositionY,
                                         ski.TargetRange())))
                                 {
-                                    if (Session.Character.BattleEntity.CanAttackEntity(character.Character.BattleEntity))
+                                    if (Session.Character.BattleEntity.CanAttackEntity(character.Character.BattleEntity)
+                                    )
                                     {
-                                        Session.PvpHit(new HitRequest(TargetHitType.AOETargetHit, Session, ski.Skill, skillBCards: ski.GetSkillBCards()),
-                                            character);
+                                        Session.PvpHit(
+                                                new HitRequest(TargetHitType.AOETargetHit, Session, ski.Skill,
+                                                        skillBCards: ski.GetSkillBCards()),
+                                                character);
                                     }
                                 }
 
-                                foreach (MapMonster mon in Session.CurrentMapInstance
-                                    .GetMonsterInRangeList(Session.Character.PositionX, Session.Character.PositionY,
-                                        ski.TargetRange()).Where(s => Session.Character.BattleEntity.CanAttackEntity(s.BattleEntity)))
+                                foreach (var mon in Session.CurrentMapInstance
+                                                           .GetMonsterInRangeList(Session.Character.PositionX, Session.Character.PositionY,
+                                                                   ski.TargetRange()).Where(s =>
+                                                                   Session.Character.BattleEntity.CanAttackEntity(s.BattleEntity)))
                                 {
                                     lock (mon._onHitLockObject)
                                     {
                                         mon.OnReceiveHit(new HitRequest(TargetHitType.AOETargetHit, Session, ski.Skill,
-                                            skillinfo?.Skill.Effect ?? ski.Skill.Effect));
+                                                skillinfo?.Skill.Effect ?? ski.Skill.Effect));
                                     }
                                 }
 
-                                foreach (Mate mate in Session.CurrentMapInstance
-                                    .GetListMateInRange(Session.Character.PositionX, Session.Character.PositionY,
-                                        ski.TargetRange()).Where(s => Session.Character.BattleEntity.CanAttackEntity(s.BattleEntity)))
+                                foreach (var mate in Session.CurrentMapInstance
+                                                            .GetListMateInRange(Session.Character.PositionX, Session.Character.PositionY,
+                                                                    ski.TargetRange()).Where(s =>
+                                                                    Session.Character.BattleEntity.CanAttackEntity(s.BattleEntity)))
                                 {
                                     mate.HitRequest(new HitRequest(TargetHitType.AOETargetHit, Session, ski.Skill,
-                                        skillinfo?.Skill.Effect ?? ski.Skill.Effect, skillBCards: ski.GetSkillBCards()));
+                                            skillinfo?.Skill.Effect ?? ski.Skill.Effect,
+                                            skillBCards: ski.GetSkillBCards()));
                                 }
                             }
                         }
@@ -1064,19 +1117,32 @@ namespace NosTale.Extension.Extension.Packet
                             ConcurrentBag<ArenaTeamMember> team = null;
                             if (Session.Character.MapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance)
                             {
-                                team = ServerManager.Instance.ArenaTeams.ToList().FirstOrDefault(s => s.Any(o => o.Session == Session));
+                                team = ServerManager.Instance.ArenaTeams.ToList()
+                                                    .FirstOrDefault(s => s.Any(o => o.Session == Session));
                             }
 
                             if (Session.Character.BattleEntity.CanAttackEntity(targetEntity)
-                             || (team != null && team.FirstOrDefault(s => s.Session == Session)?.ArenaTeamType != team.FirstOrDefault(s => s.Session == targetEntity.Character.Session)?.ArenaTeamType))
+                             || team != null && team.FirstOrDefault(s => s.Session == Session)?.ArenaTeamType !=
+                                team.FirstOrDefault(s => s.Session == targetEntity.Character.Session)?.ArenaTeamType)
                             {
                                 targetEntity = Session.Character.BattleEntity;
                             }
-                            if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance && targetEntity.Mate?.Owner != Session.Character && targetEntity != Session.Character.BattleEntity && (Session.Character.Group == null || !Session.Character.Group.IsMemberOfGroup(targetEntity.MapEntityId)))
+
+                            if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance &&
+                                targetEntity.Mate?.Owner != Session.Character &&
+                                targetEntity != Session.Character.BattleEntity &&
+                                (Session.Character.Group == null ||
+                                 !Session.Character.Group.IsMemberOfGroup(targetEntity.MapEntityId)))
                             {
                                 targetEntity = Session.Character.BattleEntity;
                             }
-                            if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance && targetEntity.Mate?.Owner != Session.Character && targetEntity != Session.Character.BattleEntity && Session.Character.Family != (targetEntity.Character?.Family ?? targetEntity.Mate?.Owner.Family ?? targetEntity.MapMonster?.Owner?.Character?.Family))
+
+                            if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance &&
+                                targetEntity.Mate?.Owner != Session.Character &&
+                                targetEntity != Session.Character.BattleEntity &&
+                                Session.Character.Family !=
+                                (targetEntity.Character?.Family ?? targetEntity.Mate?.Owner.Family ??
+                                        targetEntity.MapMonster?.Owner?.Character?.Family))
                             {
                                 targetEntity = Session.Character.BattleEntity;
                             }
@@ -1092,14 +1158,18 @@ namespace NosTale.Extension.Extension.Packet
                                 Session.CurrentMapInstance?.Broadcast(targetEntity.Mate.GenerateRest(false));
                             }
 
-                            ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill)).ToList()
-                                .ForEach(s => s.ApplyBCards(targetEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                            ski.GetSkillBCards().ToList()
+                               .Where(s => !s.Type.Equals((byte)BCardType.CardType.MeditationSkill)).ToList()
+                               .ForEach(s => s.ApplyBCards(targetEntity, Session.Character.BattleEntity,
+                                       partnerBuffLevel: ski.TattooLevel));
 
                             targetEntity.MapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Player,
                                 Session.Character.CharacterId, targetEntity.UserType, targetEntity.MapEntityId,
                                 ski.Skill.CastAnimation, ski.Skill.CastEffect, ski.Skill.SkillVNum));
                             targetEntity.MapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                Session.Character.CharacterId, (byte)targetEntity.UserType, targetEntity.MapEntityId, ski.Skill.SkillVNum, (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D),
+                                Session.Character.CharacterId, (byte)targetEntity.UserType, targetEntity.MapEntityId,
+                                ski.Skill.SkillVNum,
+                                (short)(ski.Skill.Cooldown),
                                 ski.Skill.AttackAnimation, ski.Skill.Effect, targetEntity.PositionX,
                                 targetEntity.PositionY, true,
                                 (int)(targetEntity.Hp / targetEntity.HPLoad() * 100), 0, -1,
@@ -1117,11 +1187,23 @@ namespace NosTale.Extension.Extension.Packet
                             }
 
                             Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                Session.Character.CharacterId, 1, Session.Character.CharacterId, ski.Skill.SkillVNum,
-                                (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation, ski.Skill.Effect,
-                                Session.Character.PositionX, Session.Character.PositionY, true,
-                                (int)(Session.Character.Hp / Session.Character.HPLoad() * 100), 0, -1,
-                                (byte)(ski.Skill.SkillType - 1)));
+                                            Session.Character.CharacterId, 1, Session.Character.CharacterId, ski.Skill.SkillVNum,
+                                            (short)(ski.Skill.Cooldown),
+                                            ski.Skill.AttackAnimation, ski.Skill.Effect,
+                                            Session.Character.PositionX, Session.Character.PositionY, true,
+                                            (int)(Session.Character.Hp / Session.Character.HPLoad() * 100), 0, -1,
+                                            (byte)(ski.Skill.SkillType - 1)));
+
+
+                            // test?
+                            if (ski.SkillVNum == 1330)
+                            {
+                                if (Session.Character.MapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance)
+                                {
+                                    Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                    return;
+                                }
+                            }
 
                             if (ski.SkillVNum != 1330)
                             {
@@ -1129,90 +1211,198 @@ namespace NosTale.Extension.Extension.Packet
                                 {
                                     case 0:
                                     case 4:
-                                        if (Session.Character.Buff.FirstOrDefault(s => s.Card.BCards.Any(b => b.Type == (byte)BCardType.CardType.FalconSkill && b.SubType.Equals((byte)AdditionalTypes.FalconSkill.Hide / 10))) is Buff FalconHideBuff)
+                                        if (Session.Character.Buff.FirstOrDefault(s =>
+                                                        s.Card.BCards.Any(b =>
+                                                                b.Type == (byte)BCardType.CardType.FalconSkill &&
+                                                                b.SubType.Equals((byte)AdditionalTypes.FalconSkill.Hide))) is Buff
+                                                FalconHideBuff)
                                         {
                                             Session.Character.RemoveBuff(FalconHideBuff.Card.CardId);
-                                            Session.Character.AddBuff(new Buff(560, Session.Character.Level), Session.Character.BattleEntity);
+                                            Session.Character.AddBuff(new Buff(560, Session.Character.Level),
+                                                    Session.Character.BattleEntity);
                                         }
+
                                         break;
 
                                     case 2:
                                         ConcurrentBag<ArenaTeamMember> team = null;
-                                        if (Session.Character.MapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance)
+                                        if (Session.Character.MapInstance.MapInstanceType ==
+                                            MapInstanceType.TalentArenaMapInstance)
                                         {
-                                            team = ServerManager.Instance.ArenaTeams.ToList().FirstOrDefault(s => s.Any(o => o.Session == Session));
+                                            team = ServerManager.Instance.ArenaTeams.ToList()
+                                                                .FirstOrDefault(s => s.Any(o => o.Session == Session));
                                         }
 
-                                        IEnumerable<ClientSession> clientSessions =
-                                            Session.CurrentMapInstance.Sessions?.Where(s => s.Character.CharacterId != Session.Character.CharacterId &&
-                                                s.Character.IsInRange(Session.Character.PositionX,
-                                                    Session.Character.PositionY, ski.TargetRange()));
+                                        var clientSessions =
+                                                Session.CurrentMapInstance.Sessions?.Where(s =>
+                                                        s.Character.CharacterId != Session.Character.CharacterId &&
+                                                        s.Character.IsInRange(Session.Character.PositionX,
+                                                                Session.Character.PositionY, ski.TargetRange()));
                                         if (clientSessions != null)
                                         {
-                                            foreach (ClientSession target in clientSessions)
+                                            foreach (var target in clientSessions)
                                             {
-                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.Character.BattleEntity)
-                                                  && (team == null || team.FirstOrDefault(s => s.Session == Session)?.ArenaTeamType == team.FirstOrDefault(s => s.Session == target.Character.Session)?.ArenaTeamType))
+                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.Character
+                                                                                                          .BattleEntity)
+                                                 && (team == null ||
+                                                     team.FirstOrDefault(s => s.Session == Session)?.ArenaTeamType ==
+                                                     team.FirstOrDefault(s => s.Session == target.Character.Session)
+                                                         ?.ArenaTeamType))
                                                 {
-                                                    if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance && (Session.Character.Group == null || !Session.Character.Group.IsMemberOfGroup(target.Character.CharacterId)))
+                                                    foreach (var s in ski.Skill.BCards.Where(s =>
+                                                                                 !s.Type.Equals((byte)BCardType.CardType.MeditationSkill))
+                                                                         .ToList())
                                                     {
-                                                        continue;
-                                                    }
-                                                    if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance && Session.Character.Family != target.Character.Family)
-                                                    {
-                                                        continue;
+                                                        if (s.Type != (short)BCardType.CardType.Buff)
+                                                        {
+                                                            s.ApplyBCards(target.Character.BattleEntity,
+                                                                    Session.Character.BattleEntity);
+                                                            continue;
+                                                        }
+
+                                                        switch (Session.CurrentMapInstance.MapInstanceType)
+                                                        {
+                                                            case MapInstanceType.Act4Berios:
+                                                            case MapInstanceType.Act4Calvina:
+                                                            case MapInstanceType.Act4Hatus:
+                                                            case MapInstanceType.Act4Morcos:
+                                                                var bf = new Buff((short)s.SecondData, 0);
+                                                                switch (bf.Card?.BuffType)
+                                                                {
+                                                                    case BuffType.Bad:
+                                                                        s.ApplyBCards(target.Character.BattleEntity,
+                                                                                Session.Character.BattleEntity,
+                                                                                partnerBuffLevel: ski.TattooLevel);
+                                                                        break;
+
+                                                                    case BuffType.Good:
+                                                                    case BuffType.Neutral:
+                                                                        if (Session.Character.Faction ==
+                                                                            target.Character.Faction)
+                                                                        {
+                                                                            s.ApplyBCards(target.Character.BattleEntity,
+                                                                                    Session.Character.BattleEntity,
+                                                                                    partnerBuffLevel: ski.TattooLevel);
+                                                                        }
+
+                                                                        break;
+                                                                }
+
+                                                                break;
+
+                                                            case MapInstanceType.ArenaInstance:
+                                                                var b = new Buff((short)s.SecondData, 0);
+                                                                switch (b.Card?.BuffType)
+                                                                {
+                                                                    case BuffType.Bad:
+                                                                        s.ApplyBCards(target.Character.BattleEntity,
+                                                                                Session.Character.BattleEntity,
+                                                                                partnerBuffLevel: ski.TattooLevel);
+                                                                        break;
+
+                                                                    case BuffType.Good:
+                                                                    case BuffType.Neutral:
+                                                                        if (Session.Character.Group?.GroupType ==
+                                                                            GroupType.Group &&
+                                                                            Session.Character.Group.IsMemberOfGroup(
+                                                                                    target.Character.CharacterId))
+                                                                        {
+                                                                            s.ApplyBCards(target.Character.BattleEntity,
+                                                                                    Session.Character.BattleEntity,
+                                                                                    partnerBuffLevel: ski.TattooLevel);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            s.ApplyBCards(
+                                                                                    Session.Character.BattleEntity,
+                                                                                    Session.Character.BattleEntity,
+                                                                                    partnerBuffLevel: ski.TattooLevel);
+                                                                        }
+
+                                                                        break;
+                                                                }
+
+                                                                break;
+
+                                                            default:
+                                                                s.ApplyBCards(target.Character.BattleEntity,
+                                                                        Session.Character.BattleEntity,
+                                                                        partnerBuffLevel: ski.TattooLevel);
+                                                                break;
+                                                        }
                                                     }
 
-                                                    ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill))
-                                                    .ToList().ForEach(s =>
-                                                        s.ApplyBCards(target.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
-
-                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                                        Session.Character.CharacterId, 1, target.Character.CharacterId, ski.Skill.SkillVNum,
-                                                        (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation, ski.Skill.Effect,
-                                                        target.Character.PositionX, target.Character.PositionY, true,
-                                                        (int)(target.Character.Hp / target.Character.HPLoad() * 100), 0, -1,
-                                                        (byte)(ski.Skill.SkillType - 1)));
+                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(
+                                                            UserType.Player,
+                                                            Session.Character.CharacterId, 1, target.Character.CharacterId,
+                                                            ski.Skill.SkillVNum,
+                                                            (short)(ski.Skill.Cooldown),
+                                                            ski.Skill.AttackAnimation, ski.Skill.Effect,
+                                                            target.Character.PositionX, target.Character.PositionY, true,
+                                                            (int)(target.Character.Hp / target.Character.HPLoad() * 100),
+                                                            0, -1,
+                                                            (byte)(ski.Skill.SkillType - 1)));
                                                 }
                                             }
                                         }
 
-                                        IEnumerable<Mate> mates = Session.CurrentMapInstance.GetListMateInRange(Session.Character.PositionX, Session.Character.PositionY, ski.TargetRange());
+                                        IEnumerable<Mate> mates =
+                                                Session.CurrentMapInstance.GetListMateInRange(Session.Character.PositionX,
+                                                        Session.Character.PositionY, ski.TargetRange());
                                         if (mates != null)
                                         {
-                                            foreach (Mate target in mates)
+                                            foreach (var target in mates)
                                             {
-                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity))
+                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity)
+                                                )
                                                 {
-                                                    if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance && (Session.Character.Group == null || !Session.Character.Group.IsMemberOfGroup(target.Owner.CharacterId)))
-                                                    {
-                                                        continue;
-                                                    }
-                                                    if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance && Session.Character.Family != target.Owner.Family)
+                                                    if (Session.Character.MapInstance ==
+                                                        ServerManager.Instance.ArenaInstance &&
+                                                        (Session.Character.Group == null ||
+                                                         !Session.Character.Group.IsMemberOfGroup(target.Owner
+                                                                                                        .CharacterId)))
                                                     {
                                                         continue;
                                                     }
 
-                                                    ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill))
-                                                    .ToList().ForEach(s =>
-                                                        s.ApplyBCards(target.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                                    if (Session.Character.MapInstance ==
+                                                        ServerManager.Instance.FamilyArenaInstance &&
+                                                        Session.Character.Family != target.Owner.Family)
+                                                    {
+                                                        continue;
+                                                    }
 
-                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                                        Session.Character.CharacterId, (byte)target.BattleEntity.UserType, target.MateTransportId, ski.Skill.SkillVNum,
-                                                        (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation, ski.Skill.Effect,
-                                                        target.PositionX, target.PositionY, true,
-                                                        (int)(target.Hp / target.HpLoad() * 100), 0, -1,
-                                                        (byte)(ski.Skill.SkillType - 1)));
+                                                    ski.GetSkillBCards().ToList().Where(s =>
+                                                               !s.Type.Equals((byte)BCardType.CardType.MeditationSkill))
+                                                       .ToList().ForEach(s =>
+                                                               s.ApplyBCards(target.BattleEntity,
+                                                                       Session.Character.BattleEntity,
+                                                                       partnerBuffLevel: ski.TattooLevel));
+
+                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(
+                                                            UserType.Player,
+                                                            Session.Character.CharacterId,
+                                                            (byte)target.BattleEntity.UserType, target.MateTransportId,
+                                                            ski.Skill.SkillVNum,
+                                                            (short)(ski.Skill.Cooldown),
+                                                            ski.Skill.AttackAnimation, ski.Skill.Effect,
+                                                            target.PositionX, target.PositionY, true,
+                                                            (int)(target.Hp / target.HpLoad() * 100), 0, -1,
+                                                            (byte)(ski.Skill.SkillType - 1)));
                                                 }
                                             }
                                         }
 
-                                        IEnumerable<MapMonster> monsters = Session.CurrentMapInstance.GetMonsterInRangeList(Session.Character.PositionX, Session.Character.PositionY, ski.TargetRange());
+                                        IEnumerable<MapMonster> monsters =
+                                                Session.CurrentMapInstance.GetMonsterInRangeList(
+                                                        Session.Character.PositionX, Session.Character.PositionY,
+                                                        ski.TargetRange());
                                         if (monsters != null)
                                         {
-                                            foreach (MapMonster target in monsters)
+                                            foreach (var target in monsters)
                                             {
-                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity))
+                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity)
+                                                )
                                                 {
                                                     if (target.Owner != null)
                                                     {
@@ -1220,59 +1410,91 @@ namespace NosTale.Extension.Extension.Packet
                                                         {
                                                             continue;
                                                         }
-                                                        if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance && (Session.Character.Group == null || !Session.Character.Group.IsMemberOfGroup(target.Owner.MapEntityId)))
+
+                                                        if (Session.Character.MapInstance ==
+                                                            ServerManager.Instance.ArenaInstance &&
+                                                            (Session.Character.Group == null ||
+                                                             !Session.Character.Group.IsMemberOfGroup(target.Owner
+                                                                                                            .MapEntityId)))
                                                         {
                                                             continue;
                                                         }
-                                                        if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance && Session.Character.Family != target.Owner.Character?.Family)
+
+                                                        if (Session.Character.MapInstance ==
+                                                            ServerManager.Instance.FamilyArenaInstance &&
+                                                            Session.Character.Family != target.Owner.Character?.Family)
                                                         {
                                                             continue;
                                                         }
                                                     }
 
-                                                    ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill))
-                                                    .ToList().ForEach(s =>
-                                                        s.ApplyBCards(target.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                                    ski.GetSkillBCards().ToList().Where(s =>
+                                                               !s.Type.Equals((byte)BCardType.CardType.MeditationSkill))
+                                                       .ToList().ForEach(s =>
+                                                               s.ApplyBCards(target.BattleEntity,
+                                                                       Session.Character.BattleEntity,
+                                                                       partnerBuffLevel: ski.TattooLevel));
 
-                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                                        Session.Character.CharacterId, (byte)target.BattleEntity.UserType, target.MapMonsterId, ski.Skill.SkillVNum,
-                                                        (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation, ski.Skill.Effect,
-                                                        target.MapX, target.MapY, true,
-                                                        (int)(target.CurrentHp / target.MaxHp * 100), 0, -1,
-                                                        (byte)(ski.Skill.SkillType - 1)));
+                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(
+                                                            UserType.Player,
+                                                            Session.Character.CharacterId,
+                                                            (byte)target.BattleEntity.UserType, target.MapMonsterId,
+                                                            ski.Skill.SkillVNum,
+                                                            (short)(ski.Skill.Cooldown),
+                                                            ski.Skill.AttackAnimation, ski.Skill.Effect,
+                                                            target.MapX, target.MapY, true,
+                                                            (int)(target.CurrentHp / target.MaxHp * 100), 0, -1,
+                                                            (byte)(ski.Skill.SkillType - 1)));
                                                 }
                                             }
                                         }
 
-                                        IEnumerable<MapNpc> npcs = Session.CurrentMapInstance.GetListNpcInRange(Session.Character.PositionX, Session.Character.PositionY, ski.TargetRange());
+                                        IEnumerable<MapNpc> npcs =
+                                                Session.CurrentMapInstance.GetListNpcInRange(Session.Character.PositionX,
+                                                        Session.Character.PositionY, ski.TargetRange());
                                         if (npcs != null)
                                         {
-                                            foreach (MapNpc target in npcs)
+                                            foreach (var target in npcs)
                                             {
-                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity))
+                                                if (!Session.Character.BattleEntity.CanAttackEntity(target.BattleEntity)
+                                                )
                                                 {
                                                     if (target.Owner != null)
                                                     {
-                                                        if (Session.Character.MapInstance == ServerManager.Instance.ArenaInstance && (Session.Character.Group == null || !Session.Character.Group.IsMemberOfGroup(target.Owner.MapEntityId)))
+                                                        if (Session.Character.MapInstance ==
+                                                            ServerManager.Instance.ArenaInstance &&
+                                                            (Session.Character.Group == null ||
+                                                             !Session.Character.Group.IsMemberOfGroup(target.Owner
+                                                                                                            .MapEntityId)))
                                                         {
                                                             continue;
                                                         }
-                                                        if (Session.Character.MapInstance == ServerManager.Instance.FamilyArenaInstance && Session.Character.Family != target.Owner.Character?.Family)
+
+                                                        if (Session.Character.MapInstance ==
+                                                            ServerManager.Instance.FamilyArenaInstance &&
+                                                            Session.Character.Family != target.Owner.Character?.Family)
                                                         {
                                                             continue;
                                                         }
                                                     }
 
-                                                    ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill))
-                                                    .ToList().ForEach(s =>
-                                                        s.ApplyBCards(target.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                                    ski.GetSkillBCards().ToList().Where(s =>
+                                                               !s.Type.Equals((byte)BCardType.CardType.MeditationSkill))
+                                                       .ToList().ForEach(s =>
+                                                               s.ApplyBCards(target.BattleEntity,
+                                                                       Session.Character.BattleEntity,
+                                                                       partnerBuffLevel: ski.TattooLevel));
 
-                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(UserType.Player,
-                                                        Session.Character.CharacterId, (byte)target.BattleEntity.UserType, target.MapNpcId, ski.Skill.SkillVNum,
-                                                        (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D), ski.Skill.AttackAnimation, ski.Skill.Effect,
-                                                        target.MapX, target.MapY, true,
-                                                        (int)(target.CurrentHp / target.MaxHp * 100), 0, -1,
-                                                        (byte)(ski.Skill.SkillType - 1)));
+                                                    Session.CurrentMapInstance.Broadcast(StaticPacketHelper.SkillUsed(
+                                                            UserType.Player,
+                                                            Session.Character.CharacterId,
+                                                            (byte)target.BattleEntity.UserType, target.MapNpcId,
+                                                            ski.Skill.SkillVNum,
+                                                            (short)(ski.Skill.Cooldown),
+                                                            ski.Skill.AttackAnimation, ski.Skill.Effect,
+                                                            target.MapX, target.MapY, true,
+                                                            (int)(target.CurrentHp / target.MaxHp * 100), 0, -1,
+                                                            (byte)(ski.Skill.SkillType - 1)));
                                                 }
                                             }
                                         }
@@ -1281,11 +1503,15 @@ namespace NosTale.Extension.Extension.Packet
                                 }
                             }
 
-                            ski.GetSkillBCards().ToList().Where(s => !s.Type.Equals((byte)CardType.MeditationSkill)).ToList().ForEach(s => s.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                            ski.GetSkillBCards().ToList()
+                               .Where(s => !s.Type.Equals((byte)BCardType.CardType.MeditationSkill)).ToList()
+                               .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity,
+                                       Session.Character.BattleEntity, partnerBuffLevel: ski.TattooLevel));
                         }
                         else if (ski.Skill.TargetType == 0)
                         {
-                            if (Session.Character.MapInstance.MapInstanceType == MapInstanceType.TalentArenaMapInstance && !Session.Character.MapInstance.IsPVP)
+                            if (Session.Character.MapInstance.MapInstanceType ==
+                                MapInstanceType.TalentArenaMapInstance && !Session.Character.MapInstance.IsPVP)
                             {
                                 Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                                 return;
@@ -1294,7 +1520,7 @@ namespace NosTale.Extension.Extension.Packet
                             if (isPvp)
                             {
                                 //ClientSession playerToAttack = ServerManager.Instance.GetSessionByCharacterId(targetId);
-                                ClientSession playerToAttack = targetEntity.Character?.Session;
+                                var playerToAttack = targetEntity.Character?.Session;
 
                                 if (playerToAttack != null && !IceBreaker.FrozenPlayers.Contains(playerToAttack) && !playerToAttack.Character.isFreezed)
                                 {
@@ -1318,16 +1544,18 @@ namespace NosTale.Extension.Extension.Packet
                                         if (ski.SkillVNum == 1061)
                                         {
                                             Session.CurrentMapInstance.Broadcast($"eff 1 {targetId} 4968");
-                                            Session.CurrentMapInstance.Broadcast($"eff 1 {Session.Character.CharacterId} 4968");
+                                            Session.CurrentMapInstance.Broadcast(
+                                                $"eff 1 {Session.Character.CharacterId} 4968");
                                         }
 
                                         Session.SendPacket(Session.Character.GenerateStat());
-                                        CharacterSkill characterSkillInfo = Session.Character.Skills.FirstOrDefault(s =>
+                                        var characterSkillInfo = Session.Character.Skills.FirstOrDefault(s =>
                                             s.Skill.UpgradeSkill == ski.Skill.SkillVNum && s.Skill.Effect > 0
                                                                                         && s.Skill.SkillType == 2);
                                         Session.CurrentMapInstance.Broadcast(
                                             StaticPacketHelper.CastOnTarget(UserType.Player,
-                                                Session.Character.CharacterId, UserType.Player, targetId, ski.Skill.CastAnimation,
+                                                Session.Character.CharacterId, UserType.Player, targetId,
+                                                ski.Skill.CastAnimation,
                                                 characterSkillInfo?.Skill.CastEffect ?? ski.Skill.CastEffect,
                                                 ski.Skill.SkillVNum));
                                         Session.Character.Skills.Where(s => s.Id != ski.Id).ForEach(i => i.Hit = 0);
@@ -1344,6 +1572,12 @@ namespace NosTale.Extension.Extension.Packet
 
                                         ski.LastUse = DateTime.Now;
 
+                                        // We will check if there's a cooldown reduction in queue
+                                        if (cooldownReduction != 0)
+                                        {
+                                            ski.LastUse = ski.LastUse.AddMilliseconds((reducedCooldown) * -1 * 100);
+                                        }
+
                                         if (ski.Skill.CastEffect != 0)
                                         {
                                             Thread.Sleep(ski.Skill.CastTime * 100);
@@ -1351,17 +1585,19 @@ namespace NosTale.Extension.Extension.Packet
 
                                         if (ski.Skill.HitType == 3)
                                         {
-                                            int count = 0;
+                                            var count = 0;
                                             if (playerToAttack.CurrentMapInstance == Session.CurrentMapInstance
                                                 && playerToAttack.Character.CharacterId !=
                                                 Session.Character.CharacterId)
                                             {
-                                                if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack.Character.BattleEntity))
+                                                if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack
+                                                    .Character.BattleEntity))
                                                 {
                                                     count++;
                                                     Session.PvpHit(
                                                         new HitRequest(TargetHitType.SingleAOETargetHit, Session,
-                                                            ski.Skill, skillBCards: ski.GetSkillBCards(), showTargetAnimation: true), playerToAttack);
+                                                            ski.Skill, skillBCards: ski.GetSkillBCards(),
+                                                            showTargetAnimation: true), playerToAttack);
                                                 }
                                                 else
                                                 {
@@ -1371,19 +1607,24 @@ namespace NosTale.Extension.Extension.Packet
                                             }
 
                                             //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Player).Select(s => s.TargetId))
-                                            foreach (long id in Session.Character.GetMTListTargetQueue_QuickFix(ski, UserType.Player))
+                                            foreach (var id in Session.Character.GetMTListTargetQueue_QuickFix(ski,
+                                                UserType.Player))
                                             {
-                                                ClientSession character = ServerManager.Instance.GetSessionByCharacterId(id);
+                                                var character = ServerManager.Instance.GetSessionByCharacterId(id);
 
                                                 if (character != null
                                                     && character.CurrentMapInstance == Session.CurrentMapInstance
                                                     && character.Character.CharacterId != Session.Character.CharacterId
                                                     && character != playerToAttack)
                                                 {
-                                                    if (Session.Character.BattleEntity.CanAttackEntity(character.Character.BattleEntity))
+                                                    if (Session.Character.BattleEntity.CanAttackEntity(
+                                                            character.Character.BattleEntity))
                                                     {
                                                         count++;
-                                                        Session.PvpHit(new HitRequest(TargetHitType.SingleAOETargetHit, Session, ski.Skill, showTargetAnimation: count == 1, skillBCards: ski.GetSkillBCards()), character);
+                                                        Session.PvpHit(
+                                                                new HitRequest(TargetHitType.SingleAOETargetHit, Session,
+                                                                        ski.Skill, showTargetAnimation: count == 1,
+                                                                        skillBCards: ski.GetSkillBCards()), character);
                                                     }
                                                 }
                                             }
@@ -1398,7 +1639,7 @@ namespace NosTale.Extension.Extension.Packet
                                             // check if we will hit mutltiple targets
                                             if (ski.TargetRange() != 0)
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
                                                 if (skillCombo != null)
                                                 {
                                                     if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit
@@ -1407,20 +1648,22 @@ namespace NosTale.Extension.Extension.Packet
                                                         ski.Hit = 0;
                                                     }
 
-                                                    IEnumerable<ClientSession> playersInAoeRange =
+                                                    var playersInAoeRange =
                                                         ServerManager.Instance.Sessions.Where(s =>
                                                             s.CurrentMapInstance == Session.CurrentMapInstance
                                                             && s.Character.CharacterId != Session.Character.CharacterId
                                                             && s != playerToAttack
                                                             && s.Character.IsInRange(playerToAttack.Character.PositionX,
                                                                 playerToAttack.Character.PositionY, ski.TargetRange()));
-                                                    int count = 0;
-                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack.Character.BattleEntity))
+                                                    var count = 0;
+                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack
+                                                        .Character.BattleEntity))
                                                     {
                                                         count++;
                                                         Session.PvpHit(
                                                             new HitRequest(TargetHitType.SingleTargetHitCombo,
-                                                                Session, ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()),
+                                                                Session, ski.Skill, skillCombo: skillCombo,
+                                                                skillBCards: ski.GetSkillBCards()),
                                                             playerToAttack);
                                                     }
                                                     else
@@ -1429,15 +1672,18 @@ namespace NosTale.Extension.Extension.Packet
                                                             StaticPacketHelper.Cancel(2, targetId));
                                                     }
 
-                                                    foreach (ClientSession character in playersInAoeRange)
+                                                    foreach (var character in playersInAoeRange)
                                                     {
-                                                        if (Session.Character.BattleEntity.CanAttackEntity(character.Character.BattleEntity))
+                                                        if (Session.Character.BattleEntity.CanAttackEntity(
+                                                                character.Character.BattleEntity))
                                                         {
                                                             count++;
                                                             Session.PvpHit(
-                                                                new HitRequest(TargetHitType.SingleTargetHitCombo,
-                                                                    Session, ski.Skill, skillCombo: skillCombo, showTargetAnimation: count == 1, skillBCards: ski.GetSkillBCards()),
-                                                                character);
+                                                                    new HitRequest(TargetHitType.SingleTargetHitCombo,
+                                                                            Session, ski.Skill, skillCombo: skillCombo,
+                                                                            showTargetAnimation: count == 1,
+                                                                            skillBCards: ski.GetSkillBCards()),
+                                                                    character);
                                                         }
                                                     }
 
@@ -1448,7 +1694,7 @@ namespace NosTale.Extension.Extension.Packet
                                                 }
                                                 else
                                                 {
-                                                    IEnumerable<ClientSession> playersInAoeRange =
+                                                    var playersInAoeRange =
                                                         ServerManager.Instance.Sessions.Where(s =>
                                                             s.CurrentMapInstance == Session.CurrentMapInstance
                                                             && s.Character.CharacterId != Session.Character.CharacterId
@@ -1456,14 +1702,17 @@ namespace NosTale.Extension.Extension.Packet
                                                             && s.Character.IsInRange(playerToAttack.Character.PositionX,
                                                                 playerToAttack.Character.PositionY, ski.TargetRange()));
 
-                                                    int count = 0;
+                                                    var count = 0;
+
                                                     // hit the targetted player
-                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack.Character.BattleEntity))
+                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack
+                                                        .Character.BattleEntity))
                                                     {
                                                         count++;
                                                         Session.PvpHit(
                                                             new HitRequest(TargetHitType.SingleAOETargetHit,
-                                                                Session, ski.Skill, showTargetAnimation: true, skillBCards: ski.GetSkillBCards()), playerToAttack);
+                                                                Session, ski.Skill, showTargetAnimation: true,
+                                                                skillBCards: ski.GetSkillBCards()), playerToAttack);
                                                     }
                                                     else
                                                     {
@@ -1472,14 +1721,16 @@ namespace NosTale.Extension.Extension.Packet
                                                     }
 
                                                     //hit all other players
-                                                    foreach (ClientSession character in playersInAoeRange)
+                                                    foreach (var character in playersInAoeRange)
                                                     {
                                                         count++;
-                                                        if (Session.Character.BattleEntity.CanAttackEntity(character.Character.BattleEntity))
+                                                        if (Session.Character.BattleEntity.CanAttackEntity(
+                                                            character.Character.BattleEntity))
                                                         {
                                                             Session.PvpHit(
-                                                                new HitRequest(TargetHitType.SingleAOETargetHit,
-                                                                    Session, ski.Skill, showTargetAnimation: count == 1, skillBCards: ski.GetSkillBCards()), character);
+                                                                    new HitRequest(TargetHitType.SingleAOETargetHit,
+                                                                            Session, ski.Skill, showTargetAnimation: count == 1,
+                                                                            skillBCards: ski.GetSkillBCards()), character);
                                                         }
                                                     }
 
@@ -1491,7 +1742,7 @@ namespace NosTale.Extension.Extension.Packet
                                             }
                                             else
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
                                                 if (skillCombo != null)
                                                 {
                                                     if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit
@@ -1500,31 +1751,35 @@ namespace NosTale.Extension.Extension.Packet
                                                         ski.Hit = 0;
                                                     }
 
-                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack.Character.BattleEntity))
+                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack
+                                                                                                       .Character.BattleEntity))
                                                     {
                                                         Session.PvpHit(
-                                                            new HitRequest(TargetHitType.SingleTargetHitCombo,
-                                                                Session, ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()),
-                                                            playerToAttack);
+                                                                new HitRequest(TargetHitType.SingleTargetHitCombo,
+                                                                        Session, ski.Skill, skillCombo: skillCombo,
+                                                                        skillBCards: ski.GetSkillBCards()),
+                                                                playerToAttack);
                                                     }
                                                     else
                                                     {
                                                         Session.SendPacket(
-                                                            StaticPacketHelper.Cancel(2, targetId));
+                                                                StaticPacketHelper.Cancel(2, targetId));
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack.Character.BattleEntity))
+                                                    if (Session.Character.BattleEntity.CanAttackEntity(playerToAttack
+                                                        .Character.BattleEntity))
                                                     {
                                                         Session.PvpHit(
-                                                            new HitRequest(TargetHitType.SingleTargetHit,
-                                                                Session, ski.Skill, showTargetAnimation: true, skillBCards: ski.GetSkillBCards()), playerToAttack);
+                                                                new HitRequest(TargetHitType.SingleTargetHit,
+                                                                        Session, ski.Skill, showTargetAnimation: true,
+                                                                        skillBCards: ski.GetSkillBCards()), playerToAttack);
                                                     }
                                                     else
                                                     {
                                                         Session.SendPacket(
-                                                            StaticPacketHelper.Cancel(2, targetId));
+                                                                StaticPacketHelper.Cancel(2, targetId));
                                                     }
                                                 }
                                             }
@@ -1533,6 +1788,7 @@ namespace NosTale.Extension.Extension.Packet
                                     else
                                     {
                                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                        return;
                                     }
                                 }
                                 else if (playerToAttack.Character.isFreezed)
@@ -1558,22 +1814,30 @@ namespace NosTale.Extension.Extension.Packet
                                     if (playerToAttack.Character.LastPvPKiller == null
                                         || playerToAttack.Character.LastPvPKiller != Session)
                                     {
-                                        Session.SendPacket($"delay 2000 5 #guri^502^1^{playerToAttack.Character.CharacterId}");
+                                        Session.SendPacket(
+                                                $"delay 2000 5 #guri^502^1^{playerToAttack.Character.CharacterId}");
                                     }
                                 }
                                 else
                                 {
                                     Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                    return;
                                 }
                             }
                             else
                             {
-                                MapMonster monsterToAttack = targetEntity.MapMonster;
+                                var monsterToAttack = targetEntity.MapMonster;
 
                                 if (monsterToAttack != null)
                                 {
-                                    if (Map.GetDistance(new MapCell { X = Session.Character.PositionX, Y = Session.Character.PositionY },
-                                        new MapCell { X = monsterToAttack.MapX, Y = monsterToAttack.MapY }) <= ski.Skill.Range + 5 + monsterToAttack.Monster.BasicArea)
+                                    if (Map.GetDistance(
+                                            new MapCell
+                                            {
+                                                X = Session.Character.PositionX,
+                                                Y = Session.Character.PositionY
+                                            },
+                                            new MapCell { X = monsterToAttack.MapX, Y = monsterToAttack.MapY }) <=
+                                        ski.Skill.Range + 5 + monsterToAttack.Monster.BasicArea)
                                     {
                                         if (Session.Character.UseSp && ski.Skill.CastEffect != -1)
                                         {
@@ -1585,21 +1849,27 @@ namespace NosTale.Extension.Extension.Packet
                                         if (ski.SkillVNum == 1061)
                                         {
                                             Session.CurrentMapInstance.Broadcast($"eff 3 {targetId} 4968");
-                                            Session.CurrentMapInstance.Broadcast($"eff 1 {Session.Character.CharacterId} 4968");
+                                            Session.CurrentMapInstance.Broadcast(
+                                                $"eff 1 {Session.Character.CharacterId} 4968");
                                         }
 
-                                        #endregion Taunt
+                                        #endregion
 
                                         ski.GetSkillBCards().ToList().Where(s => s.CastType == 1).ToList()
-                                            .ForEach(s => s.ApplyBCards(monsterToAttack.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                            .ForEach(s => s.ApplyBCards(monsterToAttack.BattleEntity,
+                                                Session.Character.BattleEntity, partnerBuffLevel: ski.TattooLevel));
 
                                         Session.SendPacket(Session.Character.GenerateStat());
 
-                                        CharacterSkill ski2 = Session.Character.Skills.FirstOrDefault(s => s.Skill.UpgradeSkill == ski.Skill.SkillVNum
+                                        var ski2 = Session.Character.Skills.FirstOrDefault(s =>
+                                            s.Skill.UpgradeSkill == ski.Skill.SkillVNum
                                             && s.Skill.Effect > 0 && s.Skill.SkillType == 2);
 
-                                        Session.CurrentMapInstance.Broadcast(StaticPacketHelper.CastOnTarget(UserType.Player, Session.Character.CharacterId, UserType.Monster, monsterToAttack.MapMonsterId,
-                                            ski.Skill.CastAnimation, ski2?.Skill.CastEffect ?? ski.Skill.CastEffect, ski.Skill.SkillVNum));
+                                        Session.CurrentMapInstance.Broadcast(StaticPacketHelper.CastOnTarget(
+                                            UserType.Player, Session.Character.CharacterId, UserType.Monster,
+                                            monsterToAttack.MapMonsterId,
+                                            ski.Skill.CastAnimation, ski2?.Skill.CastEffect ?? ski.Skill.CastEffect,
+                                            ski.Skill.SkillVNum));
 
                                         Session.Character.Skills.Where(x => x.Id != ski.Id).ForEach(x => x.Hit = 0);
 
@@ -1614,9 +1884,15 @@ namespace NosTale.Extension.Extension.Packet
                                             ski.Hit++;
                                         }
 
-                                        #endregion Generate scp
+                                        #endregion
 
                                         ski.LastUse = DateTime.Now;
+
+                                        // We will check if there's a cooldown reduction in queue
+                                        if (cooldownReduction != 0)
+                                        {
+                                            ski.LastUse = ski.LastUse.AddMilliseconds((reducedCooldown) * -1 * 100);
+                                        }
 
                                         if (ski.Skill.CastEffect != 0)
                                         {
@@ -1625,18 +1901,23 @@ namespace NosTale.Extension.Extension.Packet
 
                                         if (ski.Skill.HitType == 3)
                                         {
-                                            monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, Session,
-                                                ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect, showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
+                                            monsterToAttack.HitQueue.Enqueue(new HitRequest(
+                                                TargetHitType.SingleAOETargetHit, Session,
+                                                ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect,
+                                                showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
 
                                             //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Monster).Select(s => s.TargetId))
-                                            foreach (long id in Session.Character.GetMTListTargetQueue_QuickFix(ski, UserType.Monster))
+                                            foreach (var id in Session.Character.GetMTListTargetQueue_QuickFix(ski,
+                                                UserType.Monster))
                                             {
-                                                MapMonster mon = Session.CurrentMapInstance.GetMonsterById(id);
+                                                var mon = Session.CurrentMapInstance.GetMonsterById(id);
 
                                                 if (mon?.CurrentHp > 0)
                                                 {
-                                                    mon.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, Session,
-                                                        ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect, skillBCards: ski.GetSkillBCards()));
+                                                    mon.HitQueue.Enqueue(new HitRequest(
+                                                            TargetHitType.SingleAOETargetHit, Session,
+                                                            ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect,
+                                                            skillBCards: ski.GetSkillBCards()));
                                                 }
                                             }
                                         }
@@ -1644,24 +1925,31 @@ namespace NosTale.Extension.Extension.Packet
                                         {
                                             if (ski.TargetRange() != 0 || ski.Skill.HitType == 1)
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
 
-                                                List<MapMonster> monstersInAoeRange = Session.CurrentMapInstance?.GetMonsterInRangeList(monsterToAttack.MapX, monsterToAttack.MapY, ski.TargetRange())?
-                                                        .Where(m => Session.Character.BattleEntity.CanAttackEntity(m.BattleEntity)).ToList();
+                                                var monstersInAoeRange = Session.CurrentMapInstance
+                                                    ?.GetMonsterInRangeList(monsterToAttack.MapX, monsterToAttack.MapY,
+                                                        ski.TargetRange())?
+                                                    .Where(m =>
+                                                        Session.Character.BattleEntity.CanAttackEntity(m.BattleEntity))
+                                                    .ToList();
 
                                                 if (skillCombo != null)
                                                 {
-                                                    if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit == ski.Hit)
+                                                    if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit ==
+                                                        ski.Hit)
                                                     {
                                                         ski.Hit = 0;
                                                     }
 
                                                     if (monsterToAttack.IsAlive && monstersInAoeRange?.Count != 0)
                                                     {
-                                                        foreach (MapMonster mon in monstersInAoeRange)
+                                                        foreach (var mon in monstersInAoeRange)
                                                         {
-                                                            mon.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleTargetHitCombo, Session,
-                                                                ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()));
+                                                            mon.HitQueue.Enqueue(new HitRequest(
+                                                                    TargetHitType.SingleTargetHitCombo, Session,
+                                                                    ski.Skill, skillCombo: skillCombo,
+                                                                    skillBCards: ski.GetSkillBCards()));
                                                         }
                                                     }
                                                     else
@@ -1671,14 +1959,21 @@ namespace NosTale.Extension.Extension.Packet
                                                 }
                                                 else
                                                 {
-                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, Session,
-                                                            ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect, showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
+                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(
+                                                        TargetHitType.SingleAOETargetHit, Session,
+                                                        ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect,
+                                                        showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
 
                                                     if (monsterToAttack.IsAlive && monstersInAoeRange?.Count != 0)
                                                     {
-                                                        foreach (MapMonster mon in monstersInAoeRange.Where(m => m.MapMonsterId != monsterToAttack.MapMonsterId))
+                                                        foreach (var mon in monstersInAoeRange.Where(m =>
+                                                                m.MapMonsterId != monsterToAttack.MapMonsterId))
                                                         {
-                                                            mon.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleAOETargetHit, Session, ski.Skill, ski2?.Skill.Effect ?? ski.Skill.Effect, skillBCards: ski.GetSkillBCards()));
+                                                            mon.HitQueue.Enqueue(
+                                                                    new HitRequest(TargetHitType.SingleAOETargetHit,
+                                                                            Session, ski.Skill,
+                                                                            ski2?.Skill.Effect ?? ski.Skill.Effect,
+                                                                            skillBCards: ski.GetSkillBCards()));
                                                         }
                                                     }
                                                     else
@@ -1689,21 +1984,25 @@ namespace NosTale.Extension.Extension.Packet
                                             }
                                             else
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
 
                                                 if (skillCombo != null)
                                                 {
-                                                    if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit == ski.Hit)
+                                                    if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit ==
+                                                        ski.Hit)
                                                     {
                                                         ski.Hit = 0;
                                                     }
 
-                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleTargetHitCombo, Session,
-                                                        ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()));
+                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(
+                                                                            TargetHitType.SingleTargetHitCombo, Session,
+                                                                            ski.Skill, skillCombo: skillCombo,
+                                                                            skillBCards: ski.GetSkillBCards()));
                                                 }
                                                 else
                                                 {
-                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(TargetHitType.SingleTargetHit, Session,
+                                                    monsterToAttack.HitQueue.Enqueue(new HitRequest(
+                                                        TargetHitType.SingleTargetHit, Session,
                                                         ski.Skill, skillBCards: ski.GetSkillBCards()));
                                                 }
                                             }
@@ -1712,13 +2011,15 @@ namespace NosTale.Extension.Extension.Packet
                                     else
                                     {
                                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                        return;
                                     }
                                 }
                                 else if (targetEntity.Mate is Mate mateToAttack)
                                 {
                                     if (!Session.Character.BattleEntity.CanAttackEntity(mateToAttack.BattleEntity))
                                     {
-                                        Session.Character.Session.SendPacket(StaticPacketHelper.Cancel(2, mateToAttack.BattleEntity.MapEntityId));
+                                        Session.Character.Session.SendPacket(
+                                            StaticPacketHelper.Cancel(2, mateToAttack.BattleEntity.MapEntityId));
                                         return;
                                     }
 
@@ -1739,13 +2040,16 @@ namespace NosTale.Extension.Extension.Packet
                                         if (ski.SkillVNum == 1061)
                                         {
                                             Session.CurrentMapInstance.Broadcast($"eff 2 {targetId} 4968");
-                                            Session.CurrentMapInstance.Broadcast($"eff 1 {Session.Character.CharacterId} 4968");
+                                            Session.CurrentMapInstance.Broadcast(
+                                                $"eff 1 {Session.Character.CharacterId} 4968");
                                         }
 
-                                        ski.GetSkillBCards().ToList().Where(s => s.CastType == 1).ToList().ForEach(s => s.ApplyBCards(mateToAttack.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                        ski.GetSkillBCards().ToList().Where(s => s.CastType == 1).ToList().ForEach(s =>
+                                            s.ApplyBCards(mateToAttack.BattleEntity, Session.Character.BattleEntity,
+                                                partnerBuffLevel: ski.TattooLevel));
 
                                         Session.SendPacket(Session.Character.GenerateStat());
-                                        CharacterSkill characterSkillInfo = Session.Character.Skills.FirstOrDefault(s =>
+                                        var characterSkillInfo = Session.Character.Skills.FirstOrDefault(s =>
                                             s.Skill.UpgradeSkill == ski.Skill.SkillVNum && s.Skill.Effect > 0
                                                                                         && s.Skill.SkillType == 2);
 
@@ -1767,6 +2071,13 @@ namespace NosTale.Extension.Extension.Packet
                                         }
 
                                         ski.LastUse = DateTime.Now;
+
+                                        // We will check if there's a cooldown reduction in queue
+                                        if (cooldownReduction != 0)
+                                        {
+                                            ski.LastUse = ski.LastUse.AddMilliseconds((reducedCooldown) * -1 * 100);
+                                        }
+
                                         if (ski.Skill.CastEffect != 0)
                                         {
                                             Thread.Sleep(ski.Skill.CastTime * 100);
@@ -1780,22 +2091,26 @@ namespace NosTale.Extension.Extension.Packet
                                                 showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
 
                                             //foreach (long id in Session.Character.MTListTargetQueue.Where(s => s.EntityType == UserType.Monster).Select(s => s.TargetId))
-                                            foreach (long id in Session.Character.GetMTListTargetQueue_QuickFix(ski, UserType.Monster))
+                                            foreach (var id in Session.Character.GetMTListTargetQueue_QuickFix(ski,
+                                                UserType.Monster))
                                             {
-                                                Mate mate = Session.CurrentMapInstance.GetMate(id);
-                                                if (mate != null && mate.Hp > 0 && Session.Character.BattleEntity.CanAttackEntity(mate.BattleEntity))
+                                                var mate = Session.CurrentMapInstance.GetMate(id);
+                                                if (mate != null && mate.Hp > 0 &&
+                                                    Session.Character.BattleEntity.CanAttackEntity(mate.BattleEntity))
                                                 {
                                                     mate.HitRequest(new HitRequest(
-                                                        TargetHitType.SingleAOETargetHit, Session, ski.Skill,
-                                                        characterSkillInfo?.Skill.Effect ?? ski.Skill.Effect, skillBCards: ski.GetSkillBCards()));
+                                                            TargetHitType.SingleAOETargetHit, Session, ski.Skill,
+                                                            characterSkillInfo?.Skill.Effect ?? ski.Skill.Effect,
+                                                            skillBCards: ski.GetSkillBCards()));
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            if (ski.TargetRange() != 0 || ski.Skill.HitType == 1) // check if we will hit mutltiple targets
+                                            if (ski.TargetRange() != 0 || ski.Skill.HitType == 1
+                                            ) // check if we will hit mutltiple targets
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
                                                 if (skillCombo != null)
                                                 {
                                                     if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit
@@ -1804,16 +2119,19 @@ namespace NosTale.Extension.Extension.Packet
                                                         ski.Hit = 0;
                                                     }
 
-                                                    List<Mate> monstersInAoeRange = Session.CurrentMapInstance?
-                                                        .GetListMateInRange(mateToAttack.MapX,
-                                                            mateToAttack.MapY, ski.TargetRange()).Where(m => Session.Character.BattleEntity.CanAttackEntity(m.BattleEntity)).ToList();
+                                                    var monstersInAoeRange = Session.CurrentMapInstance?
+                                                                                     .GetListMateInRange(mateToAttack.MapX,
+                                                                                             mateToAttack.MapY, ski.TargetRange()).Where(m =>
+                                                                                             Session.Character.BattleEntity.CanAttackEntity(
+                                                                                                             m.BattleEntity)).ToList();
                                                     if (monstersInAoeRange.Count != 0)
                                                     {
-                                                        foreach (Mate mate in monstersInAoeRange)
+                                                        foreach (var mate in monstersInAoeRange)
                                                         {
                                                             mate.HitRequest(
-                                                                new HitRequest(TargetHitType.SingleTargetHitCombo,
-                                                                    Session, ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()));
+                                                                    new HitRequest(TargetHitType.SingleTargetHitCombo,
+                                                                            Session, ski.Skill, skillCombo: skillCombo,
+                                                                            skillBCards: ski.GetSkillBCards()));
                                                         }
                                                     }
                                                     else
@@ -1828,32 +2146,36 @@ namespace NosTale.Extension.Extension.Packet
                                                 }
                                                 else
                                                 {
-                                                    List<Mate> matesInAoeRange = Session.CurrentMapInstance?
-                                                                                              .GetListMateInRange(
-                                                                                                  mateToAttack.MapX,
-                                                                                                  mateToAttack.MapY,
-                                                                                                  ski.TargetRange())
-                                                                                              ?.Where(m => Session.Character.BattleEntity.CanAttackEntity(m.BattleEntity)).ToList();
+                                                    var matesInAoeRange = Session.CurrentMapInstance?
+                                                        .GetListMateInRange(
+                                                            mateToAttack.MapX,
+                                                            mateToAttack.MapY,
+                                                            ski.TargetRange())
+                                                        ?.Where(m =>
+                                                            Session.Character.BattleEntity.CanAttackEntity(
+                                                                m.BattleEntity)).ToList();
 
                                                     //hit the targetted mate
                                                     mateToAttack.HitRequest(
                                                         new HitRequest(TargetHitType.SingleAOETargetHit, Session,
                                                             ski.Skill,
                                                             characterSkillInfo?.Skill.Effect ?? ski.Skill.Effect,
-                                                            showTargetAnimation: true, skillBCards: ski.GetSkillBCards()));
+                                                            showTargetAnimation: true,
+                                                            skillBCards: ski.GetSkillBCards()));
 
                                                     //hit all other mates
                                                     if (matesInAoeRange != null && matesInAoeRange.Count != 0)
                                                     {
-                                                        foreach (Mate mate in matesInAoeRange.Where(m =>
-                                                            m.MateTransportId != mateToAttack.MateTransportId)
+                                                        foreach (var mate in matesInAoeRange.Where(m =>
+                                                                m.MateTransportId != mateToAttack.MateTransportId)
                                                         ) //exclude targetted mates
                                                         {
                                                             mate.HitRequest(
-                                                                new HitRequest(TargetHitType.SingleAOETargetHit,
-                                                                    Session, ski.Skill,
-                                                                    characterSkillInfo?.Skill.Effect ??
-                                                                    ski.Skill.Effect, skillBCards: ski.GetSkillBCards()));
+                                                                    new HitRequest(TargetHitType.SingleAOETargetHit,
+                                                                            Session, ski.Skill,
+                                                                            characterSkillInfo?.Skill.Effect ??
+                                                                            ski.Skill.Effect,
+                                                                            skillBCards: ski.GetSkillBCards()));
                                                         }
                                                     }
                                                     else
@@ -1869,7 +2191,7 @@ namespace NosTale.Extension.Extension.Packet
                                             }
                                             else
                                             {
-                                                ComboDTO skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
+                                                var skillCombo = ski.Skill.Combos.Find(s => ski.Hit == s.Hit);
                                                 if (skillCombo != null)
                                                 {
                                                     if (ski.Skill.Combos.OrderByDescending(s => s.Hit).First().Hit
@@ -1880,7 +2202,8 @@ namespace NosTale.Extension.Extension.Packet
 
                                                     mateToAttack.HitRequest(
                                                         new HitRequest(TargetHitType.SingleTargetHitCombo, Session,
-                                                            ski.Skill, skillCombo: skillCombo, skillBCards: ski.GetSkillBCards()));
+                                                            ski.Skill, skillCombo: skillCombo,
+                                                            skillBCards: ski.GetSkillBCards()));
                                                 }
                                                 else
                                                 {
@@ -1894,6 +2217,7 @@ namespace NosTale.Extension.Extension.Packet
                                     else
                                     {
                                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
+                                        return;
                                     }
                                 }
                                 else
@@ -1908,48 +2232,69 @@ namespace NosTale.Extension.Extension.Packet
                             }
 
                             ski.GetSkillBCards().Where(s =>
-                               (s.Type.Equals((byte)CardType.Buff) && new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType == BuffType.Good)).ToList()
-                                .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity, Session.Character.BattleEntity, ski.TattooLevel));
+                                       s.Type.Equals((byte)BCardType.CardType.Buff) &&
+                                       new Buff((short)s.SecondData, Session.Character.Level).Card?.BuffType ==
+                                       BuffType.Good).ToList()
+                               .ForEach(s => s.ApplyBCards(Session.Character.BattleEntity,
+                                       Session.Character.BattleEntity, partnerBuffLevel: ski.TattooLevel));
                         }
                         else
                         {
                             Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                         }
 
-
-
-                        //if (ski.Skill.UpgradeSkill == 3 && ski.Skill.SkillType == 1)
+                        //if (ski.Skill.UpgradeSkill == 3 && ski.Skill.SkillType == (byte)SkillType.CharacterSKill)
                         if (ski.Skill.SkillVNum != 1098 && ski.Skill.SkillVNum != 1330)
                         {
-                            Session.SendPacket(StaticPacketHelper.SkillResetWithCoolDown(castingId, (short)(ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D)));
+                            Session.SendPacket(StaticPacketHelper.SkillResetWithCoolDown(castingId,
+                                    (short)(ski.Skill.Cooldown)));
                         }
 
-                        int cdResetMilliseconds = (int)((ski.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D) * 100);
+                        var cdResetMilliseconds =
+                            (int)((ski.Skill.Cooldown)) * 100;
                         Observable.Timer(TimeSpan.FromMilliseconds(cdResetMilliseconds))
                             .Subscribe(o =>
                             {
                                 sendSkillReset();
-                                if (cdResetMilliseconds <= 500) Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(obs => sendSkillReset());
+                                if (cdResetMilliseconds <= 500)
+                                {
+                                    Observable.Timer(TimeSpan.FromMilliseconds(500)).Subscribe(obs => sendSkillReset());
+                                }
+
                                 void sendSkillReset()
                                 {
-                                    List<CharacterSkill> charSkills = Session.Character.GetSkills();
+                                    var charSkills = Session.Character.GetSkills();
 
-                                    CharacterSkill skill = charSkills.Find(s => s.Skill?.CastId == castingId && (s.Skill?.UpgradeSkill == 0 || s.Skill?.SkillType == 1));
+                                    var skill = charSkills.Find(s =>
+                                        s.Skill?.CastId == castingId &&
+                                        (s.Skill?.UpgradeSkill == 0 ||
+                                         s.Skill?.SkillType == (byte)SkillType.CharacterSKill));
 
-                                    if (skill != null && skill.LastUse.AddMilliseconds((short)(skill.Skill.Cooldown + ski.Skill.Cooldown * cooldownReduction / 100D) * 100 - 100) <= DateTime.Now)
+                                    var dateTimeNow = DateTime.Now;
+                                    if (skill != null
+                                        //&&
+                                        //    skill.LastUse.AddMilliseconds(
+                                        //        (short)(skill.Skill.Cooldown) * 100 - 100) <=
+                                        //    dateTimeNow
+                                        // If we set the time to send the packet, then it shouldn't be an issue about "re-looking" for the skill last use. This may cause troubles.
+                                        )
                                     {
-                                        if (cooldownReduction < 0)
+                                // ????
+                                if (cooldownReduction < 0)
                                         {
-                                            skill.LastUse = DateTime.Now.AddMilliseconds(skill.Skill.Cooldown * 100 * -1);
-                                        }
+                                    //skill.LastUse =
+                                    //        DateTime.Now.AddMilliseconds(skill.Skill.Cooldown * 100 * -1);
+                                }
 
                                         Session.SendPacket(StaticPacketHelper.SkillReset(castingId));
+                                        skill.ReinstantiateSkill();
                                     }
                                 }
                             });
 
-                        int[] fairyWings = Session.Character.GetBuff(CardType.EffectSummon, 11);
-                        int random = ServerManager.RandomNumber();
+                        // This will reset skill's cooldown if you have fairy wings
+                        var fairyWings = Session.Character.GetBuff(BCardType.CardType.EffectSummon, (byte)AdditionalTypes.EffectSummon.LastSkillReset);
+                        var random = ServerManager.RandomNumber();
                         if (fairyWings[0] > random)
                         {
                             Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(o =>
@@ -1967,23 +2312,23 @@ namespace NosTale.Extension.Extension.Packet
                         Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
                         Session.SendPacket(
                             Session.Character.GenerateSay(Language.Instance.GetMessageFromKey("NOT_ENOUGH_MP"), 10));
-                        Session.SendPacket($"guri 19 {(short)UserType.Player} {Session.Character.CharacterId} 1323");
                     }
                 }
+
             }
             else
             {
                 Session.SendPacket(StaticPacketHelper.Cancel(2, targetId));
             }
 
-            if ((castingId != 0 && castingId < 11 && shouldCancel) || Session.Character.SkillComboCount > 7)
+            if (castingId != 0 && castingId < 11 && shouldCancel || Session.Character.SkillComboCount > 7)
             {
                 Session.SendPackets(Session.Character.GenerateQuicklist());
 
                 if (!Session.Character.HasMagicSpellCombo
                     && Session.Character.SkillComboCount > 7)
                 {
-                    Session.SendPacket("ms_c 1");
+                    Session.SendPacket($"mslot {Session.Character.LastComboCastId} 0");
                 }
             }
 

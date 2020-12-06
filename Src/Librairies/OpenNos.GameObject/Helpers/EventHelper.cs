@@ -133,7 +133,7 @@ namespace OpenNos.GameObject.Helpers
                             break;
 
                         case EventType.RAINBOWBATTLE:
-                            if (ServerManager.Instance.ChannelId == 4)
+                            if (ServerManager.Instance.ChannelId == 1)
                             {
                                 Event.RAINBOWBATTLE.RainbowBattle.GenerateEvent();
                             }

@@ -3285,12 +3285,10 @@ namespace OpenNos.GameObject
             }
 
             var fLvl = (Family != null ? Family.FamilyLevel >= 5 ? Family.FamilyFaction == 0 ? "1" : Family.FamilyFaction.ToString() : "0" : "0");
-            //return $"in 1 {(Authority > AuthorityType.User ? $"[{Authority.ToString()}]{Name}" : name)} - {CharacterId} {PositionX} {PositionY} {Direction} {(byte)AuthorityType.User} {(byte)Gender} {(byte)HairStyle} {color} {(byte)Class} {GenerateEqListForPacket()} {Math.Ceiling(Hp / HPLoad() * 100)} {Math.Ceiling(Mp / MPLoad() * 100)} {(IsSitting ? 1 : 0)} {(Group?.GroupType == GroupType.Group ? (Group?.GroupId ?? -1) : -1)} {(fairy != null && !Undercover ? 4 : 0)} {fairy?.Item.Element ?? 0} 0 {fairy?.Item.Morph ?? 0} {InEffect} {(UseSp || IsVehicled || IsMorphed ? Morph : 0)} {GenerateEqRareUpgradeForPacket()} {(!Undercover ? (foe ? -1 : Family?.FamilyId ?? -1) : -1)} {(!Undercover ? (foe ? name : Family?.Name ?? "-") : "-")} {(GetDignityIco() == 1 ? GetReputationIco() : -GetDignityIco())} {(Invisible ? 1 : 0)} {(UseSp ? MorphUpgrade : 0)} {faction} {(UseSp ? MorphUpgrade2 : 0)} {Level} {Family?.FamilyLevel ?? 0} 0|0|0 {ArenaWinner} {(Authority != AuthorityType.User ? CharacterHelper.AuthorityColor(Authority) : Compliment)} {Size} {HeroLevel} {tit}";
-
             return $"in 1 " +
-                   $"{(Authority > AuthorityType.User ? $"[{Authority.ToString()}]{Name}" : name)} " +
+                   $"{(Authority > AuthorityType.User && !Undercover ? Authority == AuthorityType.Supporter ? $"[{Authority}]" + name : name : name)} " +
                    $"- {CharacterId} {PositionX} {PositionY} {Direction} " +
-                   $"{(byte)AuthorityType.User} {(byte)Gender} {(byte)HairStyle} {color} {(byte)Class} " +
+                   $"{(Undercover ? (byte) AuthorityType.User : Authority >= AuthorityType.MOD ? 2 : (byte) Authority)} {(byte) Gender} {(byte) HairStyle} {color} {(byte) Class} " +
                    $"{GenerateEqListForPacket()} {Math.Ceiling(Hp / HPLoad() * 100)} {Math.Ceiling(Mp / MPLoad() * 100)} {(IsSitting ? 1 : 0)} " +
                    $"{(Group?.GroupType == GroupType.Group ? (Group?.GroupId ?? -1) : -1)} {(fairy != null && !Undercover ? 4 : 0)} " +
                    $"{fairy?.Item.Element ?? 0} 0 {fairy?.Item.Morph ?? 0} {InEffect} {(UseSp || IsVehicled || IsMorphed ? Morph : 0)} " +
@@ -3301,7 +3299,7 @@ namespace OpenNos.GameObject
                    $"{(IsFamilyTop(true) ? 1 : 0)}|" +
                    $"{(IsFamilyTop(false) ? 1 : 0)}|" +
                    $"{fLvl} " +
-                   $"{(Authority != AuthorityType.User ? CharacterHelper.AuthorityColor(Authority) : Compliment)} {Size} {HeroLevel} {tit}";
+                   $"{Compliment} {Size} {HeroLevel} {tit}";
         }
 
         public string GenerateInvisible() => $"cl {CharacterId} {(Invisible ? 1 : 0)} {(InvisibleGm ? 1 : 0)}";

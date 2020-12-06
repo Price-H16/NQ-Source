@@ -226,12 +226,10 @@ namespace OpenNos.Master.Library.Client
             return _client.ServiceProxy.RetrieveOriginWorld(accountId);
         }
 
-        public string RetrieveRegisteredWorldServers(string username, byte regionType, int sessionId, bool ignoreUserName) => _client.ServiceProxy.RetrieveRegisteredWorldServers(username, regionType, sessionId, ignoreUserName);
-
-        //public string RetrieveRegisteredWorldServers(string username, byte regionType, int sessionId, bool ignoreUserName)
-        //{
-        //    return _client.ServiceProxy.RetrieveRegisteredWorldServers(username, regionType, sessionId, ignoreUserName);
-        //}
+        public string RetrieveRegisteredWorldServers(string username, int sessionId, bool ignoreUserName)
+        {
+            return _client.ServiceProxy.RetrieveRegisteredWorldServers(username, sessionId, ignoreUserName);
+        }
 
         public IEnumerable<string> RetrieveServerStatisticsPlayer()
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using NosTale.Configuration;
 using NosTale.Configuration.Utilities;
@@ -394,52 +393,29 @@ namespace OpenNos.Master.Server
             return null;
         }
 
-        public string RetrieveRegisteredWorldServers(string username, byte regionType, int sessionId, bool ignoreUserName)
+        public string RetrieveRegisteredWorldServers(string username, int sessionId, bool ignoreUserName)
         {
-            Console.WriteLine("2");
-            if (!MSManager.Instance.AuthentificatedClients.Any(s => s.Equals(CurrentClient.ClientId)))
-            {
-                return null;
-            }
+            if (!MSManager.Instance.AuthentificatedClients.Any(s => s.Equals(CurrentClient.ClientId))) return null;
 
-            var a = DependencyContainer.Instance.GetInstance<JsonGameConfiguration>().Server;
-
-            //to access to chnanel
-            string channelPacket = "NsTeST";
-            if (a.UseOldCrypto == true)
-            {
-                channelPacket += (ignoreUserName ? "" : " " + username) + $" {sessionId} ";
-            }
-            else
-            {
-                channelPacket += $@" {regionType}{(ignoreUserName ? "" : " " + username)} {sessionId} ";
-            }
-
-            string lastGroup = "";
+            var lastGroup = "";
             byte worldCount = 0;
+            var channelPacket = "NsTeST" + (ignoreUserName ? "" : " " + username) + $" {sessionId} ";
 
-
-            foreach (WorldServer world in MSManager.Instance.WorldServers.OrderBy(w => w.WorldGroup))
+            foreach (var world in MSManager.Instance.WorldServers.OrderBy(w => w.WorldGroup))
             {
-
-
-
-                if (lastGroup != world.WorldGroup)
-                {
-                    worldCount++;
-                }
+                if (lastGroup != world.WorldGroup) worldCount++;
                 lastGroup = world.WorldGroup;
 
-                int currentlyConnectedAccounts = MSManager.Instance.ConnectedAccounts.CountLinq(a => a.ConnectedWorld?.ChannelId == world.ChannelId);
-                int channelcolor = (int)Math.Round(((double)currentlyConnectedAccounts / world.AccountLimit) * 20) + 1;
+                var currentlyConnectedAccounts =
+                    MSManager.Instance.ConnectedAccounts.CountLinq(a => a.ConnectedWorld?.ChannelId == world.ChannelId);
+                var channelcolor = (int) Math.Round((double) currentlyConnectedAccounts / world.AccountLimit * 20) + 1;
 
-                if (world.ChannelId == 51)
-                {
-                    continue;
-                }
+                if (world.ChannelId == 51) continue;
 
-                channelPacket += $"{world.Endpoint.IpAddress}:{world.Endpoint.TcpPort}:{channelcolor}:{worldCount}.{world.ChannelId}.{world.WorldGroup} ";
+                channelPacket +=
+                    $"{world.Endpoint.IpAddress}:{world.Endpoint.TcpPort}:{channelcolor}:{worldCount}.{world.ChannelId}.{world.WorldGroup} ";
             }
+
             return channelPacket;
         }
 

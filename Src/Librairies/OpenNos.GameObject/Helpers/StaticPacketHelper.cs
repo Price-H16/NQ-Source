@@ -42,17 +42,14 @@ namespace OpenNos.GameObject.Helpers
             }
         }
 
-        public static MovePacket Move(UserType type, long callerId, short positionX, short positionY, byte speed)
+        public static MovePacket Move(UserType type, long callerId, short positionX, short positionY, byte speed) => new MovePacket
         {
-            return new MovePacket
-            {
-                MoveType = type,
-                CallerId = callerId,
+                MoveType  = type,
+                CallerId  = callerId,
                 PositionX = positionX,
                 PositionY = positionY,
-                Speed = speed
-            };
-        }
+                Speed     = speed
+        };
 
         public static string Out(UserType type, long callerId) => $"out {(byte) type} {callerId}";
 

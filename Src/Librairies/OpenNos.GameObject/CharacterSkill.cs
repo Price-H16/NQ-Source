@@ -159,9 +159,8 @@ namespace OpenNos.GameObject
         {
             int skillRange = Skill.Range;
             if (ServerManager.Instance.GetSessionByCharacterId(CharacterId) is ClientSession Session)
-            {
-                skillRange += Session.Character.GetBuff(CardType.FearSkill, (byte)AdditionalTypes.FearSkill.AttackRangedIncreased)[0];
-            }
+                skillRange += Session.Character.GetBuff(CardType.FearSkill,
+                    (byte) AdditionalTypes.FearSkill.AttackRangedIncreased)[0];
             return skillRange;
         }
 
@@ -184,17 +183,14 @@ namespace OpenNos.GameObject
 
         public byte TargetRange()
         {
-            byte targetRange = Skill.TargetRange;
+            var targetRange = Skill.TargetRange;
 
             if (Skill.HitType != 0)
-            {
                 if (ServerManager.Instance.GetSessionByCharacterId(CharacterId) is ClientSession Session)
-                {
-                    Session.Character.Buff.GetAllItems().SelectMany(s => s.Card.BCards).Where(s => s.Type == (byte)BCardType.CardType.FireCannoneerRangeBuff
-                        && s.SubType == (byte)AdditionalTypes.FireCannoneerRangeBuff.AOEIncreased / 10).ToList()
-                    .ForEach(s => targetRange += (byte)s.FirstData);
-                }
-            }
+                    Session.Character.Buff.GetAllItems().SelectMany(s => s.Card.BCards).Where(s =>
+                            s.Type == (byte) CardType.FireCannoneerRangeBuff
+                            && s.SubType == (byte) AdditionalTypes.FireCannoneerRangeBuff.AOEIncreased).ToList()
+                        .ForEach(s => targetRange += (byte) s.FirstData);
 
             return targetRange;
         }
